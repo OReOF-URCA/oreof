@@ -45,10 +45,15 @@ class MailEntrantFactory
             );
         }
 
+        $sujet = trim($this->decoder($this->premiereValeur($message->get('subject')) ?? ''));
+
         $autoSubmitted = mb_strtolower(trim($this->premiereValeur($message->get('auto_submitted')) ?? ''));
         $automatique = ($autoSubmitted !== '' && $autoSubmitted !== 'no')
             || str_starts_with($expediteurEmail, 'mailer-daemon@')
-            || str_starts_with($expediteurEmail, 'postmaster@');
+            || str_starts_with($expediteurEmail, 'postmaster@')
+            // notification envoyée par l'application (« [ORéOF] … ») ; restent à traiter une réponse « Re: [ORéOF] … »
+            // et un signalement de bug « [ORéOF][Bug] … » envoyé depuis le formulaire de l'application
+            || preg_match('/^\[OR[ée]OF\](?!\s*\[Bug\])/iu', $sujet) === 1;
 
         return new MailEntrant(
             messageId: $this->ids($message->get('message_id'))[0] ?? null,
@@ -57,7 +62,7 @@ class MailEntrantFactory
             expediteurEmail: $expediteurEmail,
             expediteurNom: $this->nom($expediteur),
             destinataires: $destinataires,
-            sujet: trim($this->decoder($this->premiereValeur($message->get('subject')) ?? '')),
+            sujet: $sujet,
             corpsTexte: $texte,
             corpsHtml: $html !== '' ? $html : null,
             date: $this->date($message->get('date')),

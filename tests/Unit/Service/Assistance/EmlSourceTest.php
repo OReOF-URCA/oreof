@@ -33,7 +33,16 @@ class EmlSourceTest extends TestCase
     {
         $source = new EmlSource(self::DOSSIER, new MailEntrantFactory());
 
-        self::assertCount(6, iterator_to_array($source->lire(new DateTimeImmutable()), false));
+        self::assertCount(9, iterator_to_array($source->lire(new DateTimeImmutable()), false));
+    }
+
+    public function testNotificationOreofEstAutomatique(): void
+    {
+        $mails = $this->lire();
+
+        self::assertTrue($mails['07']->automatique);
+        self::assertFalse($mails['08']->automatique, 'Une réponse humaine à une notification reste à traiter');
+        self::assertFalse($mails['09']->automatique, 'Un signalement de bug est une vraie demande');
     }
 
     public function testReponseExposeInReplyTo(): void

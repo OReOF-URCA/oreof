@@ -90,7 +90,7 @@ class IntegrationMailAssistanceTest extends TestCase
     {
         $source = new EmlSource(self::DOSSIER, new MailEntrantFactory());
 
-        self::assertSame(6, $this->integration->integrerTout($source, new DateTimeImmutable('-7 days')));
+        self::assertSame(9, $this->integration->integrerTout($source, new DateTimeImmutable('-7 days')));
         self::assertSame(0, $this->integration->integrerTout($source, new DateTimeImmutable('-7 days')));
         self::assertNull($this->integration->integrer($this->mail('05')));
     }
@@ -200,6 +200,17 @@ class IntegrationMailAssistanceTest extends TestCase
         self::assertNull($this->integration->integrer($this->mailSimple($idLong, 'Id long')));
     }
 
+    public function testNotificationOreofCreeUneDemandeResolueQuUneReponseRouvre(): void
+    {
+        $notification = $this->integration->integrer($this->mail('07'));
+        $demande = $notification->getDemande();
+        self::assertSame(StatutDemandeAssistanceEnum::RESOLUE, $demande->getStatut());
+
+        $reponse = $this->integration->integrer($this->mail('08'));
+        self::assertSame($demande, $reponse->getDemande());
+        self::assertSame(StatutDemandeAssistanceEnum::EN_COURS, $demande->getStatut());
+    }
+
     public function testRebondSansFilCreeUneDemandeDejaResolue(): void
     {
         $message = $this->integration->integrer($this->mail('06'));
@@ -224,7 +235,7 @@ class IntegrationMailAssistanceTest extends TestCase
 
         $nombre = $integration->integrerTout(new EmlSource(self::DOSSIER, new MailEntrantFactory()), new DateTimeImmutable('-7 days'));
 
-        self::assertSame(5, $nombre, 'seul le mail avec pièce jointe (01) échoue');
+        self::assertSame(8, $nombre, 'seul le mail avec pièce jointe (01) échoue');
     }
 
     public function testIntegrerToutSignaleALaSourceLesMailsDejaConnus(): void

@@ -39,7 +39,7 @@ class AssistanceCommandesTest extends TestCase
         $dossier = __DIR__ . '/../../Fixtures/assistance';
 
         self::assertSame(Command::SUCCESS, $commande->execute(['chemin' => $dossier]));
-        self::assertStringContainsString('6 mail(s) intégré(s).', $commande->getDisplay());
+        self::assertStringContainsString('9 mail(s) intégré(s).', $commande->getDisplay());
 
         self::assertSame(Command::SUCCESS, $commande->execute(['chemin' => $dossier]));
         self::assertStringContainsString('0 mail(s) intégré(s).', $commande->getDisplay());

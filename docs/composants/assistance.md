@@ -31,7 +31,9 @@ responsable, des notes internes, et affiche le contexte ORéOF du demandeur. Acc
    - sinon nouvelle demande (statut « Nouvelle »).
    Un mail reçu non automatique rouvre une demande « Résolue » ou « En attente de l'usager » (→ « En cours »).
    Les rebonds et réponses automatiques (`Auto-Submitted`, `MAILER-DAEMON`, `postmaster`) sont rattachés sans rouvrir ;
-   hors de tout échange connu, ils créent une demande directement « Résolue ».
+   hors de tout échange connu, ils créent une demande directement « Résolue ». Les notifications de l'application
+   (sujet commençant par `[ORéOF]`) sont traitées de même, sauf les signalements de bug `[ORéOF][Bug] …` (vraies
+   demandes) ; une réponse « Re: [ORéOF] … » d'un usager rouvre la demande.
    Un mail dont l'expéditeur est `oreof@` ou un `ROLE_ADMIN` est classé « Réponse envoyée ».
 3. **Stockage** : HTML nettoyé à l'enregistrement par le sanitizer `assistance_sanitizer` (pas de script, pas d'image
    ni média, liens `https`/`mailto` seulement, entrée jusqu'à 2 Mo : la limite Symfony par défaut de 20 000 caractères
