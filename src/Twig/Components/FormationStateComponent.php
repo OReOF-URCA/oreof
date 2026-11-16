@@ -194,7 +194,10 @@ class FormationStateComponent
             }
 
             if ($nb === $nbParcours) {
-                //todo: vérifier formation
+                if ($this->getEtatFormation() !== EtatProcessMentionEnum::COMPLETE) {
+                    return EtatProcessMentionEnum::WIP;
+                }
+
                 return EtatProcessMentionEnum::COMPLETE;
             }
         }

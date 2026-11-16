@@ -1,5 +1,3 @@
-{# todo: reprendre cette page comme le bilan des formations pour le SES, DPE ou Admin avec état, remplissage et
-bouton pour valider/invalide les étapes successives #}
 <div class="space-y-4" {{ stimulus_controller('structure--formation') }}>
     {% set sort = params.sort is defined ? params.sort : 'typeDiplome' %}
     {% set direction = params.direction is defined ? params.direction : 'asc' %}

@@ -28,9 +28,10 @@
                     </span>
                     {% endif %}
                 </div>
-                <p class="text-xs text-secondary-400 font-bold uppercase mt-1">Total horaire
+                <p class="text-xs text-secondary-400 font-bold uppercase mt-1"
+                   id="heures_semestre_{{ semestreParcours.id }}">Total horaire
                     : {{ semestre.heuresEctsSemestre.sommeSemestreTotalPres }}
-                    heures</p> {# todo à update avec turbo... #}
+                    heures</p>
                 <div class="flex items-center gap-4 mt-1" id="valide_semestre_{{ semestreParcours.id }}">
                     {{ include('parcours_v2/_valideSemestre.html.twig') }}
                 </div>

@@ -2,7 +2,6 @@
     <!-- component html -->
     {% if this.type == 'parcours' %}
         {% if this.hasPv == false %}
-            {# todo: filtrer uniquement sur DPE pour la mise à jour #}
             <twig:Button
                     label="{{ 'deposer.le.pv'|trans({}, 'process') }}"
                     variant="warning"

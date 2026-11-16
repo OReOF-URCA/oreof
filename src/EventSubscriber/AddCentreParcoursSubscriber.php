@@ -9,12 +9,9 @@
 
 namespace App\EventSubscriber;
 
-use App\Classes\Mailer;
 use App\Entity\UserProfil;
 use App\Events\AddCentreParcoursEvent;
-use App\Events\NotifCentreFormationEvent;
 use App\Events\NotifCentreParcoursEvent;
-use App\Repository\ParcoursRepository;
 use App\Repository\UserProfilRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -25,8 +22,6 @@ class AddCentreParcoursSubscriber implements EventSubscriberInterface
 {
     public function __construct(
         protected EventDispatcherInterface    $eventDispatcher,
-        protected Mailer                      $mailer,
-        protected ParcoursRepository $parcoursRepository,
         protected EntityManagerInterface      $entityManager,
         private readonly UserProfilRepository $userProfilRepository,
     ) {
@@ -45,7 +40,6 @@ class AddCentreParcoursSubscriber implements EventSubscriberInterface
      */
     public function onAddCentreParcours(AddCentreParcoursEvent $event): void
     {
-        //todo: réécrire pour refactoriser avec la création de centre
         $user = $event->user ?? $event->parcours->getRespParcours();
         $parcours = $event->parcours;
         $campagneCollecte = $event->campagneCollecte;
