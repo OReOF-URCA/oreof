@@ -49,7 +49,8 @@ responsable, des notes internes, et affiche le contexte ORéOF du demandeur. Acc
    `app_assistance_piece_jointe` en téléchargement.
 4. **Réponse** (`ReponseAssistance`) : envoyée depuis `oreof@univ-reims.fr` (`From` et `Reply-To`), avec
    `In-Reply-To`/`References` du dernier message et un `Message-ID` enregistré : la réponse de l'usager revient dans
-   le même fil. Statut → « En attente de l'usager », ou « Résolue » si la case est cochée.
+   le même fil. Statut → « En attente de l'usager », ou « Résolue » si la case est cochée. Sans responsable, la demande
+   est attribuée à l'auteur de la réponse (un responsable déjà désigné est conservé).
 5. **Contexte du demandeur** (`ContexteUsagerAssistance`) : compte, rôles, profils (`UserProfil`), état de chaque
    module (`CampagneAccessibilityService::getModuleStatus`) pour la campagne par défaut et celles des profils,
    5 dernières `DpeDemande`, liens fiche utilisateur et « se connecter en tant que ».

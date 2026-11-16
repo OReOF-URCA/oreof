@@ -92,6 +92,10 @@ class ReponseAssistance
             ->setAuteur($auteur);
         $demande->addMessage($message);
         $demande->setStatut($resoudre ? StatutDemandeAssistanceEnum::RESOLUE : StatutDemandeAssistanceEnum::EN_ATTENTE_USAGER);
+        // qui répond prend la demande, sauf si un collègue en est déjà responsable
+        if ($demande->getResponsable() === null) {
+            $demande->setResponsable($auteur);
+        }
         $this->entityManager->flush();
 
         return $message;

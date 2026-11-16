@@ -96,6 +96,31 @@ class ReponseAssistanceTest extends TestCase
         self::assertSame(StatutDemandeAssistanceEnum::EN_ATTENTE_USAGER, $this->demande->getStatut());
     }
 
+    public function testRepondreSansResponsableAssigneLAuteur(): void
+    {
+        self::assertNull($this->demande->getResponsable());
+
+        $this->repondre();
+
+        self::assertSame($this->auteur, $this->demande->getResponsable());
+    }
+
+    public function testRepondreNeRemplacePasUnResponsableExistant(): void
+    {
+        $collegue = new User();
+        $collegue->setUsername('collegue-reponse-assistance');
+        $collegue->setEmail('collegue-reponse@univ-test.fr');
+        $collegue->setNom('Collègue');
+        $collegue->setPrenom('Admin');
+        $collegue->setRoles(['ROLE_ADMIN']);
+        $this->persist($collegue);
+        $this->demande->setResponsable($collegue);
+
+        $this->repondre();
+
+        self::assertSame($collegue, $this->demande->getResponsable());
+    }
+
     public function testReponseEtResoudre(): void
     {
         $this->repondre(true);
