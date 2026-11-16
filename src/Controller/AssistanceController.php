@@ -129,9 +129,11 @@ class AssistanceController extends AbstractController
         UserRepository $userRepository,
         FormationRepository $formationRepository,
         ReponseAssistance $reponse,
+        FilMessagesAssistance $fil,
     ): Response {
         return $this->render('assistance/show.html.twig', [
             'demande' => $demande,
+            'arbre' => $fil->arbre($demande->getMessages()),
             'statuts' => StatutDemandeAssistanceEnum::cases(),
             'equipe' => $userRepository->findByRole('ROLE_ADMIN'),
             'formations' => $formationRepository->findBy([], ['id' => 'DESC']),

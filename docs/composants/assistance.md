@@ -55,10 +55,15 @@ responsable, des notes internes, et affiche le contexte ORéOF du demandeur. Acc
 
 | Route | Rôle |
 |---|---|
-| `app_assistance_index` | liste filtrable (statut, responsable, recherche ; appliqués à la saisie par le contrôleur Stimulus `auto-submit`), compteur des demandes ouvertes |
-| `app_assistance_show` | fil de la demande, réponse, note interne, statut, responsable, formation/parcours, fusion, contexte |
+| `app_assistance_index` | liste filtrable (statut, responsable, recherche ; appliqués à la saisie par le contrôleur Stimulus `auto-submit`), compteur des demandes ouvertes ; chaque demande se déplie (`<details>`) sur l'arbre de ses messages (une ligne par message : expéditeur, extrait sans historique, date ; lien vers `#message-<id>`) |
+| `app_assistance_show` | fil de la demande en arbre, réponse, note interne, statut, responsable, formation/parcours, fusion, contexte |
 | `app_assistance_{statut,responsable,note,rattacher,fusionner,repondre}` | POST, jeton CSRF `assistance_<id>` |
 | `app_assistance_relever` | POST, jeton `assistance_relever` |
+
+Fil en arbre (`FilMessagesAssistance`, façon Thunderbird) : chaque message est placé sous celui auquel il répond
+(`In-Reply-To` au sein de la demande) ; parent absent, sans `In-Reply-To` ou note interne → racine ; tri par date ;
+décalage plafonné à `PROFONDEUR_MAX` = 3 ; un fil mal formé (réponses mutuelles) affiche chaque message une fois.
+Les messages des demandes listées sont chargés avec la liste (jointure dans `DemandeAssistanceRepository::rechercher`).
 
 Affichage d'un message (`MessageAssistanceCard`) : l'historique cité (« Le … a écrit : », en-têtes Outlook
 « De : … Envoyé : », `blockquote`, `gmail_quote`, message transféré, lignes `>`) est replié derrière « Afficher

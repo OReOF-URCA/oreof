@@ -190,6 +190,30 @@ class AssistanceControllerTest extends WebTestCase
         self::assertStringContainsString('31 demande(s)', $crawler->text());
     }
 
+    public function testFicheAfficheLesReponsesSousLeurParent(): void
+    {
+        $demande = $this->demande('Arbre fiche assistance');
+        $a = $demande->getMessages()->first();
+        $a->setDateEnvoi(new \DateTimeImmutable('2026-11-13 09:00'));
+        $c = $this->ajouterReponse($demande, $a, 'Réponse à A', '2026-11-13 11:00');
+        $b = (new MessageAssistance())
+            ->setSens(SensMessageAssistanceEnum::ENTRANT)
+            ->setMessageId('<' . uniqid('racine', true) . '@univ-test.fr>')
+            ->setExpediteurEmail('autre-assistance@univ-test.fr')
+            ->setSujet('Autre')
+            ->setCorpsTexte('Nouveau message')
+            ->setDateEnvoi(new \DateTimeImmutable('2026-11-13 10:00'));
+        $demande->addMessage($b);
+        $this->em->flush();
+        $this->connecterAdmin();
+
+        $crawler = $this->client->request('GET', '/administration/assistance/' . $demande->getId());
+
+        $ordre = $crawler->filter('article[id^="message-"]')->each(static fn ($n) => $n->attr('id'));
+        self::assertSame(['message-' . $a->getId(), 'message-' . $c->getId(), 'message-' . $b->getId()], $ordre);
+        self::assertSame('1', $crawler->filter('#message-' . $c->getId())->ancestors()->filter('[data-profondeur]')->first()->attr('data-profondeur'));
+    }
+
     public function testFicheAfficheLeFil(): void
     {
         $demande = $this->demande('Fiche assistance');

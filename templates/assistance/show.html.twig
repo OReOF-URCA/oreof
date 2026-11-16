@@ -30,8 +30,12 @@
                 </p>
             {% endif %}
 
-            {% for message in demande.messages %}
-                <twig:MessageAssistanceCard :message="message" />
+            {# fil en arbre : réponses décalées sous le message auquel elles répondent (profondeur plafonnée à 3) #}
+            {% set decalages = ['', 'ml-6 border-l-2 border-secondary-200 pl-3 dark:border-secondary-700', 'ml-12 border-l-2 border-secondary-200 pl-3 dark:border-secondary-700', 'ml-18 border-l-2 border-secondary-200 pl-3 dark:border-secondary-700'] %}
+            {% for noeud in arbre %}
+                <div data-profondeur="{{ noeud.profondeur }}" class="{{ decalages[noeud.profondeur] }}">
+                    <twig:MessageAssistanceCard :message="noeud.message" />
+                </div>
             {% endfor %}
 
             {% if not demande.annonce %}
