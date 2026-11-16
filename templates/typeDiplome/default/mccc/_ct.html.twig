@@ -2,13 +2,13 @@
 <div id="epreuves_ct" class="space-y-3">
     {% if mcccs[1]['et'] is defined %}
         {% for i in 1..mcccs[1]['et']|length %}
-            {{ include('typeDiplome/licence/mccc/_epreuveCt.html.twig', {index:i}) }}
+            {{ include('typeDiplome/default/mccc/_epreuveCt.html.twig', {index:i}) }}
 
         {% else %}
-            {{ include('typeDiplome/licence/mccc/_epreuveCt.html.twig',{index:1}) }}
+            {{ include('typeDiplome/default/mccc/_epreuveCt.html.twig',{index:1}) }}
         {% endfor %}
     {% else %}
-        {{ include('typeDiplome/licence/mccc/_epreuveCt.html.twig',{index:1}) }}
+        {{ include('typeDiplome/default/mccc/_epreuveCt.html.twig',{index:1}) }}
     {% endif %}
 </div>
 <twig:Button
@@ -23,12 +23,12 @@
 <div id="epreuves_s2_ct" class="space-y-3">
     {% if mcccs[2]['et'] is defined %}
         {% for i in 1..mcccs[2]['et']|length %}
-            {{ include('typeDiplome/licence/mccc/_secondeChance.html.twig', {index:i}) }}
+            {{ include('typeDiplome/default/mccc/_secondeChance.html.twig', {index:i}) }}
         {% else %}
-            {{ include('typeDiplome/licence/mccc/_secondeChance.html.twig',{index:1}) }}
+            {{ include('typeDiplome/default/mccc/_secondeChance.html.twig',{index:1}) }}
         {% endfor %}
     {% else %}
-        {{ include('typeDiplome/licence/mccc/_secondeChance.html.twig',{index:1}) }}
+        {{ include('typeDiplome/default/mccc/_secondeChance.html.twig',{index:1}) }}
     {% endif %}
 </div>
 

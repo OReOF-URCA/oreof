@@ -39,7 +39,7 @@
 <h3 class="mt-2">2ᵉ Session</h3>
 
     {% if mcccs[2]['et'] is defined %}
-        {{ include('typeDiplome/mccc-non-editable/licence/_secondeChance.html.twig', 
+        {{ include('typeDiplome/default/mccc-non-editable/_secondeChance.html.twig', 
             {
                 mcccs:mcccs[2]['et'],
                 mcccVersioning: mcccVersioning[2]['et'] ?? ""

@@ -92,7 +92,7 @@
 
     {% for ordEc, ec in ue.elementConstitutifs %}
         {% set indexEc = loop.index0 %}
-        {{ include('typeDiplome/licence/structure/_structureEc.html.twig', {
+        {{ include('typeDiplome/default/structure/_structureEc.html.twig', {
             ec:ec,
             semestreOrdre:semestreOrdre,
             ecEnfant:false,
@@ -103,7 +103,7 @@
         }) }}
         {% for ordEce, ece in ec.elementsConstitutifsEnfants %}
             {% set indexEcEnfant = loop.index0 %}
-            {{ include('typeDiplome/licence/structure/_structureEc.html.twig', {
+            {{ include('typeDiplome/default/structure/_structureEc.html.twig', {
                 ec:ece,
                 semestreOrdre:semestreOrdre,
                 ecEnfant:true,
@@ -117,7 +117,7 @@
 {% endif %}
 
 {% for ueE in ue.uesEnfants %}
-    {{ include('typeDiplome/licence/structure/_structureUe.html.twig', {ue:ueE, enfant: true}) }}
+    {{ include('typeDiplome/default/structure/_structureUe.html.twig', {ue:ueE, enfant: true}) }}
 {% endfor %}
 
 <tr>

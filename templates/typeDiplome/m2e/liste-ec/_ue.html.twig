@@ -45,8 +45,8 @@
     </th>
 </tr>
 {% for ec in ue.elementConstitutifs %}
-    {{ include('typeDiplome/licence/liste-ec/_ec.html.twig', {ec:ec, enfant:false}) }}
+    {{ include('typeDiplome/default/liste-ec/_ec.html.twig', {ec:ec, enfant:false}) }}
     {% for ece in ec.elementsConstitutifsEnfants %}
-        {{ include('typeDiplome/licence/liste-ec/_ec.html.twig', {ec:ece, enfant:true}) }}
+        {{ include('typeDiplome/default/liste-ec/_ec.html.twig', {ec:ece, enfant:true}) }}
     {% endfor %}
 {% endfor %}

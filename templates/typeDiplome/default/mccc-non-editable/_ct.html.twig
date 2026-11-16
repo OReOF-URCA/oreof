@@ -1,7 +1,7 @@
 <h3>1ᵉ Session</h3>
 <div id="epreuves_ct">
     {% if mcccs[1]['et'] is defined %}
-        {{ include('typeDiplome/mccc-non-editable/licence/_epreuveCt.html.twig', 
+        {{ include('typeDiplome/default/mccc-non-editable/_epreuveCt.html.twig', 
             {
                 mcccs:mcccs[1]['et'], 
                 mcccVersioning: mcccVersioning[1]['et'] ?? ""
@@ -13,7 +13,7 @@
 <h3>2ᵉ Session</h3>
 <div id="epreuves_s2_ct">
     {% if mcccs[2]['et'] is defined %}
-        {{ include('typeDiplome/mccc-non-editable/licence/_secondeChance.html.twig', 
+        {{ include('typeDiplome/default/mccc-non-editable/_secondeChance.html.twig', 
             {
                 mcccs:mcccs[2]['et'],
                 mcccVersioning: mcccVersioning[2]['et'] ?? ""

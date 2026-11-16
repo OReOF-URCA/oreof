@@ -42,7 +42,7 @@
     <div class="space-y-5">
         {% for ordUe, ue in semestre.ues %}
             <div class="overflow-hidden rounded-2xl border border-secondary-200 bg-surface shadow-xs dark:border-secondary-700">
-                {{ include('typeDiplome/licence/structure/v2/_structure_ue.html.twig', {
+                {{ include('typeDiplome/default/structure/v2/_structure_ue.html.twig', {
                     semestreOrdre: ordre,
                     enfant: false,
                     diffUe: diffSemestre != null ? diffSemestre.ues[ordUe] ?? null : null,

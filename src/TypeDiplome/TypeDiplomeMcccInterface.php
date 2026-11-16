@@ -15,7 +15,7 @@ use Symfony\Component\Form\FormInterface;
 
 interface TypeDiplomeMcccInterface
 {
-    public const TEMPLATE_FORM_MCCC = 'licence.html.twig';
+    public const TEMPLATE_FORM_MCCC = 'default.html.twig';
 
     public function checkIfMcccValide(FicheMatiere|ElementConstitutif $owner): bool;
 

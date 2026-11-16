@@ -70,40 +70,40 @@ class LicenceController extends BaseController
             case 'cc':
                 if ($this->typeDiplome->getLibelleCourt() !== 'L') {
                     //seul cas particulier, pour les autres mêmes formulaires
-                    return $this->render('typeDiplome/mccc/licence/_cc_autres_diplomes.html.twig', [
+                    return $this->render('typeDiplome/default/mccc/_cc_autres_diplomes.html.twig', [
                         'mcccs' => $this->typeDiplomeHandler->getMcccs($ficheMatiere),
                         'typeEpreuves' => $typeEpreuves,
                         'disabled' => false,
                     ]);
                 }
 
-                return $this->render('typeDiplome/mccc/licence/_cc.html.twig', [
+                return $this->render('typeDiplome/default/mccc/_cc.html.twig', [
                     'mcccs' => $this->typeDiplomeHandler->getMcccs($ficheMatiere),
                     'typeEpreuves' => $typeEpreuves,
                     'disabled' => false,
                 ]);
 
             case 'cci':
-                return $this->render('typeDiplome/mccc/licence/_cci.html.twig', [
+                return $this->render('typeDiplome/default/mccc/_cci.html.twig', [
                     'mcccs' => $this->typeDiplomeHandler->getMcccs($ficheMatiere),
                     'typeEpreuves' => $typeEpreuves,
                     'disabled' => false,
                 ]);
             case 'cc_ct':
-                return $this->render('typeDiplome/mccc/licence/_cc_ct.html.twig', [
+                return $this->render('typeDiplome/default/mccc/_cc_ct.html.twig', [
                     'mcccs' => $this->typeDiplomeHandler->getMcccs($ficheMatiere),
                     'typeEpreuves' => $typeEpreuves,
                     'disabled' => false,
                 ]);
             case 'ct':
-                return $this->render('typeDiplome/mccc/licence/_ct.html.twig', [
+                return $this->render('typeDiplome/default/mccc/_ct.html.twig', [
                     'mcccs' => $this->typeDiplomeHandler->getMcccs($ficheMatiere),
                     'typeEpreuves' => $typeEpreuves,
                     'disabled' => false,
                 ]);
         }
 
-        return $this->render('typeDiplome/mccc/licence/_vide.html.twig');
+        return $this->render('typeDiplome/default/mccc/_vide.html.twig');
     }
 
     #[Route('/type_diplome/change/licence/{elementConstitutif}/{parcours}', name: 'type_diplome_licence_change')]
@@ -141,7 +141,7 @@ class LicenceController extends BaseController
             $entityManager->refresh($elementConstitutif);
         }
 
-        $folderTypeDiplome = 'licence'; //$typeDiplomeHandler->getTemplateFolder();
+        $folderTypeDiplome = $typeDiplomeHandler->getTemplateFolder();
         if ($disabled === true) {
             $folder = 'mccc-non-editable';
 

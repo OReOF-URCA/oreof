@@ -1,6 +1,6 @@
 <turbo-stream action="replace" target="bcc-{{ blocCompetence.id }}">
     <template>
-        {{ include('typeDiplome/licence/competences/_blocCompetences.html.twig', {blocCompetence: blocCompetence, parcours: parcours}) }}
+        {{ include('typeDiplome/default/competences/_blocCompetences.html.twig', {blocCompetence: blocCompetence, parcours: parcours}) }}
 
         <script data-turbo-eval="true">
           (function () {
