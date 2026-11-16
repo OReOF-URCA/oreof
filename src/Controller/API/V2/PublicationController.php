@@ -188,6 +188,7 @@ final class PublicationController extends AbstractController
             'maquette-pdf' => $this->generateUrl('app_parcours_mccc_export_cfvu_valid', ['parcours' => $parcoursVersion->getParcours()->getId(), 'format' => 'simplifie'], UrlGeneratorInterface::ABSOLUTE_URL),
             'maquette-json' => $this->generateUrl('api_site_web_v2_parcours_maquette_validee_cfvu', ['parcours' => $parcoursVersion->getParcours()->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'logos-parcours' => $logosParcours,
+            'lien-court' => $parcours->getLienCourt(),
         ];
 
         return new JsonResponse($data);
@@ -318,6 +319,8 @@ final class PublicationController extends AbstractController
             'maquette-pdf' => $urlMaquettePdf,
             'maquette-json' => $urlMaquetteJson,
             'logos-parcours' => $logosParcours,
+            'lien-court' => $parcours->getLienCourt(),
+            'lien_court' => $parcours->getLienCourt(),
         ];
 
         return new JsonResponse($data);

@@ -135,6 +135,13 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 ),
 
                 MenuItem::link(
+                    'pilotage.liens_courts_parcours',
+                    'menu.admin.liens_courts_parcours',
+                    'app_admin_pilotage_liens_courts_index',
+                    icon: 'ph:link-bold',
+                ),
+
+                MenuItem::link(
                     'pilotage.exports',
                     'menu.admin.exports',
                     'app_export_index',

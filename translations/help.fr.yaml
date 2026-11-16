@@ -462,6 +462,7 @@ parcours_step7.helps.debouches: "Métiers, fonctions et secteurs d'activité acc
 parcours_step7.helps.descriptifBasPage: 'Mentions légales ou informations de bas de page.'
 parcours_step7.helps.descriptifHautPage: "Descriptif affiché en haut des pages formations sur le site de l'URCA"
 parcours_step7.helps.descriptifHautPageAutomatique: 'Génération automatique du descriptif synthétique de tête.'
+parcours_step7.helps.lienCourt: 'URL permanente faisant le lien entre ce parcours et des plateformes externes (recopiée d''année en année à l''identique).'
 parcours_step7.helps.poursuitesEtudes: 'Formations et diplômes accessibles après réussite du parcours.'
 parcours_step8.helps.coordSecretariat: 'Indiquez les coordonnées postales et téléphoniques du secrétariat ainsi que son adresse mail générique.'
 parcours_step8.helps.respParcours: 'Indiquez le responsable de parcours.'

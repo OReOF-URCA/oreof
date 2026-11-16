@@ -96,6 +96,8 @@ La bascule de schéma entre la version historique (`main` / V1) et la V2 s'artic
   - `semestre_debut`, `semestre_fin` (`INT DEFAULT NULL`) : bornes semestrielles du parcours.
   - `maquette_pdf`, `maquette_pdf_nom_original` (`VARCHAR(255) DEFAULT NULL`) : fichier maquette pour les formations non classiques.
   - `logo` (`JSON DEFAULT NULL`).
+  - `lien_court` (`VARCHAR(255) DEFAULT NULL`, `Version20261116120000`) : permalien externe du parcours vers les
+    plateformes tierces (Parcoursup, Mon Master…), reconduit d'année en année à l'identique.
   - `etat_steps` (`JSON NOT NULL`), `etat_parcours` (`JSON DEFAULT NULL`), `remplissage` (`JSON DEFAULT NULL`), `etats_fiches_matieres` (`JSON DEFAULT NULL`).
   - `codes_rome` (`JSON DEFAULT NULL`), `regime_inscription` (`JSON DEFAULT NULL`).
 - **Suppression** : `capacite_accueil`.

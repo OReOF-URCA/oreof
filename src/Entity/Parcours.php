@@ -260,6 +260,10 @@ class Parcours
     #[Groups('parcours_json_versioning')]
     private ?string $codeRNCP = null;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups('parcours_json_versioning')]
+    private ?string $lienCourt = null;
+
     #[Groups('parcours_json_versioning')]
     #[ORM\Column(length: 20, nullable: true, enumType: TypeParcoursEnum::class)]
     private ?TypeParcoursEnum $typeParcours = null;
@@ -1534,6 +1538,18 @@ class Parcours
     public function setCodeRNCP(?string $codeRNCP): static
     {
         $this->codeRNCP = $codeRNCP;
+
+        return $this;
+    }
+
+    public function getLienCourt(): ?string
+    {
+        return $this->lienCourt;
+    }
+
+    public function setLienCourt(?string $lienCourt): static
+    {
+        $this->lienCourt = $lienCourt;
 
         return $this;
     }

@@ -93,6 +93,9 @@ SQL;
             if (!$this->columnExists('parcours', 'logo')) {
                 $sql['Ajout parcours.logo'] = 'ALTER TABLE parcours ADD logo JSON DEFAULT NULL';
             }
+            if (!$this->columnExists('parcours', 'lien_court')) {
+                $sql['Ajout parcours.lien_court'] = 'ALTER TABLE parcours ADD lien_court VARCHAR(255) DEFAULT NULL';
+            }
         }
 
         if ($this->tableExists('annee') && !$this->columnExists('annee', 'regime_inscription')) {

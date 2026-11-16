@@ -514,6 +514,7 @@ parcours_step7.labels.debouches: Débouchés
 parcours_step7.labels.descriptifBasPage: 'Descriptif bas page sur le site institutionnel'
 parcours_step7.labels.descriptifHautPage: 'Descriptif haut page sur le site institutionnel'
 parcours_step7.labels.descriptifHautPageAutomatique: 'Descriptif haut page sur le site institutionnel, généré automatiquement'
+parcours_step7.labels.lienCourt: 'Lien court (permalien)'
 parcours_step7.labels.poursuitesEtudes: "Poursuites d'études envisageables"
 parcours_step8.labels.coordSecretariat: 'Coordonnées du secrétariat'
 parcours_step8.labels.respParcours: 'Responsable du parcours'

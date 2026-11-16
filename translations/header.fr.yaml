@@ -12,6 +12,8 @@ app_admin_pilotage_campagne_index.description: "Tableau de bord stratégique : m
 app_admin_pilotage_campagne_index.title: 'Tour de Contrôle & Pilotage de Campagne'
 app_admin_pilotage_descriptifs_index.description: 'Revue et édition des textes de présentation en haut de page (automatiques ou spécifiques) des parcours de la campagne en cours.'
 app_admin_pilotage_descriptifs_index.title: 'Pilotage des descriptifs haut de page'
+app_admin_pilotage_liens_courts_index.description: 'Revue et édition des liens courts (permaliens) des parcours de la campagne vers les plateformes externes.'
+app_admin_pilotage_liens_courts_index.title: 'Pilotage des liens courts des parcours'
 app_admin_pilotage_parcours_descriptifs.description: 'Revue et édition des textes de présentation en haut de page (automatiques ou spécifiques) des parcours de la campagne en cours.'
 app_admin_pilotage_parcours_descriptifs.title: 'Pilotage des descriptifs haut de page'
 app_admin_statistiques_visites_index.description: "Connexions, utilisateurs uniques et pages vues, calculés à partir des journaux de l'application."

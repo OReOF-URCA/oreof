@@ -22,6 +22,20 @@
             <twig:RncpField :form="form.codeRNCP" :parcoursId="parcours.id" />
         </div>
 
+        <div class="mt-4 p-4 rounded-xl border border-secondary-200 bg-white dark:border-secondary-700 dark:bg-secondary-900 shadow-xs">
+            {{ form_row(form.lienCourt) }}
+            {% if parcours.lienCourt %}
+                <div class="mt-2 flex items-center gap-2 text-xs">
+                    <span class="text-secondary-500">Tester le lien :</span>
+                    <a href="{{ parcours.lienCourt }}" target="_blank" rel="noopener noreferrer"
+                       class="text-primary hover:underline font-mono inline-flex items-center gap-1">
+                        {{ parcours.lienCourt }}
+                        <twig:UX:Icon name="ph:arrow-square-out-light" class="h-3.5 w-3.5"/>
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+
         {{ form_end(form) }}
     </div>
 </turbo-frame>

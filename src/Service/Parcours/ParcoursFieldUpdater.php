@@ -121,6 +121,7 @@ final class ParcoursFieldUpdater extends AbstractFieldUpdater
             'parcours_step7[descriptifHautPage]' => fn(Parcours $p, $v) => $p->setDescriptifHautPage($this->toString($v)),
             'parcours_step7[descriptifBasPage]' => fn(Parcours $p, $v) => $p->setDescriptifBasPage($this->toString($v)),
             'parcours_step7[codeRNCP]' => fn(Parcours $p, $v) => $p->setCodeRNCP($this->toString($v)),
+            'parcours_step7[lienCourt]' => fn(Parcours $p, $v) => $p->setLienCourt($this->toStringOrNull($v)),
         ];
     }
 
@@ -177,7 +178,8 @@ final class ParcoursFieldUpdater extends AbstractFieldUpdater
                 'parcours_step7[descriptifHautPageAutomatique]',
                 'parcours_step7[descriptifHautPage]',
                 'parcours_step7[descriptifBasPage]',
-                'parcours_step7[codeRNCP]'
+                'parcours_step7[codeRNCP]',
+                'parcours_step7[lienCourt]',
             ],
         ];
     }

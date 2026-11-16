@@ -120,6 +120,7 @@ class ParcoursExportV2 {
             'formation_id_old' => $idOldFormation,
             'formation' => $parcours->getFormation()?->getDisplay(),
             'parcours' => $parcours->isParcoursDefaut() ? '' : $parcours->getLibelle(),
+            'lien_court' => $actualParcours->getLienCourt(),
             'typeDiplome' => $typeDiplome->getLibelle(),
             'composante' => $parcours->getFormation()?->getComposantePorteuse()?->getLibelle(),
             'volumes'=> [
