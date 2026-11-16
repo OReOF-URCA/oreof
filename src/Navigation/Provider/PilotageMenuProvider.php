@@ -79,6 +79,13 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 ),
 
                 MenuItem::link(
+                    'pilotage.gestion_offre_etablissement',
+                    'menu.admin.gestion_offre_etablissement',
+                    'app_offre_etablissement_index',
+                    icon: 'mdi:school-outline',
+                ),
+
+                MenuItem::link(
                     'pilotage.statistiques_offre',
                     'menu.admin.statistiques_offre',
                     'offre_v2_statistiques',
@@ -118,6 +125,13 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                     'menu.admin.controle_lheo',
                     'app_parcours_lheo_invalid_list',
                     icon: 'mdi:shield-check-outline',
+                ),
+
+                MenuItem::link(
+                    'pilotage.descriptifs_parcours',
+                    'menu.admin.descriptifs_parcours',
+                    'app_admin_pilotage_descriptifs_index',
+                    icon: 'mdi:card-text-outline',
                 ),
 
                 MenuItem::link(
@@ -184,6 +198,14 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 route: 'app_offre_composante_index',
                 routeParams: ['composante' => $composante->getId()],
                 icon: 'mdi:notebook-edit-outline',
+            )->inColumn($column);
+
+            $children[] = MenuItem::link(
+                key: sprintf('pilotage_composante.%s.gestion_offre_etablissement', $composante->getId()),
+                label: 'menu.compo.gestion_offre_etablissement',
+                route: 'app_offre_etablissement_composante_index',
+                routeParams: ['composante' => $composante->getId()],
+                icon: 'mdi:school-outline',
             )->inColumn($column);
 
             $children[] = MenuItem::link(

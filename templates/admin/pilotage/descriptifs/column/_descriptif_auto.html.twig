@@ -1,0 +1,15 @@
+{% if row.descriptifHautPageAutomatique %}
+    <div class="text-xs text-secondary-800 dark:text-secondary-200 bg-secondary-50 dark:bg-secondary-800/60 p-2.5 rounded-lg border border-secondary-200 dark:border-secondary-700 max-h-28 overflow-y-auto font-sans leading-relaxed">
+        <span class="inline-flex items-center gap-1 mb-1 text-[10px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-info-100 text-info-700 dark:bg-info-900/50 dark:text-info-300">
+            <twig:UX:Icon name="mdi:robot-outline" class="w-3 h-3"/>
+            Automatique
+        </span>
+        <div class="mt-1 text-slate-700 dark:text-slate-300">
+            {{ row.descriptifHautPageAutomatique|raw }}
+        </div>
+    </div>
+{% else %}
+    <span class="inline-flex items-center text-xs text-secondary-400 italic">
+        — Aucun texte —
+    </span>
+{% endif %}

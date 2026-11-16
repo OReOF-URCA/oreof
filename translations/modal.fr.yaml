@@ -703,5 +703,7 @@ fiche_matiere_v2.synthese_modifications.avant: 'Avant (Référence)'
 fiche_matiere_v2.synthese_modifications.apres: 'Après (Version actuelle)'
 fiche_matiere_v2.synthese_modifications_footer.fermer: 'Fermer'
 fiche_matiere_v2.synthese_modifications_footer.sauvegarder_snapshot: 'Figer un nouveau snapshot JSON'
+parcours_descriptifs.edit.title: 'Modifier les descriptifs haut de page'
+
 
 

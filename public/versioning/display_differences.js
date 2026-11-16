@@ -37,16 +37,20 @@ function registerShowDifferencesClick(buttonElement, idToShow, idToHide) {
 };
 
 function registerShowCurrentDataClick(buttonElement) {
-    buttonElement.addEventListener('click', e => {
-        e.preventDefault();
-        [idDiffLastVersion, idDiffLastYear].forEach(
-            id => {
-                document.querySelectorAll(`#${id}`).forEach(elt => { elt.classList.add('d-none')});
-            }
-        );
-        toggleMaquetteDifferences('undefined');
-        currentDisplay = undefined;
-    })
+    if (buttonElement) {
+        buttonElement.addEventListener('click', e => {
+            e.preventDefault();
+            [idDiffLastVersion, idDiffLastYear].forEach(
+                id => {
+                    document.querySelectorAll(`#${id}`).forEach(elt => {
+                        elt.classList.add('d-none')
+                    });
+                }
+            );
+            toggleMaquetteDifferences('undefined');
+            currentDisplay = undefined;
+        });
+    }
 }
 
 function toggleMaquetteDifferences(elementToShow) {

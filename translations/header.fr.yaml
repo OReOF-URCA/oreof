@@ -10,6 +10,10 @@ app_actualite_index.description: 'Gérer les actualités ORéOF.'
 app_actualite_index.title: 'Gestion des actualités'
 app_admin_pilotage_campagne_index.description: "Tableau de bord stratégique : matrice d'avancement par composante, détection des goulets d'étranglement et alertes SLA."
 app_admin_pilotage_campagne_index.title: 'Tour de Contrôle & Pilotage de Campagne'
+app_admin_pilotage_descriptifs_index.description: 'Revue et édition des textes de présentation en haut de page (automatiques ou spécifiques) des parcours de la campagne en cours.'
+app_admin_pilotage_descriptifs_index.title: 'Pilotage des descriptifs haut de page'
+app_admin_pilotage_parcours_descriptifs.description: 'Revue et édition des textes de présentation en haut de page (automatiques ou spécifiques) des parcours de la campagne en cours.'
+app_admin_pilotage_parcours_descriptifs.title: 'Pilotage des descriptifs haut de page'
 app_admin_statistiques_visites_index.description: "Connexions, utilisateurs uniques et pages vues, calculés à partir des journaux de l'application."
 app_admin_statistiques_visites_index.title: 'Statistiques de visites'
 app_admin_workflow_index.description: "Visualisation interactive, matrice des transitions et audit des règles de validation de l'application."
@@ -105,6 +109,10 @@ app_notication_liste.description: 'Paramétrer les notifications par profil et w
 app_notication_liste.title: 'Gérer les notifications'
 app_offre_composante_index.description: "Gestion de l'offre de formation de votre composante. Capacités d''accueil, ouvertures, ..."
 app_offre_composante_index.title: "Gestion de l'offre de formation"
+app_offre_etablissement_composante_index.description: "Gestion de l'offre d'établissement de votre composante (hors accréditation). Modifications au fil de l'eau."
+app_offre_etablissement_composante_index.title: "Offre d'établissement"
+app_offre_etablissement_index.description: "Synthèse de l'offre de formation d'établissement. Processus simplifié au fil de l'eau."
+app_offre_etablissement_index.title: "Offre d'établissement"
 app_offre_index.description: 'Synthèse de l’offre de formation. Ouverture, plateformes, capacités et validations.'
 app_offre_index.title: 'Synthèse de l’offre de formation'
 app_parcours_bcc_but.title: 'BCC pour le parcours %libelle%'

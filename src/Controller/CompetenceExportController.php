@@ -36,13 +36,27 @@ class CompetenceExportController extends AbstractController
     {
         $formation = $parcours->getFormation();
         $typeD = $typeDiplomeResolver->fromFormation($formation);
-        $dto = $typeD->calcul($parcours, new OptionsCalculStructure(dataFromFicheMatiere: true));
+        $bccData = $typeD->getBccCroiseData($parcours);
+        $dto = $bccData['dto'] ?? $typeD->calcul($parcours, new OptionsCalculStructure(dataFromFicheMatiere: true));
+        $titre = 'Tableau croisé Compétences / EC - ' . $parcours->getDisplay();
+        $fileName = 'BCC_croise_' . $parcours->getDisplay() . ($formation ? '_' . $formation->getDisplay() : '');
+
         return $myGotenbergPdf->render('pdf/bcc_export_croise.html.twig', [
             'formation' => $formation,
             'parcours' => $parcours,
             'dto' => $dto,
-            'titre' => 'BCC croisé du parcours ',
-        ], 'BCC Croisé du parcours_' . $parcours->getDisplay() . '<br>' . $formation->getDisplayLong());
+            'bccData' => $bccData,
+            'typeD' => $typeD,
+            'editable' => false,
+            'titre' => $titre,
+        ], $fileName, [
+            'landscape' => true,
+            'paperSize' => 'A4',
+            'marginTop' => 1.4,
+            'marginBottom' => 0.9,
+            'marginLeft' => 0.6,
+            'marginRight' => 0.6,
+        ]);
     }
 
     #[Route('/competence/export/croise-global/{parcours}', name: 'app_competence_export_croise_global')]

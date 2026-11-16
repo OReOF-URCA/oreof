@@ -478,10 +478,10 @@ framework:
           from: 'tacite_reconduction'
           to: 'soumis_central'
           metadata:
-            recipients: [ 'RF', 'CoRF', 'RP', 'CoRP' ]
+            recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
+            label: 'Valider la tacite reconduction'
+            description: 'Reconduire le parcours sans modification'
             type: valider
-            #            btn: success
-            #            icon: ph:check
             button_class: 'success'
             button_icon: 'ph:check'
         ##### Rouvrir #####
@@ -490,6 +490,7 @@ framework:
           to: 'en_cours_redaction'
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
+            timeline_modules: [ 'maquettes', 'mccc' ]
             label: 'Réouvrir (MCCC)'
             description: 'Réouvrir pour modification des MCCC'
             button_class: 'info'
@@ -505,6 +506,7 @@ framework:
           to: 'en_cours_redaction_ss_cfvu'
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
+            timeline_modules: [ 'descriptifs' ]
             label: 'Modification sans CFVU'
             description: 'Modifications mineures sans passage en CFVU'
             button_class: 'info'
@@ -526,6 +528,7 @@ framework:
           to: 'en_cours_redaction'
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
+            timeline_modules: [ 'maquettes', 'mccc' ]
             label: 'Réouvrir (MCCC)'
             description: 'Réouvrir pour modification des MCCC'
             button_class: 'info'
@@ -539,6 +542,7 @@ framework:
           to: 'en_cours_redaction_ss_cfvu'
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
+            timeline_modules: [ 'descriptifs' ]
             label: 'Modification sans CFVU'
             description: 'Modifications mineures sans passage en CFVU'
             button_class: 'info'
@@ -948,6 +952,7 @@ framework:
         transmettre:
           from: 'brouillon'
           to: 'soumis_ses'
+          guard: "subject.getFormation() != null and subject.getFormation().isClassique()"
           metadata:
             type: valider
             label: 'btn.offre_v2.composante.transmettre'
@@ -958,6 +963,7 @@ framework:
         valider_ses:
           from: 'soumis_ses'
           to: 'soumis_cfvu'
+          guard: "subject.getFormation() != null and subject.getFormation().isClassique()"
           metadata:
             type: valider
             label: 'Valider et transmettre au CFVU'
@@ -966,11 +972,51 @@ framework:
         reserver_ses:
           from: 'soumis_ses'
           to: 'brouillon'
+          guard: "subject.getFormation() != null and subject.getFormation().isClassique()"
           metadata:
             type: reserver
             label: 'Renvoyer pour modifications'
             btn: warning
             icon: material-symbols:fact-check-outline-sharp
+        # Transitions spécifiques aux formations d'établissement (non classiques / au fil de l'eau)
+        transmettre_etablissement:
+          from: 'brouillon'
+          to: 'soumis_ses'
+          guard: "subject.getFormation() != null and not subject.getFormation().isClassique()"
+          metadata:
+            type: valider
+            label: 'btn.offre_v2.composante.transmettre_etablissement'
+            btn: success
+            icon: ph:check
+            hasUpload: false
+            hasUploadNote: false
+        valider_ses_etablissement:
+          from: 'soumis_ses'
+          to: 'publie'
+          guard: "subject.getFormation() != null and not subject.getFormation().isClassique()"
+          metadata:
+            type: valider
+            label: 'btn.offre_v2.composante.valider_ses_etablissement'
+            btn: success
+            icon: ph:check
+        reserver_ses_etablissement:
+          from: 'soumis_ses'
+          to: 'brouillon'
+          guard: "subject.getFormation() != null and not subject.getFormation().isClassique()"
+          metadata:
+            type: reserver
+            label: 'btn.offre_v2.composante.reserver_ses_etablissement'
+            btn: warning
+            icon: material-symbols:fact-check-outline-sharp
+        reouvrir_etablissement:
+          from: 'publie'
+          to: 'brouillon'
+          guard: "subject.getFormation() != null and not subject.getFormation().isClassique()"
+          metadata:
+            type: reserver
+            label: 'btn.offre_v2.composante.reouvrir_etablissement'
+            btn: warning
+            icon: flowbite:undo-outline
         valider_cfvu_avec_pv:
           from: 'soumis_cfvu'
           to: 'publie'

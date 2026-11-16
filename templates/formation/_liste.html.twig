@@ -13,6 +13,11 @@
     {% if params['typeDiplome'] is defined and params['typeDiplome'] %}
         {% set activeFilters = activeFilters + 1 %}
     {% endif %}
+
+    {% if params['classique'] is defined and params['classique'] %}
+        {% set activeFilters = activeFilters + 1 %}
+    {% endif %}
+
     {% if params['mention'] is defined and params['mention'] %}
         {% set activeFilters = activeFilters + 1 %}
     {% endif %}
@@ -54,56 +59,56 @@
         </div>
     </div>
 
-        {% embed 'components/filter_panel.html.twig' with {
-            title: 'Filtres',
-            activeFilters: activeFilters,
-            fieldsTitle: 'Filtres avancés',
-            collapsible: true,
-            collapsedByDefault: true
-        } %}
-            {% block search %}
-                <label for="filter-quick-search" class="sr-only">Recherche rapide</label>
-                <div class="relative">
+    {% embed 'components/filter_panel.html.twig' with {
+        title: 'Filtres',
+        activeFilters: activeFilters,
+        fieldsTitle: 'Filtres avancés',
+        collapsible: true,
+        collapsedByDefault: true
+    } %}
+        {% block search %}
+            <label for="filter-quick-search" class="sr-only">Recherche rapide</label>
+            <div class="relative">
                     <span class="pointer-events-none absolute inset-y-0 left-3 flex items-center text-secondary-400">
                         {{ ux_icon('icon:search', {class: 'h-4 w-4'}) }}
                     </span>
-                    <input type="text"
-                           id="filter-quick-search"
-                           class="w-full rounded-lg border border-secondary-300 bg-white py-2 pl-9 pr-3 text-sm text-secondary-700 shadow-sm outline-none transition placeholder:text-secondary-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder:text-secondary-400 dark:focus:border-primary-500 dark:focus:ring-primary-900/50"
-                           placeholder="Rechercher une formation, mention, sigle..."
-                           value="{{ params.q|default('') }}"
-                            {{ stimulus_action('crud', 'rechercher', 'input') }}>
-                </div>
-            {% endblock %}
+                <input type="text"
+                       id="filter-quick-search"
+                       class="w-full rounded-lg border border-secondary-300 bg-white py-2 pl-9 pr-3 text-sm text-secondary-700 shadow-sm outline-none transition placeholder:text-secondary-400 focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:placeholder:text-secondary-400 dark:focus:border-primary-500 dark:focus:ring-primary-900/50"
+                       placeholder="Rechercher une formation, mention, sigle..."
+                       value="{{ params.q|default('') }}"
+                        {{ stimulus_action('crud', 'rechercher', 'input') }}>
+            </div>
+        {% endblock %}
 
-            {% block actions %}
-                <twig:Button
-                        variant="danger"
-                        size="sm"
-                        icon="icon:sync"
-                        label="Réinitialiser"
-                        dataAction="click->crud#effaceFiltre"
-                />
+        {% block actions %}
+            <twig:Button
+                    variant="danger"
+                    size="sm"
+                    icon="icon:sync"
+                    label="Réinitialiser"
+                    dataAction="click->crud#effaceFiltre"
+            />
 
-                {% if collapsible|default(false) %}
-                    <twig:Button type="button" variant="secondary" size="sm"
-                           data-crud-panel-toggle id="{{ toggleId }}"
-                           dataAction="click->filter-panel#toggle"
-                           aria-expanded="{{ isOpen ? 'true' : 'false' }}"
-                           aria-controls="{{ fieldsId }}"
-                           extraClass="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-secondary-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-600 shadow-sm transition hover:border-secondary-300 hover:text-secondary-900 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:border-secondary-500 dark:hover:text-white"
-                           title="Afficher/masquer les filtres"
-                           aria-label="Afficher ou masquer les filtres">
-                        {{ ux_icon('icon:filter', {class: 'h-4 w-4', 'aria-hidden': 'true'}) }}
-                        Filtres
-                        {% if activeFilters > 0 %}
-                            <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-primary-600 px-1.5 py-0.5 text-[10px] font-bold text-white dark:bg-primary-500">
+            {% if collapsible|default(false) %}
+                <twig:Button type="button" variant="secondary" size="sm"
+                             data-crud-panel-toggle id="{{ toggleId }}"
+                             dataAction="click->filter-panel#toggle"
+                             aria-expanded="{{ isOpen ? 'true' : 'false' }}"
+                             aria-controls="{{ fieldsId }}"
+                             extraClass="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-secondary-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-600 shadow-sm transition hover:border-secondary-300 hover:text-secondary-900 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200 dark:hover:border-secondary-500 dark:hover:text-white"
+                             title="Afficher/masquer les filtres"
+                             aria-label="Afficher ou masquer les filtres">
+                    {{ ux_icon('icon:filter', {class: 'h-4 w-4', 'aria-hidden': 'true'}) }}
+                    Filtres
+                    {% if activeFilters > 0 %}
+                        <span class="inline-flex min-w-5 items-center justify-center rounded-full bg-primary-600 px-1.5 py-0.5 text-[10px] font-bold text-white dark:bg-primary-500">
                                 {{ activeFilters }}
                             </span>
-                        {% endif %}
-                    </twig:Button>
-                {% else %}
-                    <span class="inline-flex items-center gap-2 rounded-lg border border-secondary-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-600 shadow-sm dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200">
+                    {% endif %}
+                </twig:Button>
+            {% else %}
+                <span class="inline-flex items-center gap-2 rounded-lg border border-secondary-200 bg-white px-3 py-2 text-xs font-semibold text-secondary-600 shadow-sm dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-200">
                         {{ ux_icon('icon:filter', {class: 'h-4 w-4'}) }}
                         Filtres
                         {% if activeFilters > 0 %}
@@ -112,102 +117,118 @@
                             </span>
                         {% endif %}
                     </span>
-                {% endif %}
-            {% endblock %}
+            {% endif %}
+        {% endblock %}
 
-            {% block fields %}
+        {% block fields %}
+            <div>
+                <label for="filter-mention"
+                       class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Mention</label>
+                <select id="filter-mention"
+                        class="app-filter-select w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-2 text-xs font-medium text-secondary-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/50"
+                        {{ stimulus_action('crud', 'filter', 'change', {'field': 'mention'}) }}
+                        {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                    <option value="">Toutes les mentions</option>
+                    {% for mention in mentions %}
+                        <option value="{{ mention.id }}"
+                                {% if params['mention'] is defined and params['mention'] == mention.id %}selected{% endif %}>{{ mention.libelle }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if composantes|length > 1 %}
                 <div>
-                    <label for="filter-mention"
-                           class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Mention</label>
-                    <select id="filter-mention"
+                    <label for="filter-composante"
+                           class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Composante</label>
+                    <select id="filter-composante"
                             class="app-filter-select w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-2 text-xs font-medium text-secondary-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/50"
-                            {{ stimulus_action('crud', 'filter', 'change', {'field': 'mention'}) }}
+                            {{ stimulus_action('crud', 'filter', 'change', {'field': 'composantePorteuse'}) }}
                             {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
-                        <option value="">Toutes les mentions</option>
-                        {% for mention in mentions %}
-                            <option value="{{ mention.id }}"
-                                    {% if params['mention'] is defined and params['mention'] == mention.id %}selected{% endif %}>{{ mention.libelle }}</option>
+                        <option value="">Toutes les composantes</option>
+                        {% for composante in composantes %}
+                            <option value="{{ composante.id }}"
+                                    {% if params['composantePorteuse'] is defined and params['composantePorteuse'] == composante.id %}selected{% endif %}>{{ composante.libelle }}</option>
                         {% endfor %}
                     </select>
                 </div>
-
-                {% if composantes|length > 1 %}
-                    <div>
-                        <label for="filter-composante"
-                               class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Composante</label>
-                        <select id="filter-composante"
-                                class="app-filter-select w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-2 text-xs font-medium text-secondary-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/50"
-                                {{ stimulus_action('crud', 'filter', 'change', {'field': 'composantePorteuse'}) }}
-                                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
-                            <option value="">Toutes les composantes</option>
-                            {% for composante in composantes %}
-                                <option value="{{ composante.id }}"
-                                        {% if params['composantePorteuse'] is defined and params['composantePorteuse'] == composante.id %}selected{% endif %}>{{ composante.libelle }}</option>
-                            {% endfor %}
-                        </select>
-                    </div>
-                {% elseif composantes|length == 1 and isConseilComposante|default(false) %}
-                    <div>
-                        <span class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Composante</span>
-                        <div class="rounded-lg border border-secondary-200 bg-secondary-50 px-3 py-2 text-xs font-medium text-secondary-800 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-200">
-                            {{ composantes|first.libelle }}
-                        </div>
-                    </div>
-                {% endif %}
-
+            {% elseif composantes|length == 1 and isConseilComposante|default(false) %}
                 <div>
-                    <label for="filter-type_formation"
-                           class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Type de
-                        diplome</label>
-                    <select id="filter-type_formation"
+                    <span class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Composante</span>
+                    <div class="rounded-lg border border-secondary-200 bg-secondary-50 px-3 py-2 text-xs font-medium text-secondary-800 dark:border-secondary-700 dark:bg-secondary-800 dark:text-secondary-200">
+                        {{ composantes|first.libelle }}
+                    </div>
+                </div>
+            {% endif %}
+
+            <div>
+                <label for="filter-type_formation"
+                       class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Type de
+                    diplome</label>
+                <select id="filter-type_formation"
+                        class="app-filter-select w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-2 text-xs font-medium text-secondary-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/50"
+                        {{ stimulus_action('crud', 'filter', 'change', {'field': 'typeDiplome'}) }}
+                        {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                    <option value="">Tous les types</option>
+                    {% for type in typeDiplomes %}
+                        <option value="{{ type.id }}"
+                                {% if params['typeDiplome'] is defined and params['typeDiplome'] == type.id %}selected{% endif %}>{{ type.libelle }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="filter-responsable"
+                       class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Responsable</label>
+                <select id="filter-responsable"
+                        class="app-filter-select w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-2 text-xs font-medium text-secondary-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/50"
+                        {{ stimulus_action('crud', 'filter', 'change', {'field': 'responsable'}) }}
+                        {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                    <option value="">Tous les responsables</option>
+                    {% for responsable in responsables %}
+                        <option value="{{ responsable.id }}"
+                                {% if params['responsable'] is defined and params['responsable'] == responsable.id %}selected{% endif %}>{{ responsable.display }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div>
+                <label for="filter-classique"
+                       class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Type
+                    accrédidation</label>
+                <select id="filter-classique"
+                        class="app-filter-select w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-2 text-xs font-medium text-secondary-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/50"
+                        {{ stimulus_action('crud', 'filter', 'change', {'field': 'classique'}) }}
+                        {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
+                    <option value="">Toutes</option>
+                    <option value="1">Accrédité</option>
+                    <option value="0">Etablissement</option>
+                </select>
+            </div>
+
+
+
+            {% if not (isCfvu|default(false) or isConseilComposante|default(false)) %}
+                <div>
+                    <label for="filter-remplissage"
+                           class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Remplissage</label>
+                    <select id="filter-remplissage"
                             class="app-filter-select w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-2 text-xs font-medium text-secondary-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/50"
-                            {{ stimulus_action('crud', 'filter', 'change', {'field': 'typeDiplome'}) }}
+                            {{ stimulus_action('crud', 'filter', 'change', {'field': 'remplissage'}) }}
                             {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
-                        <option value="">Tous les types</option>
-                        {% for type in typeDiplomes %}
-                            <option value="{{ type.id }}"
-                                    {% if params['typeDiplome'] is defined and params['typeDiplome'] == type.id %}selected{% endif %}>{{ type.libelle }}</option>
-                        {% endfor %}
+                        <option value="all">Tous</option>
+                        <option value="0"
+                                {% if params['remplissage'] is defined and params['remplissage'] == 0 %}selected{% endif %}>
+                            Non complete
+                        </option>
+                        <option value="100"
+                                {% if params['remplissage'] is defined and params['remplissage'] == 100 %}selected{% endif %}>
+                            Complet
+                        </option>
                     </select>
                 </div>
-
-                <div>
-                    <label for="filter-responsable"
-                           class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Responsable</label>
-                    <select id="filter-responsable"
-                            class="app-filter-select w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-2 text-xs font-medium text-secondary-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/50"
-                            {{ stimulus_action('crud', 'filter', 'change', {'field': 'responsable'}) }}
-                            {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
-                        <option value="">Tous les responsables</option>
-                        {% for responsable in responsables %}
-                            <option value="{{ responsable.id }}"
-                                    {% if params['responsable'] is defined and params['responsable'] == responsable.id %}selected{% endif %}>{{ responsable.display }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-
-                {% if not (isCfvu|default(false) or isConseilComposante|default(false)) %}
-                    <div>
-                        <label for="filter-remplissage"
-                               class="mb-1 block text-xs font-semibold text-secondary-600 dark:text-secondary-300">Remplissage</label>
-                        <select id="filter-remplissage"
-                                class="app-filter-select w-full rounded-lg border border-secondary-300 bg-white px-2.5 py-2 text-xs font-medium text-secondary-700 outline-none focus:border-primary-400 focus:ring-2 focus:ring-primary-200 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 dark:focus:border-primary-500 dark:focus:ring-primary-900/50"
-                                {{ stimulus_action('crud', 'filter', 'change', {'field': 'remplissage'}) }}
-                                {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
-                            <option value="all">Tous</option>
-                            <option value="0"
-                                    {% if params['remplissage'] is defined and params['remplissage'] == 0 %}selected{% endif %}>
-                                Non complete
-                            </option>
-                            <option value="100"
-                                    {% if params['remplissage'] is defined and params['remplissage'] == 100 %}selected{% endif %}>
-                                Complet
-                            </option>
-                        </select>
-                    </div>
-                {% endif %}
-            {% endblock %}
-        {% endembed %}
+            {% endif %}
+        {% endblock %}
+    {% endembed %}
 
     <div class="rounded-2xl border border-secondary-200 bg-white shadow-sm dark:border-secondary-700 dark:bg-secondary-900">
         <div class="overflow-x-auto">
@@ -215,7 +236,8 @@
                 <thead class="bg-secondary-50 text-left text-xs font-black uppercase tracking-wider text-secondary-500 dark:bg-secondary-800/70 dark:text-secondary-300">
                 <tr>
                     <th class="px-4 py-3 w-1/4">
-                        <a href="#" class="inline-flex items-center gap-1 hover:text-secondary-900 dark:hover:text-white"
+                        <a href="#"
+                           class="inline-flex items-center gap-1 hover:text-secondary-900 dark:hover:text-white"
                                 {{ stimulus_action('crud', 'sort', 'click', {
                                     'sort': 'mention',
                                     'direction': getDirection('mention', sort, direction)
@@ -224,7 +246,8 @@
                         </a>
                     </th>
                     <th class="px-4 py-3 w-1/5">
-                        <a href="#" class="inline-flex items-center gap-1 hover:text-secondary-900 dark:hover:text-white"
+                        <a href="#"
+                           class="inline-flex items-center gap-1 hover:text-secondary-900 dark:hover:text-white"
                                 {{ stimulus_action('crud', 'sort', 'click', {
                                     'sort': 'composantePorteuse',
                                     'direction': getDirection('composantePorteuse', sort, direction)
@@ -232,6 +255,7 @@
                             Composante {{ displaySort('composantePorteuse', sort, direction) }}
                         </a>
                     </th>
+                    <th class="px-4 py-3 text-center w-1/6">Accred./Etab.</th>
                     <th class="px-4 py-3 text-center w-1/6">Etat</th>
                     <th class="px-4 py-3 w-1/5">Remplissage</th>
                     <th class="px-4 py-3 text-right w-1/6">Actions</th>
@@ -242,7 +266,8 @@
                 {% for formation in formations %}
                     {% set remplissage = params['remplissage']|default('all') %}
                     {% if remplissage == '100' and formation.remplissage.calcul == 100 or remplissage == '0' and formation.remplissage.calcul < 100 or remplissage == 'all' %}
-                        <tr id="formation_row_{{ formation.id }}" class="align-top hover:bg-secondary-50/70 dark:hover:bg-secondary-800/40">
+                        <tr id="formation_row_{{ formation.id }}"
+                            class="align-top hover:bg-secondary-50/70 dark:hover:bg-secondary-800/40">
                             {# Colonne Formation (cliquable = action rapide pour voir détails) #}
                             <td class="px-4 py-3">
                                 <div class="space-y-1">
@@ -276,7 +301,8 @@
                                         </div>
                                     {% endif %}
 
-                                    <div class="text-xs text-secondary-500 dark:text-secondary-400" id="formation_parcours_count_{{ formation.id }}">
+                                    <div class="text-xs text-secondary-500 dark:text-secondary-400"
+                                         id="formation_parcours_count_{{ formation.id }}">
                                         <span class="inline-flex rounded-full border border-info-300 bg-info-50 px-2.5 py-0.5 font-semibold text-info-700 dark:border-info-700 dark:bg-info-950/30 dark:text-info-300">
                                             {{ formation.typeDiplome|typeDiplome }}
                                         </span>
@@ -313,6 +339,14 @@
                                     {% endif %}
                                 {% else %}
                                     <span class="inline-flex rounded-full border border-danger-300 bg-danger-50 px-2 py-0.5 text-xs font-semibold text-danger-700 dark:border-danger-700 dark:bg-danger-950/30 dark:text-danger-300">Non définie</span>
+                                {% endif %}
+                            </td>
+
+                            <td class="px-4 py-3 text-center">
+                                {% if formation.classique == true %}
+                                    <twig:_ui:badge variant="success" size="sm" label="Accréditée"/>
+                                {% else %}
+                                    <twig:_ui:badge variant="warning" size="sm" label="Établissement"/>
                                 {% endif %}
                             </td>
 
@@ -382,7 +416,7 @@
                                                     help: not is_granted('ROLE_ADMIN') ? 'Suppression réservée aux administrateurs.' : null}
                                             ]
                                         }) }}
-                                </div>
+                                    </div>
                                 </div>
                             </td>
                         </tr>

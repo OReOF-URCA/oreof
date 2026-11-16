@@ -55,20 +55,11 @@ abstract class Access {
         if ($entity instanceof DpeParcours) {
             $places = array_keys($entity->getEtatValidation());
             $currentPlace = $places[0] ?? null;
-            if (in_array($currentPlace, ['en_cours_redaction', 'en_cours_redaction_ss_cfvu'], true)) {
+            if (in_array($currentPlace, ['en_cours_redaction', 'en_cours_redaction_ss_cfvu', 'tacite_reconduction'], true)) {
                 return true;
             }
 
-            return in_array($entity->getEtatReconduction()?->value, [
-                TypeModificationDpeEnum::OUVERT->value,
-                TypeModificationDpeEnum::CREATION->value,
-                TypeModificationDpeEnum::MODIFICATION->value,
-                TypeModificationDpeEnum::MODIFICATION_TEXTE->value,
-                TypeModificationDpeEnum::MODIFICATION_INTITULE->value,
-                TypeModificationDpeEnum::MODIFICATION_PARCOURS->value,
-                TypeModificationDpeEnum::MODIFICATION_MCCC->value,
-                TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE->value,
-            ], true);
+            return $entity->getEtatReconduction()?->isOuvert() ?? false;
         }
 
         if ($entity instanceof Parcours) {
@@ -79,16 +70,11 @@ abstract class Access {
         }
 
         if ($entity instanceof Formation) {
-            return in_array($entity->getEtatReconduction()?->value, [
-                TypeModificationDpeEnum::OUVERT->value,
-                TypeModificationDpeEnum::CREATION->value,
-                TypeModificationDpeEnum::MODIFICATION->value,
-                TypeModificationDpeEnum::MODIFICATION_TEXTE->value,
-                TypeModificationDpeEnum::MODIFICATION_INTITULE->value,
-                TypeModificationDpeEnum::MODIFICATION_PARCOURS->value,
-                TypeModificationDpeEnum::MODIFICATION_MCCC->value,
-                TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE->value,
-            ], true);
+            if ($entity->getEtatReconduction() === null) {
+                return true;
+            }
+
+            return $entity->getEtatReconduction()->isOuvert();
         }
 
         return false;

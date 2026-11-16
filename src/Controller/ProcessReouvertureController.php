@@ -6,7 +6,10 @@ use App\Classes\GetDpeParcours;
 use App\Classes\JsonReponse;
 use App\Classes\ValidationProcess;
 use App\Entity\DpeDemande;
+use App\Entity\DpeParcours;
 use App\Entity\Formation;
+use App\Entity\HistoriqueFormation;
+use App\Entity\HistoriqueParcours;
 use App\Entity\Parcours;
 use App\Entity\User;
 use App\Enums\EtatDpeEnum;
@@ -18,98 +21,29 @@ use App\Repository\DpeDemandeRepository;
 use App\Repository\DpeParcoursRepository;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
+use App\Utils\TurboStreamResponseFactory;
+use DateTime;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\DependencyInjection\Attribute\Target;
-use Symfony\Component\Workflow\WorkflowInterface;
-use Dannebicque\WorkflowOperationsBundle\Operation\OperationContextNormalizer;
-use Dannebicque\WorkflowOperationsBundle\Operation\WorkflowOperationExecutor;
 
 class ProcessReouvertureController extends BaseController
 {
-//todo: a voir ce qui est encore utile
     public function __construct(
-        private readonly EventDispatcherInterface      $eventDispatcher,
-        private readonly EntityManagerInterface        $entityManager,
-        private readonly ValidationProcess             $validationProcess,
-        private readonly WorkflowOperationExecutor     $operationExecutor,
-        private readonly OperationContextNormalizer    $operationContextNormalizer,
-        #[Target('dpeParcours')]
-        private readonly WorkflowInterface             $dpeParcoursWorkflow,
-        private readonly \App\Service\Parcours\ParcoursDescriptifAutomatiqueGenerator $parcoursDescriptifAutomatiqueGenerator,
+        private readonly EventDispatcherInterface   $eventDispatcher,
+        private readonly EntityManagerInterface     $entityManager,
+        private readonly TurboStreamResponseFactory $turboStream,
     ) {
-    }
-
-    #[Route('/demande/non-ouverture/{parcours}', name: 'app_validation_demande_non_ouverture')]
-    // todo: encore utilisé ?
-    public function demandeNonOuverture(
-        Parcours           $parcours,
-        VersioningParcours $versioningParcours,
-        Request            $request
-    ): Response
-    {
-        $formation = $parcours->getFormation();
-        $typeDpe = 'P';
-
-        if ($request->isMethod('POST')) {
-            $data = $request->request->all();
-
-            $dpe = GetDpeParcours::getFromParcours($parcours);
-            if ($dpe === null) {
-                return JsonReponse::error('DPE non trouvé');
-            }
-
-            //réouverture directe sans sauvegarde ou avec sauvegarde selon le choix
-            if ($data['demandeNonOuverture'] === 'NON_OUVERTURE') {
-                $etatTypeModification = TypeModificationDpeEnum::NON_OUVERTURE_SES;
-                $dpe->setEtatReconduction($etatTypeModification);
-                $dpe->setEtatValidation(['non_ouverture_ses' => 1]); //un état de processus différent pour connaitre le branchement ensuite
-
-                $now = new DateTimeImmutable('now');
-                $histoEvent = new HistoriqueParcoursEvent($parcours, $this->getUser(), 'non_ouverture_ses', 'valide', $request);
-                $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
-                $this->entityManager->flush();
-
-
-                $demande = new DpeDemande();
-                $demande->setFormation($formation);
-                $demande->setCampagneCollecte($this->getCampagneCollecte());
-                $demande->setParcours($parcours);
-                $currentUser = $this->getUser();
-                if (!$currentUser instanceof User) {
-                    throw $this->createAccessDeniedException();
-                }
-                $demande->setAuteur($currentUser);
-                $demande->setEtatDemande(EtatDpeEnum::non_ouverture_ses);
-                $demande->setNiveauDemande($typeDpe);
-                $demande->setArgumentaireDemande($request->request->getString('argumentaire_demande_non_ouverture'));
-                $demande->setNiveauModification($etatTypeModification);
-                $this->entityManager->persist($demande);
-                $this->entityManager->flush();
-
-                //mail au SES
-                $dpeDemandeEvent = new DpeDemandeEvent($demande, $currentUser);
-                $this->eventDispatcher->dispatch($dpeDemandeEvent, DpeDemandeEvent::DPE_DEMANDE_OPENED);
-
-                return JsonReponse::success('Demande de non ouverture envoyée');
-            }
-            return JsonReponse::error('Erreur lors de la demande de non ouverture');
-        }
-
-        return $this->render('process_validation/_demande_non_ouverture.html.twig', [
-            'parcours' => $parcours
-        ]);
     }
 
     #[Route('/demande/reouverture/{parcours}', name: 'app_validation_demande_reouverture')]
     public function demandeReouverture(
-        Parcours  $parcours,
-        VersioningParcours  $versioningParcours,
-        Request             $request
+        Parcours           $parcours,
+        VersioningParcours $versioningParcours,
+        Request            $request
     ): Response {
         $formation = $parcours->getFormation();
         $typeDpe = 'P';
@@ -122,14 +56,18 @@ class ProcessReouvertureController extends BaseController
                 return JsonReponse::error('DPE non trouvé');
             }
 
-            //réouverture directe sans sauvegarde ou avec sauvegarde selon le choix
+            $currentUser = $this->getCurrentUserOrFail();
+            $currentPlace = array_key_first($dpe->getEtatValidation()) ?? 'publie';
+            $initialPlace = $currentPlace === 'tacite_reconduction' ? 'tacite_reconduction' : 'publie';
+
+            // réouverture directe sans sauvegarde ou avec sauvegarde selon le choix
             if ($data['demandeReouverture'] === 'MODIFICATION_TEXTE') {
                 $etatTypeModification = TypeModificationDpeEnum::MODIFICATION_TEXTE;
-                $dpe->setEtatValidation(['en_cours_redaction_ss_cfvu' => 1]); //un état de processus différent pour connaitre le branchement ensuite
+                $dpe->setEtatValidation(['en_cours_redaction_ss_cfvu' => 1]);
                 $dpe->setEtatReconduction($etatTypeModification);
                 $now = new DateTimeImmutable('now');
                 $versioningParcours->saveVersionOfParcours($parcours, $now, true);
-                $histoEvent = new HistoriqueParcoursEvent($parcours, $this->getUser(), 'en_cours_redaction_ss_cfvu', 'valide', $request);
+                $histoEvent = new HistoriqueParcoursEvent($parcours, $currentUser, 'en_cours_redaction_ss_cfvu', 'valide', $request, input: ['etat_depart' => $initialPlace]);
                 $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
                 $this->entityManager->flush();
             } elseif ($data['demandeReouverture'] === 'MODIFICATION_MCCC_TEXTE') {
@@ -138,7 +76,7 @@ class ProcessReouvertureController extends BaseController
                 $dpe->setEtatReconduction($etatTypeModification);
                 $now = new DateTimeImmutable('now');
                 $versioningParcours->saveVersionOfParcours($parcours, $now, true);
-                $histoEvent = new HistoriqueParcoursEvent($parcours, $this->getUser(), 'en_cours_redaction', 'valide', $request);
+                $histoEvent = new HistoriqueParcoursEvent($parcours, $currentUser, 'en_cours_redaction', 'valide', $request, input: ['etat_depart' => $initialPlace]);
                 $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
                 $this->entityManager->flush();
             } else {
@@ -149,11 +87,7 @@ class ProcessReouvertureController extends BaseController
             $demande->setFormation($formation);
             $demande->setParcours($parcours);
             $demande->setCampagneCollecte($this->getCampagneCollecte());
-            $currentUser = $this->getUser();
-                if (!$currentUser instanceof User) {
-                    throw $this->createAccessDeniedException();
-                }
-                $demande->setAuteur($currentUser);
+            $demande->setAuteur($currentUser);
             $demande->setNiveauDemande($typeDpe);
             $demande->setArgumentaireDemande($request->request->getString('argumentaire_demande_reouverture'));
             $demande->setEtatDemande(EtatDpeEnum::en_cours_redaction);
@@ -161,11 +95,21 @@ class ProcessReouvertureController extends BaseController
             $this->entityManager->persist($demande);
             $this->entityManager->flush();
 
-            //mail au SES
+            // mail au SES
             $dpeDemandeEvent = new DpeDemandeEvent($demande, $currentUser);
             $this->eventDispatcher->dispatch($dpeDemandeEvent, DpeDemandeEvent::DPE_DEMANDE_OPENED);
 
             return JsonReponse::success('DPE ouvert');
+        }
+
+        if ($this->isTurbo($request)) {
+            return $this->turboStream->streamOpenModalFromTemplates(
+                'Demande de réouverture du parcours',
+                $parcours->getDisplay(),
+                'process_validation/_demande_reouverture.html.twig',
+                ['parcours' => $parcours],
+                '_ui/_footer_cancel.html.twig',
+            );
         }
 
         return $this->render('process_validation/_demande_reouverture.html.twig', [
@@ -180,8 +124,8 @@ class ProcessReouvertureController extends BaseController
         Request              $request
     ): Response
     {
-
         $demande = $dpeDemandeRepository->findLastOpenedDemande($parcours, EtatDpeEnum::en_cours_redaction, TypeModificationDpeEnum::MODIFICATION_TEXTE);
+        $currentUser = $this->getCurrentUserOrFail();
 
         if ($request->isMethod('POST')) {
             if ($demande === null) {
@@ -190,44 +134,29 @@ class ProcessReouvertureController extends BaseController
                 $demande->setFormation($parcours->getFormation());
                 $demande->setParcours($parcours);
                 $demande->setCampagneCollecte($this->getCampagneCollecte());
-                $currentUser = $this->getUser();
-                if (!$currentUser instanceof User) {
-                    throw $this->createAccessDeniedException();
-                }
                 $demande->setAuteur($currentUser);
                 $demande->setNiveauDemande('P');
                 $demande->setniveauModification(TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE);
                 $this->entityManager->persist($demande);
             }
 
-            $data = $request->request->all();
-
             $dpe = GetDpeParcours::getFromParcours($parcours);
             if ($dpe === null) {
                 return JsonReponse::error('DPE non trouvé');
             }
 
-            //réouverture directe sans sauvegarde ou avec sauvegarde selon le choix
-
             $dpe->setEtatValidation(['en_cours_redaction' => 1]);
             $dpe->setEtatReconduction(TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE);
-            $this->entityManager->flush();
-
-
             $demande->setArgumentaireDemande($request->request->getString('argumentaire_demande_reouverture'));
             $demande->setEtatDemande(EtatDpeEnum::en_cours_redaction);
-
             $this->entityManager->flush();
 
-            $histoEvent = new HistoriqueParcoursEvent($parcours, $this->getUser(), 'en_cours_redaction', 'valide', $request);
+            $histoEvent = new HistoriqueParcoursEvent($parcours, $currentUser, 'en_cours_redaction', 'valide', $request);
             $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
 
-            $currentUser = $this->getUser();
-            $user = $currentUser instanceof User ? $currentUser : null;
-            //mail au SES
-            $dpeDemandeEvent = new DpeDemandeEvent($demande, $user);
+            // mail au SES
+            $dpeDemandeEvent = new DpeDemandeEvent($demande, $currentUser);
             $this->eventDispatcher->dispatch($dpeDemandeEvent, DpeDemandeEvent::DPE_DEMANDE_OPENED);
-
 
             return JsonReponse::success('DPE ouvert avec modification de la structure');
         }
@@ -251,7 +180,6 @@ class ProcessReouvertureController extends BaseController
             if ($data['demandeReouverture'] === 'MODIFICATION_TEXTE') {
                 $etat = TypeModificationDpeEnum::MODIFICATION_TEXTE;
                 $texte = 'DPE ouvert pour modification des textes';
-
             } elseif ($data['demandeReouverture'] === 'MODIFICATION_PARCOURS') {
                 $etat = TypeModificationDpeEnum::MODIFICATION_PARCOURS;
                 $texte = 'DPE ouvert pour modification de la structure de la mention';
@@ -259,25 +187,28 @@ class ProcessReouvertureController extends BaseController
                 return JsonReponse::error('Type de réouverture inconnu');
             }
 
-            //todo: vérifier si l'évent est OK ?
+            $currentUser = $this->getCurrentUserOrFail();
+            $dpe = GetDpeParcours::getFromFormation($formation);
+            $initialPlace = ($dpe !== null && array_key_first($dpe->getEtatValidation()) === 'tacite_reconduction')
+                ? 'tacite_reconduction'
+                : 'publie';
+
+            // Sauvegarde de version et traçabilité historique
             $versioningFormation->saveVersionOfFormation($formation, new DateTimeImmutable('now'), true);
-            $histoEvent = new HistoriqueFormationEvent($formation, $this->getUser(), 'en_cours_redaction', 'valide', $request);
+            $histoEvent = new HistoriqueFormationEvent($formation, $currentUser, 'en_cours_redaction', 'valide', $request, input: ['etat_depart' => $initialPlace]);
             $this->eventDispatcher->dispatch($histoEvent, HistoriqueFormationEvent::ADD_HISTORIQUE_FORMATION);
-            $this->entityManager->flush();
 
             $formation->setEtatReconduction($etat);
-            $this->entityManager->flush();
+            if ($dpe !== null) {
+                $dpe->setEtatValidation(['en_cours_redaction' => 1]);
+                $dpe->setEtatReconduction($etat);
+            }
 
-            //on applique directement l'ouverture, mais on historise la demande
-
+            // Historisation de la demande
             $demande = new DpeDemande();
             $demande->setFormation($formation);
             $demande->setParcours(null);
-            $currentUser = $this->getUser();
-                if (!$currentUser instanceof User) {
-                    throw $this->createAccessDeniedException();
-                }
-                $demande->setAuteur($currentUser);
+            $demande->setAuteur($currentUser);
             $demande->setCampagneCollecte($this->getCampagneCollecte());
             $demande->setNiveauDemande($typeDpe);
             $demande->setArgumentaireDemande($request->request->getString('argumentaire_demande_reouverture'));
@@ -286,267 +217,399 @@ class ProcessReouvertureController extends BaseController
             $this->entityManager->persist($demande);
             $this->entityManager->flush();
 
-            //mail au SES
+            // Mail au SES
             $dpeDemandeEvent = new DpeDemandeEvent($demande, $currentUser);
             $this->eventDispatcher->dispatch($dpeDemandeEvent, DpeDemandeEvent::DPE_DEMANDE_OPENED);
-
-            $formation->setEtatReconduction($etat);
-            $this->entityManager->flush();
 
             return JsonReponse::success($texte);
         }
 
+        if ($this->isTurbo($request)) {
+            return $this->turboStream->streamOpenModalFromTemplates(
+                'Demande de réouverture de la mention',
+                $formation->getDisplay(),
+                'process_validation/_demande_reouverture_formation.html.twig',
+                ['formation' => $formation],
+                '_ui/_footer_cancel.html.twig',
+            );
+        }
+
         return $this->render('process_validation/_demande_reouverture_formation.html.twig', [
             'formation' => $formation,
-            ]);
+        ]);
     }
 
     #[Route('/demande/reouverture/cloture/{parcours}', name: 'app_validation_demande_reouverture_cloture')]
-    //autorisation de la cloture si pas de différence entre les versions
     public function demandeReouvertureCloture(
         DpeDemandeRepository  $dpeDemandeRepository,
         DpeParcoursRepository $dpeParcoursRepository,
-        Parcours $parcours,
+        Parcours            $parcours,
         VersioningParcours    $versioningParcours,
+        VersioningFormation $versioningFormation,
         Request               $request
     ): Response {
-
         $dpeParcours = $dpeParcoursRepository->findLastDpeForParcours($parcours);
-
         if ($dpeParcours === null) {
             return JsonReponse::error('Parcours non trouvé');
         }
 
-        //on récupère la demande la plus récente et ouverte
-        $demande = $dpeDemandeRepository->findLastOpenedDemande($parcours, EtatDpeEnum::en_cours_redaction);
-
+        // On récupère la demande la plus récente et non clôturée
+        $demande = $dpeDemandeRepository->findLastUnclosedDemande($parcours);
+        if ($demande === null && $parcours->isParcoursDefaut() && $parcours->getFormation() !== null) {
+            $demande = $dpeDemandeRepository->findLastUnclosedDemandeMention($parcours->getFormation());
+        }
         if ($demande === null) {
-            return JsonReponse::error('Demande non trouvée');
+            $demande = $dpeParcours->etatDemande();
         }
 
-        //todo: gérer le cas du parcours par défaut...
+        // Si le DPE est bien réouvert mais qu'aucune trace de demande n'a été créée,
+        // on l'initialise à la volée pour permettre la clôture/annulation sans bloquer l'utilisateur
+        if ($demande === null && $dpeParcours->isReouvert()) {
+            $demande = new DpeDemande();
+            $demande->setFormation($parcours->getFormation());
+            $demande->setParcours($parcours);
+            $demande->setCampagneCollecte($dpeParcours->getCampagneCollecte() ?? $this->getCampagneCollecte());
+            $demande->setAuteur($this->getCurrentUserOrFail());
+            $demande->setNiveauDemande('P');
+            $demande->setNiveauModification($dpeParcours->getEtatReconduction());
+            $demande->setEtatDemande(EtatDpeEnum::en_cours_redaction);
+            $demande->setArgumentaireDemande('Demande synchronisée automatiquement');
+            $this->entityManager->persist($demande);
+            $this->entityManager->flush();
+        }
+
+        if ($demande === null) {
+            if ($request->isMethod('POST')) {
+                return $this->handleClotureErrorParcours($parcours, 'Demande non trouvée', $request);
+            }
+            if ($this->isTurbo($request)) {
+                return $this->turboStream->streamOpenModalFromTemplates(
+                    'Annulation de la réouverture',
+                    $parcours->getDisplay(),
+                    'process_validation/_demande_introuvable.html.twig',
+                    ['message' => 'Aucune demande de réouverture en cours de rédaction n\'a été trouvée pour ce parcours.'],
+                    '_ui/_footer_cancel.html.twig',
+                );
+            }
+            return $this->render('process_validation/_demande_introuvable.html.twig', [
+                'message' => 'Aucune demande de réouverture en cours de rédaction n\'a été trouvée pour ce parcours.'
+            ]);
+        }
+
+        // Calcul des différences de texte
         $textDifferencesParcours = $versioningParcours->getDifferencesBetweenParcoursAndLastVersion($parcours);
         $version = $versioningParcours->hasLastVersion($parcours);
 
-        //parcourir toutes les clés de $textDifferencesParcours pour vérifier si il y a des différences (valeur non vide)
         $hasDifferences = false;
-        foreach ($textDifferencesParcours as $key => $value) {
-            if ($value !== '') {
+        foreach ($textDifferencesParcours as $value) {
+            if (is_string($value) && trim(strip_tags($value)) !== '') {
                 $hasDifferences = true;
                 break;
             }
         }
 
+        // Si c'est le parcours par défaut, tester aussi les différences au niveau de la formation
+        if ($parcours->isParcoursDefaut() && $parcours->getFormation() !== null) {
+            $textDifferencesFormation = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($parcours->getFormation());
+            foreach ($textDifferencesFormation as $key => $value) {
+                if (is_string($value) && trim(strip_tags($value)) !== '') {
+                    $hasDifferences = true;
+                    $textDifferencesParcours[$key] = $value;
+                }
+            }
+        }
+
         if ($request->isMethod('POST')) {
-            $data = $request->request->all();
-
             $dpe = GetDpeParcours::getFromParcours($parcours);
-
             if ($dpe === null) {
-                return JsonReponse::error('DPE non trouvé');
-            }
-            //réouverture directe sans sauvegarde ou avec sauvegarde selon le choix
-            if ($dpe->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_TEXTE) {
-                //todo: tester si pas de diff, et si oui revenir au contenu de départ
-                if ($hasDifferences === true) {
-                    //rollback ds modifs depuis la dernière version
-                    $versioningParcours->rollbackToLastVersion($parcours);
-                }
-                $dpe->setEtatValidation(['publie' => 1]); //un état de processus différent pour connaitre le branchement ensuite
-                $parcours->getDpeParcours()->first()->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
-
-                $histoEvent = new HistoriqueParcoursEvent($parcours, $this->getUser(), 'cloture_ses_ss_cfvu', 'valide', $request);
-                $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
-
-                $this->entityManager->flush();
-            } elseif ($dpe->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_MCCC || $dpe->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE) {
-                $currentPlace = array_key_first($dpe->getEtatValidation()) ?? 'inconnue';
-                $nextStep = $this->validationProcess->getNextStepFromPlace($currentPlace);
-                if (null === $nextStep) {
-                    return JsonReponse::error('Aucune transition de validation disponible pour clôturer ce DPE');
-                }
-
-                $dpe->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
-                $this->operationExecutor->execute(
-                    $this->dpeParcoursWorkflow,
-                    $dpe,
-                    $nextStep['transition'],
-                    $this->operationContextNormalizer->normalize(
-                        workflow: $this->dpeParcoursWorkflow,
-                        transitionName: $nextStep['transition'],
-                        actor: $this->getCurrentUserOrFail(),
-                        input: [],
-                    )->withRuntime(['previous_place' => $currentPlace]),
-                );
-
-                $histoEvent = new HistoriqueParcoursEvent(
-                    $parcours,
-                    $this->getCurrentUserOrFail(),
-                    $currentPlace,
-                    'valide',
-                    $request,
-                );
-                $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
-
-                //                    $parcours->getDpeParcours()?->first()->setEtatValidation(['central' => 1]); //un état de processus différent pour connaitre le branchement ensuite
-                //                    $formation->getDpe()?->getDpeParcours()->first()->setEtatValidation(['soumis_central' => 1]);
-                //processus de passage en cfvu
-
+                return $this->handleClotureErrorParcours($parcours, 'DPE non trouvé', $request);
             }
 
-            $demande->setDateCloture(new DateTimeImmutable('now'));
-            $demande->setEtatDemande(EtatDpeEnum::publie);
+            $currentUser = $this->getCurrentUserOrFail();
+            $targetState = $this->resolveInitialStateForParcours($parcours);
+
+            // Annulation de la réouverture :
+            // Si des différences existent, rollback des modifications apportées
+            if ($hasDifferences) {
+                $versioningParcours->rollbackToLastVersion($parcours);
+                if ($parcours->isParcoursDefaut() && $parcours->getFormation() !== null) {
+                    $versioningFormation->rollbackToLastVersion($parcours->getFormation());
+                }
+            }
+
+            $dpe->setEtatValidation([$targetState => 1]);
+            $dpe->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
+
+            $demande->setDateCloture(new DateTime('now'));
+            $demande->setEtatDemande(EtatDpeEnum::tryFrom($targetState) ?? EtatDpeEnum::publie);
             $demande->setNiveauModification(TypeModificationDpeEnum::ANNULATION_REOUVERTURE);
+
+            $histoEvent = new HistoriqueParcoursEvent($parcours, $currentUser, 'annulation_reouverture', 'valide', $request);
+            $this->eventDispatcher->dispatch($histoEvent, HistoriqueParcoursEvent::ADD_HISTORIQUE_PARCOURS);
+
+            // Notification événementielle de clôture de la demande
+            $this->eventDispatcher->dispatch(new DpeDemandeEvent($demande, $currentUser), DpeDemandeEvent::DPE_DEMANDE_CLOSED);
 
             $this->entityManager->flush();
 
-            return JsonReponse::success('DPE cloturé');
+            $messageSuccess = ($targetState === 'tacite_reconduction')
+                ? 'La réouverture est annulée, le parcours est restauré en tacite reconduction.'
+                : 'La réouverture est annulée, le parcours est restauré en état publié.';
 
+            return $this->handleClotureSuccessParcours($parcours, $messageSuccess, $request);
         }
 
-
-        return $this->render('process_validation/_demande_reouverture_cloture.html.twig', [
+        $targetState = $this->resolveInitialStateForParcours($parcours);
+        $context = [
             'parcours' => $parcours,
             'hasDifferences' => $hasDifferences,
             'type_modif' => $dpeParcours->getEtatReconduction()->value,
             'stringDifferencesParcours' => $textDifferencesParcours,
             'hasLastVersion' => $version,
-        ]);
+            'targetState' => $targetState,
+        ];
+
+        if ($this->isTurbo($request)) {
+            return $this->turboStream->streamOpenModalFromTemplates(
+                'Annulation de la réouverture',
+                $parcours->getDisplay(),
+                'process_validation/_demande_reouverture_cloture.html.twig',
+                $context,
+                '_ui/_footer_cancel.html.twig',
+            );
+        }
+
+        return $this->render('process_validation/_demande_reouverture_cloture.html.twig', $context);
     }
 
     #[Route('/demande/reouverture-mention/cloture/{formation}', name: 'app_validation_demande_reouverture_cloture_mention')]
     public function demandeReouvertureClotureMention(
         DpeDemandeRepository $dpeDemandeRepository,
-        Formation $formation,
+        Formation           $formation,
         VersioningFormation $versioningFormation,
         Request             $request
     ): Response {
+        // On récupère la demande la plus récente et non clôturée
+        $demande = $dpeDemandeRepository->findLastUnclosedDemandeMention($formation);
 
-
-        //on récupère la demande la plus récente et ouverte
-        $demande = $dpeDemandeRepository->findLastOpenedDemandeMention($formation, EtatDpeEnum::en_cours_redaction);
-
-        if ($demande === null) {
-            return JsonReponse::error('Demande non trouvée');
+        // Si la mention est bien réouverte mais qu'aucune trace de demande n'a été créée,
+        // on l'initialise à la volée pour permettre la clôture/annulation sans bloquer l'utilisateur
+        if ($demande === null && $formation->getEtatReconduction() !== null && $formation->getEtatReconduction() !== TypeModificationDpeEnum::OUVERT) {
+            $demande = new DpeDemande();
+            $demande->setFormation($formation);
+            $demande->setParcours(null);
+            $demande->setCampagneCollecte($this->getCampagneCollecte());
+            $demande->setAuteur($this->getCurrentUserOrFail());
+            $demande->setNiveauDemande('F');
+            $demande->setNiveauModification($formation->getEtatReconduction());
+            $demande->setEtatDemande(EtatDpeEnum::en_cours_redaction);
+            $demande->setArgumentaireDemande('Demande mention synchronisée automatiquement');
+            $this->entityManager->persist($demande);
+            $this->entityManager->flush();
         }
 
-        //todo: gérer le cas du parcours par défaut...
+        if ($demande === null) {
+            if ($request->isMethod('POST')) {
+                return $this->handleClotureErrorFormation($formation, 'Demande non trouvée', $request);
+            }
+            if ($this->isTurbo($request)) {
+                return $this->turboStream->streamOpenModalFromTemplates(
+                    'Annulation de la réouverture de la mention',
+                    $formation->getDisplay(),
+                    'process_validation/_demande_introuvable.html.twig',
+                    ['message' => 'Aucune demande de réouverture en cours de rédaction n\'a été trouvée pour cette mention.'],
+                    '_ui/_footer_cancel.html.twig',
+                );
+            }
+            return $this->render('process_validation/_demande_introuvable.html.twig', [
+                'message' => 'Aucune demande de réouverture en cours de rédaction n\'a été trouvée pour cette mention.'
+            ]);
+        }
+
         $textDifferencesParcours = $versioningFormation->getDifferencesBetweenFormationAndLastVersion($formation);
         $version = $versioningFormation->hasLastVersion($formation);
 
-        //parcourir toutes les clés de $textDifferencesParcours pour vérifier si il y a des différences (valeur non vide)
         $hasDifferences = false;
-        foreach ($textDifferencesParcours as $key => $value) {
-            if ($value !== '') {
+        foreach ($textDifferencesParcours as $value) {
+            if (is_string($value) && trim(strip_tags($value)) !== '') {
                 $hasDifferences = true;
                 break;
             }
         }
 
         if ($request->isMethod('POST')) {
-            $data = $request->request->all();
+            $currentUser = $this->getCurrentUserOrFail();
+            $targetState = $this->resolveInitialStateForFormation($formation);
 
-            //réouverture directe sans sauvegarde ou avec sauvegarde selon le choix
-            if ($formation->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_TEXTE) {
-                //todo: tester si pas de diff, et si oui revenir au contenu de départ
-                if ($hasDifferences === true) {
-                    //rollback ds modifs depuis la dernière version
-                    $versioningFormation->rollbackToLastVersion($formation);
-                }
-            } elseif ($formation->getEtatReconduction() === TypeModificationDpeEnum::MODIFICATION_MCCC_TEXTE) {
-
-
-                //                    $parcours->getDpeParcours()?->first()->setEtatValidation(['central' => 1]); //un état de processus différent pour connaitre le branchement ensuite
-                //                    $formation->getDpe()?->getDpeParcours()->first()->setEtatValidation(['soumis_central' => 1]);
-                //processus de passage en cfvu
-
+            // Annulation de la réouverture :
+            // Si des différences existent, rollback des modifications apportées
+            if ($hasDifferences) {
+                $versioningFormation->rollbackToLastVersion($formation);
             }
+
             $formation->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
-            $demande->setDateCloture(new DateTimeImmutable('now'));
-            $demande->setEtatDemande(EtatDpeEnum::publie);
+            $dpe = GetDpeParcours::getFromFormation($formation);
+            if ($dpe !== null) {
+                $dpe->setEtatValidation([$targetState => 1]);
+                $dpe->setEtatReconduction(TypeModificationDpeEnum::OUVERT);
+            }
+
+            $demande->setDateCloture(new DateTime('now'));
+            $demande->setEtatDemande(EtatDpeEnum::tryFrom($targetState) ?? EtatDpeEnum::publie);
             $demande->setNiveauModification(TypeModificationDpeEnum::ANNULATION_REOUVERTURE);
 
+            $histoEvent = new HistoriqueFormationEvent($formation, $currentUser, 'annulation_reouverture', 'valide', $request);
+            $this->eventDispatcher->dispatch($histoEvent, HistoriqueFormationEvent::ADD_HISTORIQUE_FORMATION);
+
+            $this->eventDispatcher->dispatch(new DpeDemandeEvent($demande, $currentUser), DpeDemandeEvent::DPE_DEMANDE_CLOSED);
             $this->entityManager->flush();
 
-            return JsonReponse::success('DPE cloturé');
+            $messageSuccess = ($targetState === 'tacite_reconduction')
+                ? 'La réouverture est annulée, la mention est restaurée en tacite reconduction.'
+                : 'La réouverture est annulée, la mention est restaurée en état publié.';
 
+            return $this->handleClotureSuccessFormation($formation, $messageSuccess, $request);
         }
 
-        return $this->render('process_validation/_demande_reouverture_formation_cloture.html.twig', [
+        $targetState = $this->resolveInitialStateForFormation($formation);
+        $context = [
             'formation' => $formation,
             'hasDifferences' => $hasDifferences,
             'type_modif' => $formation->getEtatReconduction()->value,
             'stringDifferencesParcours' => $textDifferencesParcours,
             'hasLastVersion' => $version,
-        ]);
+            'targetState' => $targetState,
+        ];
+
+        if ($this->isTurbo($request)) {
+            return $this->turboStream->streamOpenModalFromTemplates(
+                'Annulation de la réouverture de la mention',
+                $formation->getDisplay(),
+                'process_validation/_demande_reouverture_formation_cloture.html.twig',
+                $context,
+                '_ui/_footer_cancel.html.twig',
+            );
+        }
+
+        return $this->render('process_validation/_demande_reouverture_formation_cloture.html.twig', $context);
     }
 
-    #[Route('/validation/ouverture/valide-lot/{etape}', name: 'app_validation_valide_ouverture_lot')]
-    public function valideLot(
-        EntityManagerInterface $entityManager,
-        DpeParcoursRepository $dpeParcoursRepository,
-        string                $etape,
-        Request               $request
-    ): Response {
-        if ($request->isMethod('POST')) {
-            $sParcours = $request->request->get('parcours');
-            $nextStep = match($etape) {
-                'NON_OUVERTURE_SES' => TypeModificationDpeEnum::NON_OUVERTURE_CFVU,
-                'OUVERTURE_SES' => TypeModificationDpeEnum::OUVERTURE_CFVU,
-                'NON_OUVERTURE_CFVU' => TypeModificationDpeEnum::NON_OUVERTURE,
-                'OUVERTURE_CFVU' => TypeModificationDpeEnum::OUVERT,
-                default => throw new \InvalidArgumentException('Étape inconnue : ' . $etape),
-            };
-        } else {
-            $sParcours = $request->query->get('parcours');
-        }
+    private function resolveInitialStateForParcours(Parcours $parcours): string
+    {
+        /** @var list<HistoriqueParcours> $historiques */
+        $historiques = $this->entityManager->getRepository(HistoriqueParcours::class)->findBy(
+            ['parcours' => $parcours],
+            ['id' => 'DESC'],
+            20
+        );
 
-        $allParcours = explode(',', (string)$sParcours);
-        $tParcours = [];
-
-        foreach ($allParcours as $id) {
-            $dpe = $dpeParcoursRepository->find($id);
-            if ($dpe === null) {
-                return JsonReponse::error('Parcours non trouvé');
+        foreach ($historiques as $histo) {
+            $complements = $histo->getComplements() ?? [];
+            if (!empty($complements['etat_depart']) && in_array($complements['etat_depart'], ['tacite_reconduction', 'publie'], true)) {
+                return (string)$complements['etat_depart'];
             }
-            $tParcours[] = $dpe;
-
-            if ($request->isMethod('POST')) {
-                $dpe->setEtatReconduction($nextStep);
-                $parcours = $dpe->getParcours();
-                if ($nextStep === TypeModificationDpeEnum::NON_OUVERTURE) {
-                    $dpe->setEtatValidation(['non_ouvert' => 1]);
-                    if ($parcours !== null) {
-                        $this->parcoursDescriptifAutomatiqueGenerator->generateForParcours($parcours, $this->getCampagneCollecte(), $dpe);
-                    }
-                }
-
-                if ($nextStep === TypeModificationDpeEnum::OUVERT) {
-                    $dpe->setEtatValidation(['soumis_ses' => 1]);
-                    if ($parcours !== null) {
-                        $this->parcoursDescriptifAutomatiqueGenerator->generateForParcours($parcours, $this->getCampagneCollecte(), $dpe);
-                    }
-                }
+            if ($histo->getEtape() === 'tacite_reconduction' || in_array($histo->getEtape(), ['reouvrir_tacite_mccc', 'reouvrir_tacite_sans_cfvu'], true)) {
+                return 'tacite_reconduction';
+            }
+            if (in_array($histo->getEtape(), ['publie', 'valide_a_publier', 'reouvrir_mccc', 'reouvrir_sans_cfvu'], true)) {
+                return 'publie';
             }
         }
 
-        if ($request->isMethod('POST')) {
-            $entityManager->flush();
-            $this->toast('success', 'Parcours validés');
+        return 'publie';
+    }
 
-            return $this->redirectToRoute('app_validation_dpe_index', [
-                'step' => 'ouverture',
-                'typeValidation' => $etape
+    private function resolveInitialStateForFormation(Formation $formation): string
+    {
+        /** @var list<HistoriqueFormation> $historiques */
+        $historiques = $this->entityManager->getRepository(HistoriqueFormation::class)->findBy(
+            ['formation' => $formation],
+            ['id' => 'DESC'],
+            20
+        );
+
+        foreach ($historiques as $histo) {
+            $complements = $histo->getComplements() ?? [];
+            if (!empty($complements['etat_depart']) && in_array($complements['etat_depart'], ['tacite_reconduction', 'publie'], true)) {
+                return (string)$complements['etat_depart'];
+            }
+            if ($histo->getEtape() === 'tacite_reconduction') {
+                return 'tacite_reconduction';
+            }
+            if (in_array($histo->getEtape(), ['publie', 'valide_a_publier'], true)) {
+                return 'publie';
+            }
+        }
+
+        return 'publie';
+    }
+
+    private function handleClotureSuccessParcours(Parcours $parcours, string $message, Request $request): Response
+    {
+        $this->toast('success', $message);
+        $redirectUrl = $this->generateUrl('parcours_v2_voir', ['parcours' => $parcours->getId()]);
+
+        if ($this->isTurbo($request)) {
+            /** @var DpeParcoursRepository $dpeParcoursRepository */
+            $dpeParcoursRepository = $this->entityManager->getRepository(DpeParcours::class);
+            $dpeParcours = $dpeParcoursRepository->findLastDpeForParcours($parcours);
+
+            return $this->turboStream->stream('process_validation/turbo/cloture_success.stream.html.twig', [
+                'redirectUrl' => $redirectUrl,
+                'toastMessage' => $message,
+                'parcours' => $parcours,
+                'dpeParcours' => $dpeParcours,
             ]);
         }
 
+        return $this->redirect($redirectUrl);
+    }
 
-        return $this->render('process_validation/_valide_ouverture_lot.html.twig', [
-            'formations' => $tParcours,
-            'sParcours' => $sParcours,
-            'type' => 'lot',
-            'etape' => $etape,
-        ]);
+    private function handleClotureErrorParcours(Parcours $parcours, string $errorMessage, Request $request): Response
+    {
+        $this->toast('danger', $errorMessage);
+        $redirectUrl = $this->generateUrl('parcours_v2_voir', ['parcours' => $parcours->getId()]);
+
+        if ($this->isTurbo($request)) {
+            return $this->turboStream->streamToastError($errorMessage, true);
+        }
+
+        return $this->redirect($redirectUrl);
+    }
+
+    private function handleClotureSuccessFormation(Formation $formation, string $message, Request $request): Response
+    {
+        $this->toast('success', $message);
+        $redirectUrl = $this->generateUrl('formation_v2_voir', ['slug' => $formation->getSlug()]);
+
+        if ($this->isTurbo($request)) {
+            return $this->turboStream->stream('process_validation/turbo/cloture_success.stream.html.twig', [
+                'redirectUrl' => $redirectUrl,
+                'toastMessage' => $message,
+                'formation' => $formation,
+            ]);
+        }
+
+        return $this->redirect($redirectUrl);
+    }
+
+    private function handleClotureErrorFormation(Formation $formation, string $errorMessage, Request $request): Response
+    {
+        $this->toast('danger', $errorMessage);
+        $redirectUrl = $this->generateUrl('formation_v2_voir', ['slug' => $formation->getSlug()]);
+
+        if ($this->isTurbo($request)) {
+            return $this->turboStream->streamToastError($errorMessage, true);
+        }
+
+        return $this->redirect($redirectUrl);
+    }
+
+    private function isTurbo(Request $request): bool
+    {
+        return $request->getPreferredFormat() === 'turbo-stream'
+            || str_contains((string)$request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')
+            || $request->isXmlHttpRequest();
     }
 
     private function getCurrentUserOrFail(): User

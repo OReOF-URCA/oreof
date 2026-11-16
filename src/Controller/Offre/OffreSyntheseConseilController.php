@@ -10,6 +10,7 @@ use App\Repository\DpeParcoursRepository;
 use App\Repository\PlateformeAdmissionParametreRepository;
 use App\Repository\PlateformeAdmissionRepository;
 use App\Repository\TypeDiplomePlateformeAdmissionRepository;
+use App\Service\Offre\SyntheseModificationsOffrePdfService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -189,5 +190,17 @@ final class OffreSyntheseConseilController extends BaseController
             'platformCode' => $platformCode,
             'categoryIdx' => $categoryIdx,
         ]);
+    }
+
+    #[Route('/conseils/synthese-offre/export-modifications-pdf', name: 'app_conseils_synthese_offre_modifications_pdf', methods: ['GET'])]
+    public function exportModificationsPdf(
+        SyntheseModificationsOffrePdfService $service,
+    ): Response
+    {
+        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+
+        $campagne = $this->getCampagneCollecte();
+
+        return $service->generatePdfResponse($campagne);
     }
 }

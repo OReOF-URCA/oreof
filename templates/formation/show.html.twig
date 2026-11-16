@@ -1,369 +1,367 @@
-{% extends 'base.html.twig' %}
-{% deprecated 'Utiliser voir dans formation_v2/' %}
-{# todo: reprendre versionning #}
-{% block stylesheets %}
-    {{ parent() }}
-    <style>
-        {{ cssDiff }}
-        {{ include('communs/versioning_view_style.html.twig') }}
-    </style>
-{% endblock %}
+{# Ce gabarit est déprécié, utiliser templates/formation_v2/voir.html.twig #}
+{# {% block stylesheets %} #}
+{#    {{ parent() }} #}
+{#    <style> #}
+{#        {{ cssDiff }} #}
+{#        {{ include('communs/versioning_view_style.html.twig') }} #}
+{#    </style> #}
+{# {% endblock %} #}
 
-{% block javascripts %}
-    {{ parent() }}
-    <!-- Test Script -->
-    <script>
-      let isSaveClicked = false
+{# {% block javascripts %} #}
+{#    {{ parent() }} #}
+{#    <!-- Test Script --> #}
+{#    <script> #}
+{#      let isSaveClicked = false #}
 
-      function showVersion () {
-        let select = document.querySelector('#selectVersion')
-        let versionSelected = select.options[select.selectedIndex].value
-        if (versionSelected !== '#') {
-          window.location = `/parcours/${versionSelected}/versioning/view`
-        }
-      }
+{#      function showVersion () { #}
+{#        let select = document.querySelector('#selectVersion') #}
+{#        let versionSelected = select.options[select.selectedIndex].value #}
+{#        if (versionSelected !== '#') { #}
+{#          window.location = `/parcours/${versionSelected}/versioning/view` #}
+{#        } #}
+{#      } #}
 
-      function saveVersion (event) {
-        if (isSaveClicked === false) {
-          let spinner = document.querySelector('#spinnerParcours')
-          spinner.classList.remove('d-none')
-          spinner.classList.add('d-flex')
-          isSaveClicked = true
-        } else {
-          event.preventDefault()
-          return false
-        }
-      }
+{#      function saveVersion (event) { #}
+{#        if (isSaveClicked === false) { #}
+{#          let spinner = document.querySelector('#spinnerParcours') #}
+{#          spinner.classList.remove('d-none') #}
+{#          spinner.classList.add('d-flex') #}
+{#          isSaveClicked = true #}
+{#        } else { #}
+{#          event.preventDefault() #}
+{#          return false #}
+{#        } #}
+{#      } #}
 
-      function saveFormationVersion (event) {
-        if (isSaveClicked === false) {
-          let spinnerFormation = document.querySelector('#spinnerFormation')
-          spinnerFormation.classList.remove('d-none')
-          spinnerFormation.classList.add('d-flex')
-          isSaveClicked = true
-        } else {
-          event.preventDefault()
-          return false
-        }
-      }
+{#      function saveFormationVersion (event) { #}
+{#        if (isSaveClicked === false) { #}
+{#          let spinnerFormation = document.querySelector('#spinnerFormation') #}
+{#          spinnerFormation.classList.remove('d-none') #}
+{#          spinnerFormation.classList.add('d-flex') #}
+{#          isSaveClicked = true #}
+{#        } else { #}
+{#          event.preventDefault() #}
+{#          return false #}
+{#        } #}
+{#      } #}
 
-      function showFormationVersion () {
-        let select = document.querySelector('#selectVersionFormation')
-        let versionSelected = select.options[select.selectedIndex].value
-        if (versionSelected !== '#') {
-          window.location = `/formation/${versionSelected}/versioning/view`
-        }
-      }
+{#      function showFormationVersion () { #}
+{#        let select = document.querySelector('#selectVersionFormation') #}
+{#        let versionSelected = select.options[select.selectedIndex].value #}
+{#        if (versionSelected !== '#') { #}
+{#          window.location = `/formation/${versionSelected}/versioning/view` #}
+{#        } #}
+{#      } #}
 
-    </script>
-    <script src="{{ asset('versioning/display_differences.js') }}"></script>
-{% endblock %}
+{#    </script> #}
+{#    <script src="{{ asset('versioning/display_differences.js') }}"></script> #}
+{# {% endblock %} #}
 
-{% block title %}Formation{% endblock %}
+{# {% block title %}Formation{% endblock %} #}
 
-{% block content %}
+{# {% block content %} #}
 
-    {{ include('formation/_synthese_formation.html.twig') }}
+{#    {{ include('formation/_synthese_formation.html.twig') }} #}
 
-    {% if is_granted('ROLE_ADMIN') or is_granted('CAN_ETABLISSEMENT_SCOLARITE_ALL') or is_granted('CAN_FORMATION_SCOLARITE_MY', formation) %}
-        {# Versioning pour les parcours par défaut #}
-        {% if formation.isHasParcours == false and formation.parcours|length == 1 %}
-            {{ include('formation/_manage_versioning_parcours.html.twig', {parcours: formation.parcours[0]}) }}
-        {% endif %}
-        {% if is_granted('ROLE_ADMIN') %}
-            {{ include('formation/_manage_versioning_formation.html.twig') }}
-        {% endif %}
-    {% endif %}
+{#    {% if is_granted('ROLE_ADMIN') or is_granted('CAN_ETABLISSEMENT_SCOLARITE_ALL') or is_granted('CAN_FORMATION_SCOLARITE_MY', formation) %} #}
+{#        #}{# Versioning pour les parcours par défaut #}
+{#        {% if formation.isHasParcours == false and formation.parcours|length == 1 %} #}
+{#            {{ include('formation/_manage_versioning_parcours.html.twig', {parcours: formation.parcours[0]}) }} #}
+{#        {% endif %} #}
+{#        {% if is_granted('ROLE_ADMIN') %} #}
+{#            {{ include('formation/_manage_versioning_formation.html.twig') }} #}
+{#        {% endif %} #}
+{#    {% endif %} #}
 
-    <div class="row">
-        {{ include('formation/legacy/common/_'~constant('SOURCE', typeD)~'.html.twig', {print:false}) }}
-        <!-- Scrollspy Start -->
-        <div class="col-md-auto d-none d-lg-block" id="scrollSpyMenu">
-            <ul class="nav flex-column">
-                <li>
-                    <a class="nav-link p-2" href="#identite_formation">
-                        <i class="fal fa-chevron-right"></i>
-                        Identité de la formation
-                    </a>
-                </li>
-                {#            <li> #}
-                {#                <a class="nav-link p-2" href="#debut_mention"> #}
-                {#                    <i class="fal fa-chevron-right"></i> #}
-                {#   todo: ... hors licence                 Début de la mention #}
-                {#                </a> #}
-                {#            </li> #}
-                <li>
-                    <a class="nav-link p-2" href="#localisation">
-                        <i class="fal fa-chevron-right"></i>
-                        Localisation
-                    </a>
-                </li>
-                <li>
-                    <a class="nav-link p-2" href="#presentation">
-                        <i class="fal fa-chevron-right"></i>
-                        Présentation
-                    </a>
-                </li>
-                {% if formation.isHasParcours == false %}
-                    <li>
-                        <a class="nav-link p-2" href="#competences">
-                            <i class="fal fa-chevron-right"></i>
-                            Compétences Acquises
-                        </a>
-                    </li>
-                    <li>
-                        <a class="nav-link p-2" href="#structure">
-                            <i class="fal fa-chevron-right"></i>
-                            Structure
-                        </a>
-                    </li>
+{#    <div class="row"> #}
+{#        {{ include('formation/legacy/common/_'~constant('SOURCE', typeD)~'.html.twig', {print:false}) }} #}
+{#        <!-- Scrollspy Start --> #}
+{#        <div class="col-md-auto d-none d-lg-block" id="scrollSpyMenu"> #}
+{#            <ul class="nav flex-column"> #}
+{#                <li> #}
+{#                    <a class="nav-link p-2" href="#identite_formation"> #}
+{#                        <i class="fal fa-chevron-right"></i> #}
+{#                        Identité de la formation #}
+{#                    </a> #}
+{#                </li> #}
+{#                #}{#            <li> #}
+{#                #}{#                <a class="nav-link p-2" href="#debut_mention"> #}
+{#                #}{#                    <i class="fal fa-chevron-right"></i> #}
+{#                #}{#   todo: ... hors licence                 Début de la mention #}
+{#                #}{#                </a> #}
+{#                #}{#            </li> #}
+{#                <li> #}
+{#                    <a class="nav-link p-2" href="#localisation"> #}
+{#                        <i class="fal fa-chevron-right"></i> #}
+{#                        Localisation #}
+{#                    </a> #}
+{#                </li> #}
+{#                <li> #}
+{#                    <a class="nav-link p-2" href="#presentation"> #}
+{#                        <i class="fal fa-chevron-right"></i> #}
+{#                        Présentation #}
+{#                    </a> #}
+{#                </li> #}
+{#                {% if formation.isHasParcours == false %} #}
+{#                    <li> #}
+{#                        <a class="nav-link p-2" href="#competences"> #}
+{#                            <i class="fal fa-chevron-right"></i> #}
+{#                            Compétences Acquises #}
+{#                        </a> #}
+{#                    </li> #}
+{#                    <li> #}
+{#                        <a class="nav-link p-2" href="#structure"> #}
+{#                            <i class="fal fa-chevron-right"></i> #}
+{#                            Structure #}
+{#                        </a> #}
+{#                    </li> #}
 
-                    <li>
-                        <a class="nav-link p-2" href="#admission">
-                            <i class="fal fa-chevron-right"></i>
-                            Admission
-                        </a>
-                    </li>
-                    <li>
-                        <a class="nav-link p-2" href="#inscription">
-                            <i class="fal fa-chevron-right"></i>
-                            Inscription
-                        </a>
-                    </li>
-                    <li>
-                        <a class="nav-link p-2" href="#et_apres">
-                            <i class="fal fa-chevron-right"></i>
-                            Et après...
-                        </a>
-                    </li>
-                    <li>
-                        <a class="nav-link p-2" href="#contacts">
-                            <i class="fal fa-chevron-right text-start"></i>
-                            Contacts pédagogiques
-                        </a>
-                    </li>
-                {% else %}
-                    {% for parcours in formation.parcours %}
-                        <li>
-                            <strong>Parcours {{ parcours.libelle }}{% set typeParcoursBadge = parcours.typeParcours|badgeTypeParcours %}{% if typeParcoursBadge is not null %} {{ component('Badge', { dto: typeParcoursBadge }) }}{% endif %}</strong>
-                        </li>
-                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}">
-                            <a class="nav-link p-2" href="#presentation_{{ parcours.id }}">
-                                <i class="fal fa-chevron-right"></i>
-                                Présentation
-                            </a>
-                        </li>
-                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}">
-                            <a class="nav-link p-2" href="#descriptif_{{ parcours.id }}">
-                                <i class="fal fa-chevron-right"></i>
-                                Descriptif du parcours
-                            </a>
-                        </li>
-                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}">
-                            <a class="nav-link p-2" href="#localisation_{{ parcours.id }}">
-                                <i class="fal fa-chevron-right"></i>
-                                Localisation
-                            </a>
-                        </li>
-                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}">
-                            <a class="nav-link p-2" href="#competences_{{ parcours.id }}">
-                                <i class="fal fa-chevron-right"></i>
-                                Compétences Acquises
-                            </a>
-                        </li>
-                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}">
-                            <a class="nav-link p-2" href="#structure_{{ parcours.id }}">
-                                <i class="fal fa-chevron-right"></i>
-                                Structure
-                            </a>
-                        </li>
-                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}">
-                            <a class="nav-link p-2" href="#admission_{{ parcours.id }}">
-                                <i class="fal fa-chevron-right"></i>
-                                Admission
-                            </a>
-                        </li>
-                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}">
-                            <a class="nav-link p-2" href="#inscription_{{ parcours.id }}">
-                                <i class="fal fa-chevron-right"></i>
-                                Inscription
-                            </a>
-                        </li>
-                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}">
-                            <a class="nav-link p-2" href="#et_apres_{{ parcours.id }}">
-                                <i class="fal fa-chevron-right"></i>
-                                Et après...
-                            </a>
-                        </li>
-                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}">
-                            <a class="nav-link p-2" href="#contacts_{{ parcours.id }}">
-                                <i class="fal fa-chevron-right text-start"></i>
-                                Contacts pédagogiques
-                            </a>
-                        </li>
-                    {% endfor %}
-                {% endif %}
-            </ul>
-        </div>
-        <!-- Scrollspy End -->
-    </div>
-{% endblock %}
+{#                    <li> #}
+{#                        <a class="nav-link p-2" href="#admission"> #}
+{#                            <i class="fal fa-chevron-right"></i> #}
+{#                            Admission #}
+{#                        </a> #}
+{#                    </li> #}
+{#                    <li> #}
+{#                        <a class="nav-link p-2" href="#inscription"> #}
+{#                            <i class="fal fa-chevron-right"></i> #}
+{#                            Inscription #}
+{#                        </a> #}
+{#                    </li> #}
+{#                    <li> #}
+{#                        <a class="nav-link p-2" href="#et_apres"> #}
+{#                            <i class="fal fa-chevron-right"></i> #}
+{#                            Et après... #}
+{#                        </a> #}
+{#                    </li> #}
+{#                    <li> #}
+{#                        <a class="nav-link p-2" href="#contacts"> #}
+{#                            <i class="fal fa-chevron-right text-start"></i> #}
+{#                            Contacts pédagogiques #}
+{#                        </a> #}
+{#                    </li> #}
+{#                {% else %} #}
+{#                    {% for parcours in formation.parcours %} #}
+{#                        <li> #}
+{#                            <strong>Parcours {{ parcours.libelle }}{% set typeParcoursBadge = parcours.typeParcours|badgeTypeParcours %}{% if typeParcoursBadge is not null %} {{ component('Badge', { dto: typeParcoursBadge }) }}{% endif %}</strong> #}
+{#                        </li> #}
+{#                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}"> #}
+{#                            <a class="nav-link p-2" href="#presentation_{{ parcours.id }}"> #}
+{#                                <i class="fal fa-chevron-right"></i> #}
+{#                                Présentation #}
+{#                            </a> #}
+{#                        </li> #}
+{#                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}"> #}
+{#                            <a class="nav-link p-2" href="#descriptif_{{ parcours.id }}"> #}
+{#                                <i class="fal fa-chevron-right"></i> #}
+{#                                Descriptif du parcours #}
+{#                            </a> #}
+{#                        </li> #}
+{#                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}"> #}
+{#                            <a class="nav-link p-2" href="#localisation_{{ parcours.id }}"> #}
+{#                                <i class="fal fa-chevron-right"></i> #}
+{#                                Localisation #}
+{#                            </a> #}
+{#                        </li> #}
+{#                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}"> #}
+{#                            <a class="nav-link p-2" href="#competences_{{ parcours.id }}"> #}
+{#                                <i class="fal fa-chevron-right"></i> #}
+{#                                Compétences Acquises #}
+{#                            </a> #}
+{#                        </li> #}
+{#                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}"> #}
+{#                            <a class="nav-link p-2" href="#structure_{{ parcours.id }}"> #}
+{#                                <i class="fal fa-chevron-right"></i> #}
+{#                                Structure #}
+{#                            </a> #}
+{#                        </li> #}
+{#                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}"> #}
+{#                            <a class="nav-link p-2" href="#admission_{{ parcours.id }}"> #}
+{#                                <i class="fal fa-chevron-right"></i> #}
+{#                                Admission #}
+{#                            </a> #}
+{#                        </li> #}
+{#                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}"> #}
+{#                            <a class="nav-link p-2" href="#inscription_{{ parcours.id }}"> #}
+{#                                <i class="fal fa-chevron-right"></i> #}
+{#                                Inscription #}
+{#                            </a> #}
+{#                        </li> #}
+{#                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}"> #}
+{#                            <a class="nav-link p-2" href="#et_apres_{{ parcours.id }}"> #}
+{#                                <i class="fal fa-chevron-right"></i> #}
+{#                                Et après... #}
+{#                            </a> #}
+{#                        </li> #}
+{#                        <li class="border-left-parcours border-left-parcours-{{ loop.index }}"> #}
+{#                            <a class="nav-link p-2" href="#contacts_{{ parcours.id }}"> #}
+{#                                <i class="fal fa-chevron-right text-start"></i> #}
+{#                                Contacts pédagogiques #}
+{#                            </a> #}
+{#                        </li> #}
+{#                    {% endfor %} #}
+{#                {% endif %} #}
+{#            </ul> #}
+{#        </div> #}
+{#        <!-- Scrollspy End --> #}
+{#    </div> #}
+{# {% endblock %} #}
 
-{% set header_title = 'formation_v2_voir.title'|trans({'%display%': formation.display}, 'header') %}
+{# {% set header_title = 'formation_v2_voir.title'|trans({'%display%': formation.display}, 'header') %} #}
 
-{% block bouton_header %}
+{# {% block bouton_header %} #}
 
-    {% if versioningParcours is defined
-        and versioningParcours != null %}
-        {{ include('communs/_bouton_difference_descriptifs.html.twig') }}
-    {% endif %}
+{#    {% if versioningParcours is defined #}
+{#        and versioningParcours != null %} #}
+{#        {{ include('communs/_bouton_difference_descriptifs.html.twig') }} #}
+{#    {% endif %} #}
 
-    {% if formation.isHasParcours == false and formation.parcours|length == 1 %}
-        {% set parcours = formation.parcours[0] %}
-        {{ include('btn/export_mccc.html.twig') }}
-        {% if formation.typeDiplome.classique ?? true %}
-        <div class="btn-group">
-            <button type="button"
-                    class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2 dropdown-toggle mb-1"
-                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="{{ iconDownload }}"></i> BCC
-            </button>
-            <div class="dropdown-menu" style="">
-                <a class="dropdown-item" href="{{ path('app_parcours_bcc', {parcours:parcours.id}) }}">
-                    Voir en ligne
-                </a>
-                <a class="dropdown-item" href="{{ path('app_competence_export_bcc', {parcours:parcours.id}) }}">
-                    Export des BCC (pdf)
-                </a>
-                <a class="dropdown-item" href="{{ path('app_competence_export_croise', {parcours:parcours.id}) }}">
-                    Export du tableau croisé BCC/EC, par semestre (pdf)
-                </a>
-                <a class="dropdown-item"
-                   href="{{ path('app_competence_export_croise_global', {parcours:parcours.id}) }}">
-                    Export du tableau croisé BCC/EC, global (xslx)
-                </a>
-            </div>
-        </div>
-        {% endif %}
-        <div class="btn-group">
-            <button type="button"
-                    class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2 dropdown-toggle mb-1"
-                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="{{ iconShow }}"></i> Voir / Télécharger
-            </button>
-            <div class="dropdown-menu" style="">
-                <a href="{{ path('app_formation_export', {slug:formation.slug}) }}"
-                   class="dropdown-item"
-                   data-bs-toggle="tooltip"
-                   data-bs-placement="bottom"
-                   title="Télécharger en PDF"
-                >
-                    <i class="{{ iconDownload }}"></i>
-                    <span> Fiche descriptive (PDF)</span>
-                </a>
+{#    {% if formation.isHasParcours == false and formation.parcours|length == 1 %} #}
+{#        {% set parcours = formation.parcours[0] %} #}
+{#        {{ include('btn/export_mccc.html.twig') }} #}
+{#        {% if formation.typeDiplome.classique ?? true %} #}
+{#        <div class="btn-group"> #}
+{#            <button type="button" #}
+{#                    class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2 dropdown-toggle mb-1" #}
+{#                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> #}
+{#                <i class="{{ iconDownload }}"></i> BCC #}
+{#            </button> #}
+{#            <div class="dropdown-menu" style=""> #}
+{#                <a class="dropdown-item" href="{{ path('app_parcours_bcc', {parcours:parcours.id}) }}"> #}
+{#                    Voir en ligne #}
+{#                </a> #}
+{#                <a class="dropdown-item" href="{{ path('app_competence_export_bcc', {parcours:parcours.id}) }}"> #}
+{#                    Export des BCC (pdf) #}
+{#                </a> #}
+{#                <a class="dropdown-item" href="{{ path('app_competence_export_croise', {parcours:parcours.id}) }}"> #}
+{#                    Export du tableau croisé BCC/EC, par semestre (pdf) #}
+{#                </a> #}
+{#                <a class="dropdown-item" #}
+{#                   href="{{ path('app_competence_export_croise_global', {parcours:parcours.id}) }}"> #}
+{#                    Export du tableau croisé BCC/EC, global (xslx) #}
+{#                </a> #}
+{#            </div> #}
+{#        </div> #}
+{#        {% endif %} #}
+{#        <div class="btn-group"> #}
+{#            <button type="button" #}
+{#                    class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2 dropdown-toggle mb-1" #}
+{#                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> #}
+{#                <i class="{{ iconShow }}"></i> Voir / Télécharger #}
+{#            </button> #}
+{#            <div class="dropdown-menu" style=""> #}
+{#                <a href="{{ path('app_formation_export', {slug:formation.slug}) }}" #}
+{#                   class="dropdown-item" #}
+{#                   data-bs-toggle="tooltip" #}
+{#                   data-bs-placement="bottom" #}
+{#                   title="Télécharger en PDF" #}
+{#                > #}
+{#                    <i class="{{ iconDownload }}"></i> #}
+{#                    <span> Fiche descriptive (PDF)</span> #}
+{#                </a> #}
 
-                <a href="{{ path('app_plaquette_formation_export', {slug:formation.slug}) }}"
-                   class="dropdown-item"
-                   data-bs-toggle="tooltip"
-                   data-bs-placement="bottom"
-                   title="Télécharger la plaquette en PDF"
-                >
-                    <i class="{{ iconDownload }}"></i>
-                    <span> Plaquette (PDF)</span>
-                </a>
-            </div>
-        </div>
-    {% else %}
-        <div class="btn-group">
-            <button type="button"
-                    class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2 dropdown-toggle mb-1"
-                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                <i class="{{ iconShow }}"></i> Voir / Télécharger
-            </button>
-            <div class="dropdown-menu" style="">
-                {% if formation.typeDiplome.classique ?? true %}
-                <a class="dropdown-item"
-                   href="#presentation"
-                   data-bs-toggle="tooltip"
-                   data-bs-placement="bottom"
-                   title="Télécharger les MCCC"
-                >
-                    <i class="{{ iconShow }}"></i>
-                    <span> MCCC Parcours</span>
-                </a>
-                <a href="#presentation"
-                   class="dropdown-item"
-                   data-bs-toggle="tooltip"
-                   data-bs-placement="bottom"
-                   title="Voir les BCC"
-                >
-                    <i class="{{ iconShow }}"></i>
-                    <span> BCC Parcours</span>
-                </a>
-                {% endif %}
-                <a href="{{ path('app_formation_export', {slug:formation.slug}) }}"
-                   class="dropdown-item"
-                   data-bs-toggle="tooltip"
-                   data-bs-placement="bottom"
-                   title="Télécharger en PDF"
-                >
-                    <i class="{{ iconDownload }}"></i>
-                    <span> Fiche descriptive (PDF)</span>
-                </a>
+{#                <a href="{{ path('app_plaquette_formation_export', {slug:formation.slug}) }}" #}
+{#                   class="dropdown-item" #}
+{#                   data-bs-toggle="tooltip" #}
+{#                   data-bs-placement="bottom" #}
+{#                   title="Télécharger la plaquette en PDF" #}
+{#                > #}
+{#                    <i class="{{ iconDownload }}"></i> #}
+{#                    <span> Plaquette (PDF)</span> #}
+{#                </a> #}
+{#            </div> #}
+{#        </div> #}
+{#    {% else %} #}
+{#        <div class="btn-group"> #}
+{#            <button type="button" #}
+{#                    class="btn btn-sm btn-outline-info btn-icon btn-icon-end w-100 w-sm-auto mx-2 dropdown-toggle mb-1" #}
+{#                    data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"> #}
+{#                <i class="{{ iconShow }}"></i> Voir / Télécharger #}
+{#            </button> #}
+{#            <div class="dropdown-menu" style=""> #}
+{#                {% if formation.typeDiplome.classique ?? true %} #}
+{#                <a class="dropdown-item" #}
+{#                   href="#presentation" #}
+{#                   data-bs-toggle="tooltip" #}
+{#                   data-bs-placement="bottom" #}
+{#                   title="Télécharger les MCCC" #}
+{#                > #}
+{#                    <i class="{{ iconShow }}"></i> #}
+{#                    <span> MCCC Parcours</span> #}
+{#                </a> #}
+{#                <a href="#presentation" #}
+{#                   class="dropdown-item" #}
+{#                   data-bs-toggle="tooltip" #}
+{#                   data-bs-placement="bottom" #}
+{#                   title="Voir les BCC" #}
+{#                > #}
+{#                    <i class="{{ iconShow }}"></i> #}
+{#                    <span> BCC Parcours</span> #}
+{#                </a> #}
+{#                {% endif %} #}
+{#                <a href="{{ path('app_formation_export', {slug:formation.slug}) }}" #}
+{#                   class="dropdown-item" #}
+{#                   data-bs-toggle="tooltip" #}
+{#                   data-bs-placement="bottom" #}
+{#                   title="Télécharger en PDF" #}
+{#                > #}
+{#                    <i class="{{ iconDownload }}"></i> #}
+{#                    <span> Fiche descriptive (PDF)</span> #}
+{#                </a> #}
 
-                <a href="{{ path('app_plaquette_formation_export', {slug:formation.slug}) }}"
-                   class="dropdown-item"
-                   data-bs-toggle="tooltip"
-                   data-bs-placement="bottom"
-                   title="Télécharger la plaquette en PDF"
-                >
-                    <i class="{{ iconDownload }}"></i>
-                    <span> Plaquette (PDF)</span>
-                </a>
-            </div>
-        </div>
-    {% endif %}
+{#                <a href="{{ path('app_plaquette_formation_export', {slug:formation.slug}) }}" #}
+{#                   class="dropdown-item" #}
+{#                   data-bs-toggle="tooltip" #}
+{#                   data-bs-placement="bottom" #}
+{#                   title="Télécharger la plaquette en PDF" #}
+{#                > #}
+{#                    <i class="{{ iconDownload }}"></i> #}
+{#                    <span> Plaquette (PDF)</span> #}
+{#                </a> #}
+{#            </div> #}
+{#        </div> #}
+{#    {% endif %} #}
 
-    {% if formation.hasParcours == true %}
-        {% if (is_granted('EDIT', {route: 'app_formation', subject: formation})
-            or is_granted('EDIT', {route: 'app_composante', subject: formation})
-            or is_granted('EDIT', {route: 'app_etablissement', subject: formation})
-            or is_granted('ROLE_ADMIN')) and isOuvert(formation) %}
-            <a href="{{ path('formation_v2_modifier', {slug:formation.slug}) }}"
-               class="btn btn-sm btn-outline-warning btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-               data-bs-toggle="tooltip"
-               data-bs-placement="bottom"
-               title="Modifier le DPE"
-            >
-                <i class="{{ iconEdit }}"></i>
-                <span> Modifier le DPE</span>
-            </a>
-        {% endif %}
+{#    {% if formation.hasParcours == true %} #}
+{#        {% if (is_granted('EDIT', {route: 'app_formation', subject: formation}) #}
+{#            or is_granted('EDIT', {route: 'app_composante', subject: formation}) #}
+{#            or is_granted('EDIT', {route: 'app_etablissement', subject: formation}) #}
+{#            or is_granted('ROLE_ADMIN')) and isOuvert(formation) %} #}
+{#            <a href="{{ path('formation_v2_modifier', {slug:formation.slug}) }}" #}
+{#               class="btn btn-sm btn-outline-warning btn-icon btn-icon-end w-100 w-sm-auto mx-2" #}
+{#               data-bs-toggle="tooltip" #}
+{#               data-bs-placement="bottom" #}
+{#               title="Modifier le DPE" #}
+{#            > #}
+{#                <i class="{{ iconEdit }}"></i> #}
+{#                <span> Modifier le DPE</span> #}
+{#            </a> #}
+{#        {% endif %} #}
 
-    {% else %}
-        {% if (is_granted('EDIT', {route: 'app_formation', subject: formation})
-            or is_granted('EDIT', {route: 'app_composante', subject: formation})
-            or is_granted('EDIT', {route: 'app_etablissement', subject: formation})
-            or is_granted('ROLE_ADMIN')) and isOuvert(formation.parcours[0].dpeParcours[0]) %}
-            <a href="{{ path('formation_v2_modifier', {slug:formation.slug}) }}"
-               class="btn btn-sm btn-outline-warning btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-               data-bs-toggle="tooltip"
-               data-bs-placement="bottom"
-               title="Modifier le DPE"
-            >
-                <i class="{{ iconEdit }}"></i>
-                <span> Modifier le DPE</span>
-            </a>
-        {% endif %}
-    {% endif %}
+{#    {% else %} #}
+{#        {% if (is_granted('EDIT', {route: 'app_formation', subject: formation}) #}
+{#            or is_granted('EDIT', {route: 'app_composante', subject: formation}) #}
+{#            or is_granted('EDIT', {route: 'app_etablissement', subject: formation}) #}
+{#            or is_granted('ROLE_ADMIN')) and isOuvert(formation.parcours[0].dpeParcours[0]) %} #}
+{#            <a href="{{ path('formation_v2_modifier', {slug:formation.slug}) }}" #}
+{#               class="btn btn-sm btn-outline-warning btn-icon btn-icon-end w-100 w-sm-auto mx-2" #}
+{#               data-bs-toggle="tooltip" #}
+{#               data-bs-placement="bottom" #}
+{#               title="Modifier le DPE" #}
+{#            > #}
+{#                <i class="{{ iconEdit }}"></i> #}
+{#                <span> Modifier le DPE</span> #}
+{#            </a> #}
+{#        {% endif %} #}
+{#    {% endif %} #}
 
-    <a href="{{ path('app_formation_index') }}"
-       class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2"
-       data-bs-toggle="tooltip"
-       data-bs-placement="bottom"
-       title="Retour à la liste des formations"
-    >
-        <i class="{{ iconBack }}"></i>
-        <span> Retour à la liste des formations</span>
-    </a>
-{% endblock %}
+{#    <a href="{{ path('app_formation_index') }}" #}
+{#       class="btn btn-sm btn-outline-success btn-icon btn-icon-end w-100 w-sm-auto mx-2" #}
+{#       data-bs-toggle="tooltip" #}
+{#       data-bs-placement="bottom" #}
+{#       title="Retour à la liste des formations" #}
+{#    > #}
+{#        <i class="{{ iconBack }}"></i> #}
+{#        <span> Retour à la liste des formations</span> #}
+{#    </a> #}
+{# {% endblock %} #}

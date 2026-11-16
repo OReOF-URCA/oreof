@@ -3,32 +3,39 @@
     message: ('demande.reouverture.annuler.alerte')|trans({}, 'process')|nl2br|raw
 }) }}
 
-<form action="{{ path('app_validation_demande_reouverture_cloture', {parcours:parcours.id}) }}" method="post"
+<form action="{{ path('app_validation_demande_reouverture_cloture', {parcours: parcours.id}) }}" method="post"
       enctype="multipart/form-data">
+    <input type="hidden" name="action" value="annuler">
 
     {% if hasDifferences %}
-        <twig:alerte type="danger" message="Des différences existent entre la version actuelle et la version précédente, si vous clôturez la demande, ces différences seront perdues." />
+        <twig:alerte type="warning"
+                     message="Des modifications ont été apportées depuis la réouverture. L'annulation de la réouverture rétablira l'état initial et annulera l'ensemble de ces modifications."/>
 
-        <p>Les différences sont sur les champs suivants</p>
-        <ul>
-            {% for key, diff in stringDifferencesParcours|filter(diff => diff != null) %}
+        <p class="mt-2 font-medium">Les champs suivants ont été modifiés et seront réinitialisés :</p>
+        <ul class="list-disc list-inside text-sm text-secondary-700 dark:text-secondary-300">
+            {% for key, diff in stringDifferencesParcours|filter(diff => diff is not empty) %}
                 <li>{{ key|trans({}, 'process') }}</li>
             {% endfor %}
         </ul>
     {% else %}
-        <twig:alerte type="success" message="Aucune différence n'a été détectée entre la version actuelle et la version précédente. Vous pouvez clôturer la demande sans risque." />
+        <twig:alerte type="success"
+                     message="Aucune modification n'a été détectée depuis la réouverture. L'annulation rétablira directement l'état initial sans relancer de circuit de validation."/>
     {% endif %}
 
-    <div class="mt-2">
-        <button type="submit" class="btn btn-success"
-                {{ stimulus_action('base','sauvegardeFormModal', 'click') }}
-        >
-            <i class="fal fa-floppy-disk"></i>
-            {% if type_modif == 'MODIFICATION_TEXTE' %}
-                {{ ('btn.demande.reouverture.cloture.sans_cfvu.ses')|trans({}, 'process') }}
-            {% else %}
-                {{ ('btn.demande.reouverture.cloture.ses')|trans({}, 'process') }}
-            {% endif %}
-        </button>
+    <div class="mt-3 rounded-lg border border-secondary-200 bg-secondary-50 p-2.5 text-xs text-secondary-600 dark:border-secondary-700 dark:bg-secondary-800/60 dark:text-secondary-300">
+        <i class="fal fa-info-circle mr-1"></i>
+        État restauré :
+        <strong class="text-secondary-800 dark:text-secondary-100">{{ targetState == 'tacite_reconduction' ? 'Tacite reconduction' : 'Publié' }}</strong>
+    </div>
+
+    <div class="mt-4 flex flex-wrap gap-2">
+        <twig:Button
+                type="submit"
+                variant="danger"
+                :soft="false"
+                size="md"
+                icon="icon:close"
+                label="Annuler la réouverture"
+        />
     </div>
 </form>

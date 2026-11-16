@@ -1,0 +1,112 @@
+{# Template de rendu d'un semestre individuel pour Turbo-Frame (BUT) #}
+{% set editable = editable is not defined ? false : editable %}
+{% set competences = bccData.competences|default(competences|default([])) %}
+{% set niveaux = bccData.niveaux|default(niveaux|default([])) %}
+{% set tabFichesMatieres = bccData.tabFichesMatieres|default(tabFichesMatieres|default([])) %}
+{% set apprentissagesCritiques = bccData.apprentissagesCritiques|default(apprentissagesCritiques|default([])) %}
+{% set tabUeEc = bccData.tabUeEc|default(tabUeEc|default([])) %}
+{% set fichesInSemestre = tabFichesMatieres[semOrdre] ?? [] %}
+
+<turbo-frame id="bcc_table_semestre_frame">
+    <div {{ stimulus_controller('parcours--bcc', {
+        urlUpdateComptence: path('app_parcours_bcc_but_update_competence', {parcours: parcours.id})
+    }) }} class="space-y-4">
+        {% if fichesInSemestre|length > 0 %}
+            <section
+                    class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-surface shadow-sm overflow-hidden"
+                    data-parcours--bcc-target="section"
+                    data-semester="{{ semOrdre }}">
+
+
+                {# Tableau #}
+                <div class="overflow-x-auto max-h-[70vh]">
+                    <table class="min-w-full border-separate border-spacing-0 text-xs">
+                        <thead>
+                        <tr class="bg-secondary-100 dark:bg-secondary-800 text-secondary-700 dark:text-secondary-300">
+                            <th class="sticky left-0 z-30 bg-secondary-100 dark:bg-secondary-800 px-3 py-2.5 text-left font-bold border-b border-r border-secondary-200 dark:border-secondary-700 w-64 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.06)]">
+                                Apprentissages critiques (AC)
+                            </th>
+                            {% for fiche in fichesInSemestre %}
+                                <th class="px-3 py-2 text-center font-bold border-b border-r border-secondary-200 dark:border-secondary-700 min-w-24">
+                                    <div class="font-bold text-text truncate max-w-[120px]" title="{{ fiche.display }}">
+                                        {{ fiche.sigle|default(fiche.code) }}
+                                    </div>
+                                    <div class="text-[10px] text-secondary-500 font-normal">
+                                        {{ fiche.nature|default('EC') }}
+                                    </div>
+                                </th>
+                            {% endfor %}
+                        </tr>
+                        </thead>
+                        <tbody class="divide-y divide-secondary-100 dark:divide-secondary-800">
+                        {% for competence in competences %}
+                            {% if niveaux[competence.id][semOrdre] is defined and niveaux[competence.id][semOrdre]|length > 0 %}
+                                {# Ligne d'en-tête de la compétence #}
+                                <tr class="bg-secondary-50/60 dark:bg-secondary-900/40">
+                                    <td colspan="{{ fichesInSemestre|length + 1 }}"
+                                        class="px-4 py-2 font-bold text-text text-xs border-y border-secondary-200 dark:border-secondary-700">
+                                        <div class="flex items-center gap-2">
+                                                <span class="inline-flex items-center justify-center h-5 w-5 rounded bg-primary-100 text-primary-800 dark:bg-primary-900/50 dark:text-primary-300 font-bold text-[11px]">
+                                                    {{ competence.numero }}
+                                                </span>
+                                            <span>{{ competence.nomCourt }} — {{ competence.libelle }}</span>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                {% for ac in niveaux[competence.id][semOrdre] %}
+                                    <tr class="hover:bg-secondary-50/40 dark:hover:bg-secondary-800/30 transition-colors">
+                                        <td class="sticky left-0 z-10 bg-surface px-3 py-2 border-r border-b border-secondary-200 dark:border-secondary-700 shadow-[2px_0_4px_-1px_rgba(0,0,0,0.04)]">
+                                            <div class="flex items-start gap-1.5">
+                                                <span class="font-bold text-primary-700 dark:text-primary-300 shrink-0">{{ ac.code }}</span>
+                                                <span class="text-secondary-600 dark:text-secondary-400 text-[11px] line-clamp-2"
+                                                      title="{{ ac.libelle }}">
+                                                        {{ ac.libelle }}
+                                                    </span>
+                                            </div>
+                                        </td>
+
+                                        {% for fiche in fichesInSemestre %}
+                                            <td class="text-center px-2 py-2 border-r border-b border-secondary-200 dark:border-secondary-700 align-middle">
+                                                {% if tabUeEc[semOrdre][competence.numero][fiche.id] is defined %}
+                                                    {% set isChecked = apprentissagesCritiques[fiche.id][ac.id] is defined %}
+                                                    {% if editable %}
+                                                        <input type="checkbox"
+                                                               class="h-4 w-4 rounded border-secondary-300 text-primary-600 focus:ring-primary-500 cursor-pointer"
+                                                               data-semester="{{ semOrdre }}"
+                                                                {{ stimulus_action('parcours--bcc', 'updateCompetence', 'change', {
+                                                                    competence: ac.id,
+                                                                    ec: fiche.id
+                                                                }) }}
+                                                               value="X"
+                                                                {% if isChecked %}checked{% endif %}>
+                                                    {% else %}
+                                                        {% if isChecked %}
+                                                            <span class="inline-flex items-center justify-center h-5 w-5 rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
+                                                                    {{ ux_icon('icon:check', {class: 'h-3.5 w-3.5'}) }}
+                                                                </span>
+                                                        {% else %}
+                                                            <span class="text-secondary-300 dark:text-secondary-600">-</span>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                {% else %}
+                                                    <span class="text-secondary-200 dark:text-secondary-700 text-xs">-</span>
+                                                {% endif %}
+                                            </td>
+                                        {% endfor %}
+                                    </tr>
+                                {% endfor %}
+                            {% endif %}
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        {% else %}
+            <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-surface p-8 text-center text-secondary-500 shadow-sm">
+                <p class="text-sm font-semibold text-text">Aucune ressource ou SAÉ configurée pour le
+                    semestre {{ semOrdre }}.</p>
+            </div>
+        {% endif %}
+    </div>
+</turbo-frame>

@@ -123,4 +123,12 @@ final class FormationHeader
 
         return $this->em->getRepository(FormationVersioning::class)->findLastVersion($this->formation);
     }
+
+    public function isReouvert(): bool
+    {
+        return $this->formation !== null
+            && $this->formation->getEtatReconduction() !== null
+            && $this->formation->getEtatReconduction() !== TypeModificationDpeEnum::OUVERT;
+    }
 }
+

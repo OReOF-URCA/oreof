@@ -1,50 +1,50 @@
 {# todo: deprecated #}
-<div {{ stimulus_controller('ec--manage', {
-    url:path('app_element_constitutif_type_ec', {ec: elementConstitutif.id, ue:ue.id, parcours:parcours.id}),
-    ue:ue.id,
-    parcours:parcours.id,
-    edit: false
-}) }}
-        data-action="ec--manage:modalHide@window->base#modalHide"
->
+{# <div {{ stimulus_controller('ec--manage', { #}
+{#    url:path('app_element_constitutif_type_ec', {ec: elementConstitutif.id, ue:ue.id, parcours:parcours.id}), #}
+{#    ue:ue.id, #}
+{#    parcours:parcours.id, #}
+{#    edit: false #}
+{# }) }} #}
+{#        data-action="ec--manage:modalHide@window->base#modalHide" #}
+{# > #}
 
-    {% form_theme form 'communs/form_theme_v2.html.twig' %}
-    {{ form_start(form, {
-        'attr': {
-            'id': 'formEc'}
-    }) }}
+{#    {% form_theme form 'communs/form_theme_v2.html.twig' %} #}
+{#    {{ form_start(form, { #}
+{#        'attr': { #}
+{#            'id': 'formEc'} #}
+{#    }) }} #}
 
-    {% if isAdmin %}
-        {{ form_row(form.ordre) }}
-        {{ form_row(form.code) }}
-    {% endif %}
+{#    {% if isAdmin %} #}
+{#        {{ form_row(form.ordre) }} #}
+{#        {{ form_row(form.code) }} #}
+{#    {% endif %} #}
 
-    <div>
-        {{ form_row(form.typeEc, {'row_attr' : {'id' : 'typeUe' }}) }}
-        <button class="btn text-info"
-                {{ stimulus_action('ec--manage','ajoutTypeEc', 'click') }}
-        >
-            <i class="{{ iconAdd }}"></i>
-            Absent de la liste, ajouter un type d'EC
-        </button>
-    </div>
+{#    <div> #}
+{#        {{ form_row(form.typeEc, {'row_attr' : {'id' : 'typeUe' }}) }} #}
+{#        <button class="btn text-info" #}
+{#                {{ stimulus_action('ec--manage','ajoutTypeEc', 'click') }} #}
+{#        > #}
+{#            <i class="{{ iconAdd }}"></i> #}
+{#            Absent de la liste, ajouter un type d'EC #}
+{#        </button> #}
+{#    </div> #}
 
-    {{ form_row(form.typeEcTexte, {'row_attr' : {'class' : 'd-none', 'id' : 'typeEcTexte' }, 'attr' :
-        {'data-action' : 'keyup->ec--manage#changeTypeEcTexte'}}) }}
+{#    {{ form_row(form.typeEcTexte, {'row_attr' : {'class' : 'd-none', 'id' : 'typeEcTexte' }, 'attr' : #}
+{#        {'data-action' : 'keyup->ec--manage#changeTypeEcTexte'}}) }} #}
 
-    {{ form_row(form.natureUeEc) }}
+{#    {{ form_row(form.natureUeEc) }} #}
 
 
-    <div {{ stimulus_target('ec--manage', 'matieres') }}></div>
+{#    <div {{ stimulus_target('ec--manage', 'matieres') }}></div> #}
 
-    <button class="btn btn-success mt-2"
-            {{ stimulus_action('ec--manage', 'valider') }}
-    >
-        <i class="fal fa-floppy-disk"></i>
-        Enregistrer
-    </button>
+{#    <button class="btn btn-success mt-2" #}
+{#            {{ stimulus_action('ec--manage', 'valider') }} #}
+{#    > #}
+{#        <i class="fal fa-floppy-disk"></i> #}
+{#        Enregistrer #}
+{#    </button> #}
 
-    {{ component('alerte', {type:"info", message:'tous les champs avec un <span class="text-red">*</span> sont
-obligatoires'}) }}
-    {{ form_end(form) }}
-</div>
+{#    {{ component('alerte', {type:"info", message:'tous les champs avec un <span class="text-red">*</span> sont #}
+{# obligatoires'}) }} #}
+{#    {{ form_end(form) }} #}
+{# </div> #}

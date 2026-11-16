@@ -225,10 +225,7 @@
                     <span>Voir PV</span>
                 </button>
 
-                {% set canEditDpe = can_edit_module('dpe') %}
-                {% set canReouvrirMccc = can_edit_module('maquettes') or can_edit_module('mccc') %}
-                {% set canEditTimeline = can_edit_timeline() %}
-                {% if canEditTimeline and validationOptions|length > 0 %}
+                {% if validationOptions|length > 0 %}
                     <div class="relative" data-controller="navbar-dropdown"
                          data-action="click@window->navbar-dropdown#close">
                         <button class="{{ quickBtnSuccess }}"
@@ -242,10 +239,9 @@
                         <ul data-navbar-dropdown-target="content"
                             class="hidden absolute right-0 top-full z-30 mt-2 min-w-[22rem] rounded-2xl border border-secondary-200 bg-white p-2 shadow-2xl dark:border-secondary-700 dark:bg-secondary-900">
                             {% for key, option in validationOptions %}
-                                {% set isReouvertureMccc = key in ['reouvrir_tacite_mccc', 'reouvrir_mccc'] %}
-                                {% set isReouvertureDpe = (option.metadata.type == 'reouvrir' or key starts with 'reouvrir') and not isReouvertureMccc %}
-                                {% set isOptionDisabled = (isReouvertureDpe and not canEditDpe) or (isReouvertureMccc and not canReouvrirMccc) %}
-                                {% set disabledReason = isReouvertureMccc ? module_status('mccc').message : module_status('dpe').message %}
+                                {% set isAllowedByTimeline = can_execute_transition(key, option.metadata|default([])) %}
+                                {% set disabledReason = not isAllowedByTimeline ? transition_disabled_reason(key, option.metadata|default([])) : '' %}
+                                {% set isOptionDisabled = not isAllowedByTimeline %}
                                 {% set itemStyle = dpeItemStyles[option.metadata.button_class]|default(dpeItemStyles['secondary']) %}
                                 <li>
                                     {% if isOptionDisabled %}
@@ -288,10 +284,23 @@
                             type="button"
                             disabled
                             {{ stimulus_controller('tooltip') }}
-                            title="{{ not canEditTimeline ? 'Aucune étape de la timeline n\'autorise d\'action actuellement.' : 'Aucune action disponible pour le statut actuel.' }}">
+                            title="{{ not isTimelineOpen ? 'Aucune étape de la timeline n\'autorise d\'action actuellement.' : 'Aucune action disponible pour le statut actuel.' }}">
                         {{ ux_icon('icon:check', {class: 'h-4 w-4'}) }}
                         <span>Gestion du DPE</span>
                     </button>
+                {% endif %}
+
+                {% if dpeParcours != null and dpeParcours.isReouvert %}
+                    <a class="{{ quickBtnWarning }} relative"
+                       data-action="click->modalturbo#open"
+                       data-turbo="true"
+                       href="{{ path('app_validation_demande_reouverture_cloture', {parcours: parcours.id}) }}"
+                            {{ stimulus_controller('tooltip') }}
+                       title="Annuler la réouverture en cours de ce parcours">
+                        {{ ux_icon('flowbite:undo-outline', {class: 'h-4 w-4'}) }}
+                        <span>Annuler réouverture</span>
+                        <span class="inline-flex h-2 w-2 rounded-full bg-warning-500 animate-pulse"></span>
+                    </a>
                 {% endif %}
 
                 <button class="{{ quickBtnSecondary }}"
@@ -334,6 +343,19 @@
 
         <div class="{{ panelClass }}" id="actions-panel-parcours">
             <div class="{{ panelGridClass }}">
+                {% if dpeParcours != null and dpeParcours.isReouvert %}
+                    <div>
+                        <a class="{{ quickBtnWarning }} w-full"
+                           data-action="click->modalturbo#open"
+                           data-turbo="true"
+                           href="{{ path('app_validation_demande_reouverture_cloture', {parcours: parcours.id}) }}"
+                                {{ stimulus_controller('tooltip') }}
+                           title="Annuler la réouverture du parcours">
+                            {{ ux_icon('flowbite:undo-outline', {class: 'h-4 w-4'}) }}
+                            <span>Annuler réouverture</span>
+                        </a>
+                    </div>
+                {% endif %}
                 <div>
                     <a class="{{ quickBtnPrimary }} w-full"
                        href="{{ path('app_parcours_bcc', {parcours:parcours.id}) }}">
@@ -593,36 +615,70 @@
                     <div class="border-t border-secondary-200 pt-3 dark:border-secondary-700">
                         <p class="{{ metaLabelClass }}">Autres actions SES</p>
                         <div class="{{ panelGridClass }}">
-                            <div>
-                                <a class="{{ quickBtnSecondary }} w-full"
-                                   data-action="click->modalturbo#open"
-                                   data-turbo="true"
-                                   href="{{ path('parcours_ses_changer_etat', { dpeParcours: dpeParcours.id }) }}">
-                                    {{ ux_icon('icon:wrench', {class: 'h-4 w-4'}) }}
-                                    <span>Changer état DPE</span>
-                                </a>
-                            </div>
-                            <div>
-                                <a class="{{ quickBtnSecondary }} w-full"
-                                   data-action="click->modalturbo#open"
-                                   data-turbo="true"
-                                   href="{{ path('parcours_ses_changer_ouverture', { dpeParcours: dpeParcours.id }) }}">
-                                    {{ ux_icon('icon:unlock', {class: 'h-4 w-4'}) }}
-                                    <span>Modifier ouverture</span>
-                                </a>
-                            </div>
-                            <div>
-                                <a class="{{ quickBtnSecondary }} relative w-full"
-                                   data-action="click->modalturbo#open"
-                                   data-turbo="true"
-                                   href="{{ path('parcours_ses_commentaires', { dpeParcours: dpeParcours.id }) }}">
-                                    {{ ux_icon('icon:info', {class: 'h-4 w-4'}) }}
-                                    <span>Commentaires</span>
-                                    {% if parcours.commentaire != null %}
-                                        <span class="absolute -right-1 -top-1 inline-flex h-3 w-3 rounded-full border border-white bg-danger-500 dark:border-secondary-900"></span>
-                                    {% endif %}
-                                </a>
-                            </div>
+                            {% if dpeParcours != null %}
+                                <div>
+                                    <a class="{{ quickBtnSecondary }} w-full"
+                                       data-action="click->modalturbo#open"
+                                       data-turbo="true"
+                                       href="{{ path('parcours_ses_changer_etat', { dpeParcours: dpeParcours.id }) }}">
+                                        {{ ux_icon('icon:wrench', {class: 'h-4 w-4'}) }}
+                                        <span>Changer état DPE</span>
+                                    </a>
+                                </div>
+                                <div>
+                                    <a class="{{ quickBtnSecondary }} w-full"
+                                       data-action="click->modalturbo#open"
+                                       data-turbo="true"
+                                       href="{{ path('parcours_ses_changer_ouverture', { dpeParcours: dpeParcours.id }) }}">
+                                        {{ ux_icon('icon:unlock', {class: 'h-4 w-4'}) }}
+                                        <span>Modifier ouverture</span>
+                                    </a>
+                                </div>
+                                {% if dpeParcours.isReouvert %}
+                                    <div>
+                                        <a class="{{ quickBtnWarning }} w-full"
+                                           data-action="click->modalturbo#open"
+                                           data-turbo="true"
+                                           href="{{ path('app_validation_demande_reouverture_cloture', { parcours: parcours.id }) }}">
+                                            {{ ux_icon('flowbite:undo-outline', {class: 'h-4 w-4'}) }}
+                                            <span>Annuler réouverture</span>
+                                        </a>
+                                    </div>
+                                {% endif %}
+                                <div>
+                                    <a class="{{ quickBtnSecondary }} relative w-full"
+                                       data-action="click->modalturbo#open"
+                                       data-turbo="true"
+                                       href="{{ path('parcours_ses_commentaires', { dpeParcours: dpeParcours.id }) }}">
+                                        {{ ux_icon('icon:info', {class: 'h-4 w-4'}) }}
+                                        <span>Commentaires</span>
+                                        {% if parcours.commentaire != null %}
+                                            <span class="absolute -right-1 -top-1 inline-flex h-3 w-3 rounded-full border border-white bg-danger-500 dark:border-secondary-900"></span>
+                                        {% endif %}
+                                    </a>
+                                </div>
+                            {% else %}
+                                <div>
+                                    <button class="{{ quickBtnSecondary }} w-full opacity-60 cursor-not-allowed"
+                                            type="button"
+                                            disabled
+                                            {{ stimulus_controller('tooltip') }}
+                                            title="Aucun DPE associé à ce parcours.">
+                                        {{ ux_icon('icon:wrench', {class: 'h-4 w-4'}) }}
+                                        <span>Changer état DPE</span>
+                                    </button>
+                                </div>
+                                <div>
+                                    <button class="{{ quickBtnSecondary }} w-full opacity-60 cursor-not-allowed"
+                                            type="button"
+                                            disabled
+                                            {{ stimulus_controller('tooltip') }}
+                                            title="Aucun DPE associé à ce parcours.">
+                                        {{ ux_icon('icon:unlock', {class: 'h-4 w-4'}) }}
+                                        <span>Modifier ouverture</span>
+                                    </button>
+                                </div>
+                            {% endif %}
                             <div>
                                 <button class="{{ quickBtnSecondary }} w-full">
                                     {{ ux_icon('icon:print', {class: 'h-4 w-4'}) }}

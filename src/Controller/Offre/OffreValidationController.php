@@ -52,14 +52,14 @@ final class OffreValidationController extends BaseController
         $campagne = $this->getCampagneCollecte();
 
         // 1. Contrôle des droits d'accès
-        if ($transition === 'transmettre') {
+        if ($transition === 'transmettre' || $transition === 'transmettre_etablissement') {
             if (!$this->isGranted('ROLE_ADMIN')) {
                 $this->denyAccessUnlessGranted('MANAGE', [
                     'route' => 'app_composante',
                     'subject' => $composante,
                 ]);
             }
-            if (!$campagne->isPeriodActive() && !$this->isGranted('ROLE_SES') && !$this->isGranted('ROLE_ADMIN')) {
+            if ($transition === 'transmettre' && !$campagne->isPeriodActive() && !$this->isGranted('ROLE_SES') && !$this->isGranted('ROLE_ADMIN')) {
                 throw $this->createAccessDeniedException('La campagne de collecte est fermée.');
             }
         } else {

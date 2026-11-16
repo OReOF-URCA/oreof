@@ -12,7 +12,7 @@
             <dt>ECTS</dt>
             <dd>{{ ects }}</dd>
         </dl>
-        {% if modalite != constant('App\\Referentiel\\ModaliteEnseignement::DISTANCIELLE') %} {# todo: utile ? peut être différent du parcours ? #}
+        {% if modalite != constant('App\\Referentiel\\ModaliteEnseignement::DISTANCIELLE') %}
             <h3>Volume Présentiel</h3>
             <table class="table table-bordered">
                 <thead>

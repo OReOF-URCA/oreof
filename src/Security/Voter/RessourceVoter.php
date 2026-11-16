@@ -86,11 +86,20 @@ class RessourceVoter extends Voter
         }
 
         if ($subject instanceof Parcours || $subject instanceof DpeParcours) {
-            return [RessourceEnum::app_parcours->value, $subject];
+            return [[
+                RessourceEnum::app_parcours->value,
+                RessourceEnum::app_formation->value,
+                RessourceEnum::app_composante->value,
+                RessourceEnum::app_etablissement->value,
+            ], $subject];
         }
 
         if ($subject instanceof Formation) {
-            return [RessourceEnum::app_formation->value, $subject];
+            return [[
+                RessourceEnum::app_formation->value,
+                RessourceEnum::app_composante->value,
+                RessourceEnum::app_etablissement->value,
+            ], $subject];
         }
 
         if ($subject instanceof FicheMatiere) {
@@ -99,7 +108,10 @@ class RessourceVoter extends Voter
         }
 
         if ($subject instanceof Composante) {
-            return [RessourceEnum::app_composante->value, $subject];
+            return [[
+                RessourceEnum::app_composante->value,
+                RessourceEnum::app_etablissement->value,
+            ], $subject];
         }
 
         if ($subject instanceof Etablissement) {
@@ -165,12 +177,15 @@ class RessourceVoter extends Voter
         // Récupère tous les profils liés à l'utilisateur
         $userProfils = $this->userProfilRepository->findBy(['user' => $user]);
 
+        $routesToCheck = is_array($route) ? $route : [$route];
         $attributesToCheck = $this->getAttributesIncludingStronger($attribute);
         foreach ($userProfils as $userProfil) {
             $profile = $userProfil->getProfil();
             foreach ($attributesToCheck as $attr) {
-                if ($this->profilDroitsRepository->hasDroit($profile, $attr, $route) && $this->checkScope($userProfil, $object, $attribute)) {
-                    return true;
+                foreach ($routesToCheck as $r) {
+                    if ($this->profilDroitsRepository->hasDroit($profile, $attr, $r) && $this->checkScope($userProfil, $object, $attribute)) {
+                        return true;
+                    }
                 }
             }
         }
@@ -317,6 +332,10 @@ class RessourceVoter extends Voter
                 }
             }
 
+            if ($object->getEtatReconduction() === null || $object->getEtatReconduction() === TypeModificationDpeEnum::OUVERT) {
+                return true;
+            }
+
             return in_array($object->getEtatReconduction()->value, [
                 TypeModificationDpeEnum::MODIFICATION->value,
                 TypeModificationDpeEnum::MODIFICATION_TEXTE->value,
@@ -385,15 +404,14 @@ class RessourceVoter extends Voter
         }
 
         if ($attribute === 'manage') {
-            return $dpeParcours === null || (
-                $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_mccc') ||
-                $this->dpeParcoursWorkflow->can($dpeParcours, 'relancer_annee') ||
-                $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_tacite_mccc') ||
-                $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_avant_publie')
-            );
+            return $dpeParcours === null || count($this->dpeParcoursWorkflow->getEnabledTransitions($dpeParcours)) > 0;
         }
 
         if ($dpeParcours === null) {
+            return true;
+        }
+
+        if (Access::isEditable($dpeParcours)) {
             return true;
         }
 

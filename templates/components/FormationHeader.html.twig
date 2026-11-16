@@ -158,6 +158,29 @@
                         </span>
                 {% endif %}
 
+                {% if formation.etatReconduction != null and formation.etatReconduction.value != 'OUVERT' %}
+                    <a class="{{ quickBtnWarning }} relative"
+                       data-action="click->modalturbo#open"
+                       data-turbo="true"
+                       href="{{ path('app_validation_demande_reouverture_cloture_mention', {formation: formation.id}) }}"
+                            {{ stimulus_controller('tooltip') }}
+                       title="Annuler la réouverture de la mention">
+                        {{ ux_icon('flowbite:undo-outline', {class: 'h-4 w-4'}) }}
+                        <span>Annuler réouverture</span>
+                        <span class="inline-flex h-2 w-2 rounded-full bg-warning-500 animate-pulse"></span>
+                    </a>
+                {% elseif is_granted('ROLE_ADMIN') %}
+                    <a class="{{ quickBtnSecondary }}"
+                       data-action="click->modalturbo#open"
+                       data-turbo="true"
+                       href="{{ path('app_validation_demande_reouverture_mention', {formation: formation.id}) }}"
+                            {{ stimulus_controller('tooltip') }}
+                       title="Demander la réouverture de la mention pour modifications">
+                        {{ ux_icon('flowbite:edit-outline', {class: 'h-4 w-4'}) }}
+                        <span>Réouvrir la mention</span>
+                    </a>
+                {% endif %}
+
                 <button class="{{ quickBtnSecondary }}"
                         data-toggle-group="accordion-formation"
                         data-toggle="actions"
@@ -180,8 +203,6 @@
                     {{ ux_icon('icon:chevron-up', {class: 'h-4 w-4 data-toggle-icon rotate-180 transition-transform duration-200'}) }}
                 </button>
 
-
-
                 {% if is_granted('ROLE_ADMIN') %}
                     <button class="{{ quickBtnSecondary }}"
                             data-toggle-group="accordion-formation"
@@ -199,6 +220,19 @@
 
         <div class="{{ panelClass }}" id="actions-panel-formation">
             <div class="{{ panelGridClass }}">
+                {% if formation.etatReconduction != null and formation.etatReconduction.value != 'OUVERT' %}
+                    <div>
+                        <a class="{{ quickBtnWarning }} w-full"
+                           data-action="click->modalturbo#open"
+                           data-turbo="true"
+                           href="{{ path('app_validation_demande_reouverture_cloture_mention', {formation: formation.id}) }}"
+                                {{ stimulus_controller('tooltip') }}
+                           title="Annuler la réouverture de la mention">
+                            {{ ux_icon('flowbite:undo-outline', {class: 'h-4 w-4'}) }}
+                            <span>Annuler réouverture</span>
+                        </a>
+                    </div>
+                {% endif %}
                 <div>
                     <a
                             href="{{ path('app_formation_state', {slug:formation.slug}) }}"
@@ -379,6 +413,27 @@
                                     <span>Modifier la formation</span>
                                 </a>
                             </div>
+                            {% if formation.etatReconduction != null and formation.etatReconduction.value != 'OUVERT' %}
+                                <div>
+                                    <a href="{{ path('app_validation_demande_reouverture_cloture_mention', {formation: formation.id}) }}"
+                                       data-turbo="true"
+                                       data-action="click->modalturbo#open"
+                                       class="{{ quickBtnWarning }} w-full text-xs py-2">
+                                        {{ ux_icon('flowbite:undo-outline', {class: 'h-4 w-4'}) }}
+                                        <span>Annuler réouverture</span>
+                                    </a>
+                                </div>
+                            {% else %}
+                                <div>
+                                    <a href="{{ path('app_validation_demande_reouverture_mention', {formation: formation.id}) }}"
+                                       data-turbo="true"
+                                       data-action="click->modalturbo#open"
+                                       class="{{ quickBtnSecondary }} w-full text-xs py-2">
+                                        {{ ux_icon('flowbite:edit-outline', {class: 'h-4 w-4'}) }}
+                                        <span>Réouvrir la mention</span>
+                                    </a>
+                                </div>
+                            {% endif %}
                             <div>
                                 <button class="{{ quickBtnSecondary }} w-full text-xs py-2">
                                     {{ ux_icon('icon:gear', {class: 'h-4 w-4'}) }}

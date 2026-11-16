@@ -46,11 +46,8 @@ class ParcoursProcessController extends BaseController
         #[Target('dpeParcours')]
         private WorkflowInterface          $dpeParcoursWorkflow,
         private readonly EventDispatcherInterface      $eventDispatcher,
-//        private readonly EntityManagerInterface        $entityManager,
         private readonly ValidationProcess             $validationProcess,
-//        private readonly ValidationProcessFicheMatiere $validationProcessFicheMatiere,
-//        private readonly FicheMatiereProcess           $ficheMatiereProcess,
-//        KernelInterface                                $kernel
+        private readonly \App\Service\CampagneAccessibilityService $campagneAccessibilityService,
     )
     {
         //$this->dir = $kernel->getProjectDir() . '/public/uploads/conseils/';
@@ -201,6 +198,16 @@ class ParcoursProcessController extends BaseController
     {
         $rawMeta = $this->validationProcess->getMetaFromTransition($transition);
         $metaDto = $this->workflowMetaMapper->fromArray($rawMeta);
+
+        if (!$this->campagneAccessibilityService->canExecuteTransition($transition, $rawMeta)) {
+            $reason = $this->campagneAccessibilityService->getTransitionDisabledReason($transition, $rawMeta) ?? 'Cette action n\'est pas autorisée dans la période actuelle.';
+            return $turboStream->stream('parcours_v2/turbo/apply_error.stream.html.twig', [
+                'dpeParcours' => $dpeParcours,
+                'transition' => $transition,
+                'type' => $metaDto->type,
+                'message' => $reason,
+            ]);
+        }
 
         $view = $this->transitionModalViewBuilder->build($transition, $dpeParcours, $rawMeta);
 

@@ -171,4 +171,48 @@ class CampagneAccessibilityServiceTest extends TestCase
         $serviceAdmin = new CampagneAccessibilityService($dataUserSession, $securityAdmin, $repository);
         $this->assertTrue($serviceAdmin->canUserEditTimeline($campagne, new DateTime('2026-09-15')));
     }
+
+    public function testCanExecuteTransitionAccordingToTimeline(): void
+    {
+        $dataUserSession = $this->createMock(DataUserSession::class);
+        $security = $this->createMock(Security::class);
+        $repository = $this->createMock(CampagneCollecteRepository::class);
+
+        $campagne = new CampagneCollecte();
+        $stepDescriptifs = new TimelineDate();
+        $stepDescriptifs->setLibelle('Enrichissement des descriptifs');
+        $stepDescriptifs->setDateDebut(new DateTime('2026-10-01'));
+        $stepDescriptifs->setDate(new DateTime('2026-10-31'));
+        $stepDescriptifs->setModulesActifs([CampagneModuleEnum::DESCRIPTIFS]);
+        $campagne->addTimelineDate($stepDescriptifs);
+
+        $dataUserSession->method('getCampagneCollecte')->willReturn($campagne);
+        $service = new CampagneAccessibilityService($dataUserSession, $security, $repository);
+
+        $currentDate = new DateTime('2026-10-15');
+
+        // reouvrir_tacite_sans_cfvu requires descriptifs (open) -> true
+        $this->assertTrue($service->canExecuteTransition('reouvrir_tacite_sans_cfvu', [
+            'timeline_modules' => ['descriptifs'],
+            'type' => 'reouvrir',
+        ], $campagne, $currentDate));
+
+        // valider_tacite_composante has no module requirement -> true
+        $this->assertTrue($service->canExecuteTransition('valider_tacite_composante', [
+            'type' => 'valider',
+        ], $campagne, $currentDate));
+
+        // reouvrir_tacite_mccc requires maquettes or mccc (closed) -> false
+        $this->assertFalse($service->canExecuteTransition('reouvrir_tacite_mccc', [
+            'timeline_modules' => ['maquettes', 'mccc'],
+            'type' => 'reouvrir',
+        ], $campagne, $currentDate));
+
+        $reason = $service->getTransitionDisabledReason('reouvrir_tacite_mccc', [
+            'timeline_modules' => ['maquettes', 'mccc'],
+            'type' => 'reouvrir',
+        ], $campagne, $currentDate);
+        $this->assertNotNull($reason);
+        $this->assertNotEmpty($reason);
+    }
 }

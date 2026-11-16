@@ -64,4 +64,42 @@ class ParcoursAccessExplainerTest extends TestCase
 
         $this->assertStringContainsString('soumis au conseil', $reason);
     }
+
+    public function testExplainsWhenTimelineIsClosedForNonAdmin(): void
+    {
+        $campagneService = $this->createMock(CampagneAccessibilityService::class);
+        $campagneService->method('isTimelineOpen')->willReturn(false);
+        $campagneService->method('getModuleStatus')->willReturn(['canEdit' => false, 'message' => 'Fermé']);
+
+        $security = $this->createMock(Security::class);
+        $security->method('isGranted')->with('ROLE_ADMIN')->willReturn(false);
+
+        $explainer = new ParcoursAccessExplainer($campagneService, $security);
+        $parcours = new Parcours(new Formation(null));
+
+        $reason = $explainer->explainEditDenial($parcours);
+        $this->assertStringContainsString('La campagne de modification est fermée', $reason);
+    }
+
+    public function testAllowsThroughWhenTimelineIsOpenForNonAdmin(): void
+    {
+        $campagneService = $this->createMock(CampagneAccessibilityService::class);
+        $campagneService->method('isTimelineOpen')->willReturn(true);
+
+        $security = $this->createMock(Security::class);
+        $security->method('isGranted')->with('ROLE_ADMIN')->willReturn(false);
+
+        $explainer = new ParcoursAccessExplainer($campagneService, $security);
+        $formation = new Formation(null);
+        $parcours = new Parcours($formation);
+
+        $dpe = new DpeParcours();
+        $dpe->setParcours($parcours);
+        $dpe->setEtatReconduction(TypeModificationDpeEnum::NON_OUVERTURE);
+        $parcours->getDpeParcours()->add($dpe);
+
+        $reason = $explainer->explainEditDenial($parcours);
+        // It bypassed step 1 (timeline is open) and caught step 2 (parcours fermé)
+        $this->assertStringContainsString('Ce parcours est fermé', $reason);
+    }
 }

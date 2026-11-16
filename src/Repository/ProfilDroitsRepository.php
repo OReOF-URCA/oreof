@@ -30,15 +30,20 @@ class ProfilDroitsRepository extends ServiceEntityRepository
             return false;
         }
 
-        $query = $this->createQueryBuilder('pd')
+        $qb = $this->createQueryBuilder('pd')
             ->where('pd.profil = :profil')
             ->andWhere('pd.permission = :droit')
-            ->andWhere('pd.ressource = :route')
             ->setParameter('profil', $profile)
-            ->setParameter('droit', strtoupper($attribute))
-            ->setParameter('route', $route)
-            ->getQuery();
+            ->setParameter('droit', strtoupper($attribute));
 
-        return (bool)$query->getOneOrNullResult();
+        if (is_array($route)) {
+            $qb->andWhere('pd.ressource IN (:route)')
+                ->setParameter('route', $route);
+        } else {
+            $qb->andWhere('pd.ressource = :route')
+                ->setParameter('route', $route);
+        }
+
+        return (bool)$qb->setMaxResults(1)->getQuery()->getOneOrNullResult();
     }
 }

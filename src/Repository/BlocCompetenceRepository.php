@@ -10,6 +10,7 @@
 namespace App\Repository;
 
 use App\Entity\BlocCompetence;
+use App\Entity\CampagneCollecte;
 use App\Entity\Formation;
 use App\Entity\Parcours;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -135,5 +136,30 @@ class BlocCompetenceRepository extends ServiceEntityRepository
             ->setParameter(':idCampagne', $idCampagneCollecte)
             ->getQuery()
             ->getResult();
+    }
+
+    /**
+     * @return BlocCompetence[]
+     */
+    public function findTransversesByCampagne(CampagneCollecte $campagne): array
+    {
+        return $this->createQueryBuilder('b')
+            ->andWhere('b.parcours IS NULL')
+            ->andWhere('b.campagneCollecte = :campagne')
+            ->setParameter('campagne', $campagne)
+            ->orderBy('b.ordre', 'ASC')
+            ->getQuery()
+            ->getResult();
+    }
+
+    public function getMaxOrdreCampagneCollecte(CampagneCollecte $campagne): ?int
+    {
+        return $this->createQueryBuilder('b')
+            ->select('MAX(b.ordre)')
+            ->andWhere('b.parcours IS NULL')
+            ->andWhere('b.campagneCollecte = :campagne')
+            ->setParameter('campagne', $campagne)
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 }

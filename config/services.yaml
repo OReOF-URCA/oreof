@@ -69,6 +69,10 @@ services:
       App\Email\Vars\VariableProviderInterface:
         tags: [ 'app.variable_provider' ]
 
+    App\TypeDiplome\Diplomes\Licence\Services\CalculBccCroiseLicence:
+      arguments:
+        $structureParcoursLicence: '@App\TypeDiplome\Diplomes\Licence\StructureParcoursLicence'
+
     App\TypeDiplome\TypeDiplomeResolver:
       arguments:
         $handlersByCode: !tagged_locator { tag: 'app.type_diplome_handler', index_by: 'code' }

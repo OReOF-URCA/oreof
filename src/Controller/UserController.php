@@ -39,7 +39,7 @@ class UserController extends AbstractController
 
         return $this->render('user/mes-notifications.html.twig', [
             'global' => $notificationSettingsService->getGlobalPreference($user),
-            'workflows' => $notificationSettingsService->getWorkflowsData($user, ['dpeParcours']),
+            'workflows' => $notificationSettingsService->getWorkflowsData($user),
         ]);
     }
 

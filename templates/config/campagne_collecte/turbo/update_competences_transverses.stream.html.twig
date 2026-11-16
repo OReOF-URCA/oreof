@@ -1,0 +1,7 @@
+<turbo-stream action="replace" target="competences_transverses_list">
+    <template>
+        {{ include('config/campagne_collecte/_competences_transverses_list.html.twig', { blocs: blocs, campagne: campagne }) }}
+    </template>
+</turbo-stream>
+
+{{ include('_ui/_toast.stream.html.twig', { message: toastMessage, type: 'success', closeModal: true }) }}

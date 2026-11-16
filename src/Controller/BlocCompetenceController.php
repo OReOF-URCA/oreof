@@ -144,7 +144,12 @@ class BlocCompetenceController extends BaseController
                 }
             }
 
-            return $this->json(true);
+            return $turboStreamResponseFactory->stream('bloc_competence/turbo/add_bloc_competence_success.stream.html.twig', [
+                'parcours' => $parcours,
+                'toastMessage' => 'Compétences transversales ajoutées avec succès',
+                'newEcId' => null,
+                'competences' => $parcours->getBlocCompetences(),
+            ]);
         }
 
         return $turboStreamResponseFactory->streamOpenModalFromTemplates(
@@ -154,6 +159,10 @@ class BlocCompetenceController extends BaseController
             [
                 'bccs' => $blocCompetenceRepository->findBy(['parcours' => null, 'campagneCollecte' => $this->getCampagneCollecte()], ['ordre' => 'ASC']),
                 'parcours' => $parcours,
+            ],
+            '_ui/_footer_submit_cancel.html.twig',
+            [
+                'submitLabel' => 'Ajouter au parcours',
             ]
         );
     }

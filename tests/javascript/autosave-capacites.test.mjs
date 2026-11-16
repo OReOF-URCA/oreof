@@ -92,3 +92,91 @@ test('updatePlateformeGlobale calculates sum of classique, alternance and specif
   assert.equal(updated, true)
   assert.equal(inputs.annee_1_plateforme_2_globale.value, '18')
 })
+
+test('onInput does not trigger save but sets status to typing', () => {
+  const {c, listeners} = setup()
+  let fetchCalled = false
+  globalThis.fetch = async () => {
+    fetchCalled = true;
+    return response()
+  }
+
+  const inputEl = {
+    name: 'annee_1_capaciteAccueil',
+    value: '25',
+    type: 'number',
+    tagName: 'INPUT',
+    closest: () => null
+  }
+
+  listeners.get('input')({target: inputEl})
+  assert.equal(fetchCalled, false)
+  assert.equal(c.statusState, 'typing')
+})
+
+test('onFocusOut triggers save on blur when value changed', async () => {
+  const {c, listeners} = setup()
+  let fetchCalled = false
+  globalThis.fetch = async () => {
+    fetchCalled = true;
+    return response()
+  }
+
+  const inputEl = {
+    name: 'annee_1_capaciteAccueil',
+    value: '30',
+    defaultValue: '20',
+    type: 'number',
+    tagName: 'INPUT',
+    closest: () => null
+  }
+
+  // Focus in memorizes initial value
+  c.previousValues[inputEl.name] = '20'
+
+  listeners.get('focusout')({target: inputEl})
+  assert.equal(fetchCalled, true)
+})
+
+test('onFocusOut does not trigger save if value was not changed', async () => {
+  const {c, listeners} = setup()
+  let fetchCalled = false
+  globalThis.fetch = async () => {
+    fetchCalled = true;
+    return response()
+  }
+
+  const inputEl = {
+    name: 'annee_1_capaciteAccueil',
+    value: '20',
+    defaultValue: '20',
+    type: 'number',
+    tagName: 'INPUT',
+    closest: () => null
+  }
+
+  c.previousValues[inputEl.name] = '20'
+
+  listeners.get('focusout')({target: inputEl})
+  assert.equal(fetchCalled, false)
+})
+
+test('onChange ignores text and number inputs to prevent premature save during stepper interaction', async () => {
+  const {c, listeners} = setup()
+  let fetchCalled = false
+  globalThis.fetch = async () => {
+    fetchCalled = true;
+    return response()
+  }
+
+  const numberInput = {
+    name: 'annee_1_capaciteAccueil',
+    value: '21',
+    type: 'number',
+    tagName: 'INPUT',
+    closest: () => null
+  }
+
+  listeners.get('change')({target: numberInput})
+  assert.equal(fetchCalled, false)
+})

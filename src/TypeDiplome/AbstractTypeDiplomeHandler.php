@@ -17,6 +17,7 @@ use App\Entity\TypeDiplome;
 use App\Entity\UserProfil;
 use App\Enums\TypeModificationDpeEnum;
 use App\Form\FormationSesType;
+use App\TypeDiplome\Dto\OptionsCalculStructure;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -155,5 +156,28 @@ abstract class AbstractTypeDiplomeHandler implements TypeDiplomeHandlerInterface
         }
 
         return new RedirectResponse($router->generate('app_formation_index'));
+    }
+
+    public function getBccCroiseTemplate(): string
+    {
+        return 'parcours_bcc/_tableauCroise.html.twig';
+    }
+
+    public function getBccCroiseSemestreTemplate(): string
+    {
+        return 'parcours_bcc/_semestre_table.html.twig';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function getBccCroiseData(Parcours $parcours, ?int $semestre = null): array
+    {
+        $dto = $this->calcul($parcours, new OptionsCalculStructure(false, true, false));
+        return [
+            'parcours' => $parcours,
+            'dto' => $dto,
+            'blocCompetences' => $this->getStructureCompetences($parcours),
+        ];
     }
 }

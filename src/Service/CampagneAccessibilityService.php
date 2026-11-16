@@ -22,9 +22,16 @@ class CampagneAccessibilityService
 
     public function getCampagne(?CampagneCollecte $campagne = null): ?CampagneCollecte
     {
-        return $campagne
-            ?? $this->dataUserSession->getCampagneCollecte()
-            ?? $this->campagneCollecteRepository->findOneBy(['defaut' => true]);
+        if ($campagne !== null) {
+            return $campagne;
+        }
+
+        try {
+            return $this->dataUserSession->getCampagneCollecte()
+                ?? $this->campagneCollecteRepository->findOneBy(['defaut' => true]);
+        } catch (\Throwable) {
+            return $this->campagneCollecteRepository->findOneBy(['defaut' => true]);
+        }
     }
 
     /**
@@ -175,6 +182,65 @@ class CampagneAccessibilityService
             'nextOpeningDate' => $nextOpeningDate,
             'message' => $message,
         ];
+    }
+
+    /**
+     * Vérifie si une action/transition du workflow est autorisée selon les modules ouverts dans la timeline.
+     * Si la transition déclare des modules via 'timeline_modules', au moins l'un d'eux doit être ouvert.
+     * Si aucun module n'est déclaré :
+     *  - les transitions de réouverture dépendent du module DPE
+     *  - les autres transitions (validation, etc.) sont autorisées.
+     */
+    public function canExecuteTransition(
+        string             $transitionName,
+        array              $metadata = [],
+        ?CampagneCollecte  $campagne = null,
+        ?DateTimeInterface $date = null
+    ): bool
+    {
+        $modules = $metadata['timeline_modules'] ?? null;
+        if ($modules === null && isset($metadata['timeline_module'])) {
+            $modules = (array)$metadata['timeline_module'];
+        }
+
+        if (!empty($modules)) {
+            foreach ($modules as $mod) {
+                if ($this->isModuleOpen($mod, $campagne, $date)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        if (($metadata['type'] ?? null) === 'reouvrir' || str_starts_with($transitionName, 'reouvrir')) {
+            return $this->isModuleOpen(CampagneModuleEnum::DPE, $campagne, $date);
+        }
+
+        return true;
+    }
+
+    public function getTransitionDisabledReason(
+        string             $transitionName,
+        array              $metadata = [],
+        ?CampagneCollecte  $campagne = null,
+        ?DateTimeInterface $date = null
+    ): ?string
+    {
+        if ($this->canExecuteTransition($transitionName, $metadata, $campagne, $date)) {
+            return null;
+        }
+
+        $modules = $metadata['timeline_modules'] ?? null;
+        if ($modules === null && isset($metadata['timeline_module'])) {
+            $modules = (array)$metadata['timeline_module'];
+        }
+
+        if (!empty($modules)) {
+            $firstModule = $modules[0];
+            return $this->getModuleStatus($firstModule, $campagne, $date)['message'];
+        }
+
+        return $this->getModuleStatus(CampagneModuleEnum::DPE, $campagne, $date)['message'];
     }
 
     private function isStepActiveAt(TimelineDate $step, DateTimeImmutable $now): bool

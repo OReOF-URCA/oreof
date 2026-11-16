@@ -20,6 +20,11 @@ class BlocCompetenceType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
+            ->add('code', TextType::class, [
+                'required' => false,
+                'attr' => ['maxlength' => 10],
+                'help' => 'Laisser vide pour générer automatiquement (ex: BC 1)',
+            ])
             ->add('libelle', TextType::class, [
                 'attr' => ['maxlength' => 400],
             ])

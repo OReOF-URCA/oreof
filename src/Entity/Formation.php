@@ -1706,7 +1706,7 @@ class Formation
         return $this->etatReconduction ?? TypeModificationDpeEnum::OUVERT;
     }
 
-    public function setEtatReconduction(TypeModificationDpeEnum $etatReconduction): static
+    public function setEtatReconduction(?TypeModificationDpeEnum $etatReconduction): static
     {
         $this->etatReconduction = $etatReconduction;
 

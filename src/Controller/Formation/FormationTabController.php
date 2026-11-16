@@ -16,7 +16,6 @@ use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/formation/v2', name: 'formation_v2_')]
-#[IsGranted('ROLE_ADMIN')]
 final class FormationTabController extends AbstractController
 {
     #[Route('/{id}/tab/{tabKey}/autosave', name: 'tab_autosave', methods: ['POST'])]
@@ -30,6 +29,10 @@ final class FormationTabController extends AbstractController
         EntityManagerInterface      $em,
     ): Response
     {
+        if (!$this->isGranted('EDIT', $formation)) {
+            return new Response('Forbidden', 403);
+        }
+
         $field = (string)$request->request->get('field');
         $value = $request->request->get('value');
 
@@ -72,6 +75,10 @@ final class FormationTabController extends AbstractController
         EntityManagerInterface      $em,
     ): Response
     {
+        if (!$this->isGranted('EDIT', $formation)) {
+            return new Response('Forbidden', 403);
+        }
+
         FormationTabRegistry::assertTab($tabKey);
 
         $state = $states->getOrCreate($formation, $tabKey);

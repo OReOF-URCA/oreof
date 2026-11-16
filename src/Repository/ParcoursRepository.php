@@ -441,4 +441,42 @@ class ParcoursRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    /**
+     * @return array{total: int, count_auto: int, count_manuel: int, count_both: int}
+     */
+    public function getStatsDescriptifsByCampagne(?CampagneCollecte $campagne): array
+    {
+        if ($campagne === null) {
+            return [
+                'total' => 0,
+                'count_auto' => 0,
+                'count_manuel' => 0,
+                'count_both' => 0,
+            ];
+        }
+
+        $qb = $this->createQueryBuilder('p')
+            ->select(
+                'COUNT(DISTINCT p.id) AS total',
+                "COUNT(DISTINCT CASE WHEN p.descriptifHautPageAutomatique IS NOT NULL AND TRIM(p.descriptifHautPageAutomatique) != '' THEN p.id ELSE NULL END) AS count_auto",
+                "COUNT(DISTINCT CASE WHEN p.descriptifHautPage IS NOT NULL AND TRIM(p.descriptifHautPage) != '' THEN p.id ELSE NULL END) AS count_manuel",
+                "COUNT(DISTINCT CASE WHEN (p.descriptifHautPageAutomatique IS NOT NULL AND TRIM(p.descriptifHautPageAutomatique) != '') AND (p.descriptifHautPage IS NOT NULL AND TRIM(p.descriptifHautPage) != '') THEN p.id ELSE NULL END) AS count_both"
+            )
+            ->leftJoin('p.dpeParcours', 'dp')
+            ->leftJoin('p.formation', 'f')
+            ->andWhere('dp.campagneCollecte = :campagne OR f.dpe = :campagne')
+            ->andWhere("(p.descriptifHautPageAutomatique IS NOT NULL AND TRIM(p.descriptifHautPageAutomatique) != '') OR (p.descriptifHautPage IS NOT NULL AND TRIM(p.descriptifHautPage) != '')")
+            ->setParameter('campagne', $campagne);
+
+        $result = $qb->getQuery()->getOneOrNullResult();
+
+        return [
+            'total' => (int)($result['total'] ?? 0),
+            'count_auto' => (int)($result['count_auto'] ?? 0),
+            'count_manuel' => (int)($result['count_manuel'] ?? 0),
+            'count_both' => (int)($result['count_both'] ?? 0),
+        ];
+    }
 }
+

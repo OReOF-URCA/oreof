@@ -1,0 +1,99 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title = 'Compétences transversales - ' ~ campagne.libelle %}
+{% set header_description = 'Gestion des blocs et compétences transversales (référentiel RNCP) applicables aux parcours de la campagne ' ~ campagne.libelle %}
+
+{% block bouton_header %}
+    <div class="flex items-center gap-2 flex-wrap">
+        <twig:Button
+                href="{{ path('app_campagne_collecte_show', { id: campagne.id }) }}"
+                variant="secondary"
+                :outline="true"
+                :soft="false"
+                icon="icon:arrow-left"
+                label="Retour à la campagne"
+                tooltip="Retourner à la fiche de la campagne"
+        />
+
+        <twig:Button
+                href="{{ path('app_campagne_collecte_competence_transverse_bloc_new', { id: campagne.id }) }}"
+                variant="primary"
+                :soft="false"
+                :outline="false"
+                icon="icon:add"
+                label="Nouveau bloc transversal"
+                tooltip="Créer un nouveau bloc de compétences transversales"
+                dataAction="click->modalturbo#open"
+        />
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="space-y-6">
+        {# Barre d'outils / Encart d'information et reprise n-1 #}
+        <div class="rounded-2xl border border-secondary-200 dark:border-secondary-700 bg-white dark:bg-secondary-900 p-5 shadow-sm">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                <div class="flex items-start gap-3">
+                    <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-info-50 text-info-600 dark:bg-info-950/60 dark:text-info-400">
+                        <twig:UX:Icon name="mdi:information-outline" class="h-5 w-5"/>
+                    </div>
+                    <div>
+                        <h3 class="text-sm font-bold text-secondary-900 dark:text-secondary-100">
+                            Référentiel des compétences transversales (RNCP)
+                        </h3>
+                        <p class="text-xs text-secondary-500 dark:text-secondary-400 mt-0.5">
+                            Ces blocs sont communs à la campagne et peuvent être importés par les responsables de
+                            formation dans leurs parcours.
+                        </p>
+                    </div>
+                </div>
+
+                {# Formulaire de reprise depuis une campagne #}
+                <div class="shrink-0 flex items-center gap-2">
+                    <form method="post"
+                          action="{{ path('app_campagne_collecte_competences_transverses_import_n1', { id: campagne.id }) }}"
+                          onsubmit="return confirm('Attention : cette action va copier tous les blocs et compétences de la campagne sélectionnée dans la campagne courante. Voulez-vous continuer ?');"
+                          class="flex items-center gap-2 flex-wrap"
+                    >
+                        <input type="hidden" name="_token" value="{{ csrf_token('import-transverse-' ~ campagne.id) }}">
+                        <label for="source_campagne_id"
+                               class="text-xs font-medium text-secondary-600 dark:text-secondary-400 sr-only">
+                            Campagne source
+                        </label>
+                        <select id="source_campagne_id"
+                                name="source_campagne_id"
+                                class="text-xs rounded-lg border-secondary-300 dark:border-secondary-600 dark:bg-secondary-800 dark:text-secondary-100 py-1.5 px-3 focus:ring-primary-500 focus:border-primary-500"
+                        >
+                            {% for c in allCampagnes %}
+                                {% if c.id != campagne.id %}
+                                    <option value="{{ c.id }}"
+                                            {% if sourceCampagneN1 is not null and c.id == sourceCampagneN1.id %}selected{% endif %}>
+                                        Reprendre de
+                                        : {{ c.libelle }} {% if sourceCampagneN1 is not null and c.id == sourceCampagneN1.id %}(n-1){% endif %}
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+
+                        <twig:Button
+                                type="submit"
+                                variant="secondary"
+                                size="sm"
+                                :soft="true"
+                                icon="mdi:content-copy"
+                                label="Importer"
+                                tooltip="Importer l'ensemble des compétences de la campagne sélectionnée"
+                        />
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        {# Liste des blocs et compétences transverses #}
+        {{ include('config/campagne_collecte/_competences_transverses_list.html.twig', {
+            blocs: blocs,
+            campagne: campagne,
+            sourceCampagneN1: sourceCampagneN1
+        }) }}
+    </div>
+{% endblock %}

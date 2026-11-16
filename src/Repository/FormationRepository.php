@@ -56,7 +56,7 @@ class FormationRepository extends ServiceEntityRepository
     /**
      * @return Formation[]
      */
-    public function findByCampagneWithRelations(CampagneCollecte $campagne, ?Composante $composante = null): array
+    public function findByCampagneWithRelations(CampagneCollecte $campagne, ?Composante $composante = null, bool $classique = true): array
     {
         $qb = $this->createQueryBuilder('f')
             ->leftJoin('f.composantePorteuse', 'cp')
@@ -66,8 +66,9 @@ class FormationRepository extends ServiceEntityRepository
             ->leftJoin('f.composantesInscription', 'ci')
             ->addSelect('cp', 'm', 'td', 'dom', 'ci')
             ->where('f.dpe = :campagne')
-            ->andWhere('COALESCE(f.classique, td.classique) = 1')
+            ->andWhere('COALESCE(f.classique, td.classique) = :classique')
             ->setParameter('campagne', $campagne)
+            ->setParameter('classique', $classique ? 1 : 0)
             ->orderBy('td.libelle', 'ASC')
             ->addOrderBy('m.libelle', 'ASC')
             ->addOrderBy('f.mentionTexte', 'ASC');

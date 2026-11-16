@@ -1,0 +1,49 @@
+{# Tableau croisé BUT : Apprentissages critiques (AC) x Fiches matières (Ressources / SAÉ) #}
+{% set editable = editable is not defined ? false : editable %}
+{% set semestresDisponibles = bccData.semestresDisponibles|default([]) %}
+{% set activeSemestre = activeSemestre|default(semestresDisponibles|keys|first|default(1)) %}
+
+{% if semestresDisponibles|length > 0 %}
+    <div {{ stimulus_controller('parcours--bcc', {
+        urlUpdateComptence: path('app_parcours_bcc_but_update_competence', {parcours: parcours.id})
+    }) }} class="app-tabs space-y-6">
+
+        {# 1. Onglets des semestres disponibles (S1, S2, ...) sans "Tous les semestres" #}
+        <div class="app-tabs-list flex-wrap gap-1.5" role="tablist" aria-label="Semestres du parcours">
+            {% for semOrdre, sInfo in semestresDisponibles %}
+                {% set isActive = (semOrdre == activeSemestre) %}
+                <a href="{{ path('app_parcours_bcc_semestre', {parcours: parcours.id, semestre: semOrdre}) }}"
+                   id="tab-semestre-{{ semOrdre }}"
+                   class="app-tab gap-2 cursor-pointer {% if isActive %}app-tab-active active{% endif %}"
+                   role="tab"
+                   aria-selected="{{ isActive ? 'true' : 'false' }}"
+                   data-parcours--bcc-target="tabButton"
+                   data-semester="{{ semOrdre }}"
+                        {{ stimulus_action('parcours--bcc', 'switchTab', 'click') }}
+                   data-turbo-frame="bcc_table_semestre_frame">
+                    <span class="font-bold text-xs tracking-wide">S{{ semOrdre }}</span>
+                </a>
+            {% endfor %}
+        </div>
+
+        {# 2. Conteneur unique du tableau chargé en Lazy Load pour le semestre sélectionné #}
+        <turbo-frame id="bcc_table_semestre_frame"
+                     src="{{ path('app_parcours_bcc_semestre', {parcours: parcours.id, semestre: activeSemestre}) }}">
+            <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-surface p-12 text-center text-secondary-500 shadow-sm">
+                <div class="mb-3 flex justify-center">
+                    <twig:Spinner size="sm" variant="primary"/>
+                </div>
+                <p class="text-sm font-semibold text-text">Chargement du tableau croisé...</p>
+                <p class="text-xs text-secondary-400 mt-1">Calcul des correspondances AC / SAÉ / Ressources</p>
+            </div>
+        </turbo-frame>
+
+    </div>
+{% else %}
+    <div class="rounded-xl border border-secondary-200 dark:border-secondary-700 bg-surface p-8 text-center text-secondary-500 shadow-sm">
+        {{ ux_icon('ph:folders-light', {class: 'h-8 w-8 text-secondary-400 mx-auto mb-2'}) }}
+        <p class="text-sm font-semibold text-text">Aucun semestre configuré</p>
+        <p class="text-xs text-secondary-400 mt-1">Ce parcours ne contient aucun semestre ou élément constitutif
+            actif.</p>
+    </div>
+{% endif %}

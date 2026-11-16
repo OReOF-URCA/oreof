@@ -1,0 +1,521 @@
+{% extends 'pdf/base-pdf.html.twig' %}
+
+{% block title %}Synthèse des modifications de l'offre - {{ campagne.libelle }}{% endblock %}
+
+{% block stylesheets %}
+    <style>
+        .report-header {
+            border-bottom: 2px solid #0284c7;
+            padding-bottom: 12px;
+            margin-bottom: 16px;
+        }
+
+        .report-title {
+            font-size: 19px;
+            font-weight: 800;
+            color: #0f172a;
+            margin-bottom: 4px;
+        }
+
+        .report-subtitle {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0369a1;
+            margin-bottom: 6px;
+        }
+
+        .report-meta {
+            font-size: 9.5px;
+            color: #64748b;
+        }
+
+        .kpi-table {
+            width: 100%;
+            margin-bottom: 16px;
+            border-collapse: separate;
+            border-spacing: 6px;
+        }
+
+        .kpi-cell {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 8px 10px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .kpi-value {
+            font-size: 16px;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.1;
+        }
+
+        .kpi-label {
+            font-size: 8.5px;
+            text-transform: uppercase;
+            font-weight: 600;
+            color: #64748b;
+            margin-top: 3px;
+        }
+
+        .kpi-highlight-green {
+            background-color: #f0fdf4;
+            border-color: #bbf7d0;
+        }
+
+        .kpi-highlight-green .kpi-value {
+            color: #15803d;
+        }
+
+        .kpi-highlight-amber {
+            background-color: #fffbeb;
+            border-color: #fde68a;
+        }
+
+        .kpi-highlight-amber .kpi-value {
+            color: #b45309;
+        }
+
+        .kpi-highlight-blue {
+            background-color: #f0f9ff;
+            border-color: #bae6fd;
+        }
+
+        .kpi-highlight-blue .kpi-value {
+            color: #0369a1;
+        }
+
+        .composante-header {
+            background-color: #f1f5f9;
+            border-left: 4px solid #0284c7;
+            padding: 7px 12px;
+            margin-top: 18px;
+            margin-bottom: 10px;
+            border-radius: 0 4px 4px 0;
+            break-after: avoid;
+            page-break-after: avoid;
+        }
+
+        .composante-title {
+            font-size: 12.5px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0;
+        }
+
+        .composante-count {
+            font-size: 9.5px;
+            font-weight: 500;
+            color: #475569;
+            margin-left: 6px;
+        }
+
+        .formation-card {
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            padding: 9px 12px;
+            margin-bottom: 12px;
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .formation-header {
+            border-bottom: 1px solid #e2e8f0;
+            padding-bottom: 5px;
+            margin-bottom: 7px;
+        }
+
+        .formation-name {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #0f172a;
+        }
+
+        .formation-type {
+            font-size: 9.5px;
+            color: #64748b;
+        }
+
+        .parcours-item {
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 3px;
+            padding: 6px 10px;
+            margin-top: 6px;
+            margin-bottom: 6px;
+        }
+
+        .parcours-name {
+            font-size: 10.5px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .change-row {
+            margin-top: 4px;
+            margin-bottom: 4px;
+            font-size: 10px;
+        }
+
+        .change-label {
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 1px 5px;
+            font-size: 8.5px;
+            font-weight: 600;
+            border-radius: 2px;
+            margin-right: 3px;
+        }
+
+        .tag-regime {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+
+        .tag-added {
+            background-color: #dcfce7;
+            color: #15803d;
+            border: 1px solid #86efac;
+        }
+
+        .tag-removed {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fca5a5;
+            text-decoration: line-through;
+        }
+
+        .justification-box {
+            background-color: #fefce8;
+            border-left: 3px solid #eab308;
+            padding: 4px 8px;
+            margin-top: 5px;
+            font-size: 9.5px;
+            color: #713f12;
+            border-radius: 0 2px 2px 0;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    {# En-tête du rapport #}
+    <div class="report-header">
+        <div class="report-title">Synthèse des évolutions de l'offre de formation</div>
+        <div class="report-subtitle">
+            Modifications &amp; Créations des intitulés et régimes d'inscription — Campagne {{ campagne.libelle }}
+        </div>
+        <div class="report-meta">
+            Document destiné aux membres du Conseil (CFVU / Conseils de composante) &bull; Édité
+            le {{ dateGeneration|date('d/m/Y à H:i') }}
+        </div>
+    </div>
+
+    {# Bloc des indicateurs clés (KPIs) #}
+    <table class="kpi-table">
+        <tr>
+            <td class="kpi-cell kpi-highlight-green" style="width: 20%;">
+                <div class="kpi-value">{{ stats.total_formations_creees }}</div>
+                <div class="kpi-label">Formations créées</div>
+            </td>
+            <td class="kpi-cell kpi-highlight-amber" style="width: 20%;">
+                <div class="kpi-value">{{ stats.total_formations_modifiees }}</div>
+                <div class="kpi-label">Formations modifiées</div>
+            </td>
+            <td class="kpi-cell kpi-highlight-green" style="width: 20%;">
+                <div class="kpi-value">{{ stats.total_parcours_crees }}</div>
+                <div class="kpi-label">Parcours créés</div>
+            </td>
+            <td class="kpi-cell kpi-highlight-amber" style="width: 20%;">
+                <div class="kpi-value">{{ stats.total_parcours_modifies }}</div>
+                <div class="kpi-label">Parcours modifiés</div>
+            </td>
+            <td class="kpi-cell kpi-highlight-blue" style="width: 20%;">
+                <div class="kpi-value">{{ stats.total_composantes_avec_modifs }}</div>
+                <div class="kpi-label">Composantes concernées</div>
+            </td>
+        </tr>
+    </table>
+
+    {# Tableau récapitulatif par composante #}
+    <h2>1. Tableau de synthèse par composante</h2>
+    <table class="table table-striped table-bordered">
+        <thead>
+        <tr>
+            <th class="text-left" style="width: 40%;">Composante</th>
+            <th style="width: 15%;">Formations créées</th>
+            <th style="width: 15%;">Formations modifiées</th>
+            <th style="width: 15%;">Parcours créés</th>
+            <th style="width: 15%;">Parcours modifiés</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for cStat in allComposantesStats %}
+            {% if cStat.total > 0 %}
+                <tr>
+                    <td class="text-left font-semibold">
+                        {{ cStat.libelle }}
+                    </td>
+                    <td class="text-center">
+                        {% if cStat.formations_creees > 0 %}
+                            <span class="badge badge-success">+{{ cStat.formations_creees }}</span>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if cStat.formations_modifiees > 0 %}
+                            <span class="badge badge-warning">{{ cStat.formations_modifiees }}</span>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if cStat.parcours_crees > 0 %}
+                            <span class="badge badge-success">+{{ cStat.parcours_crees }}</span>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if cStat.parcours_modifies > 0 %}
+                            <span class="badge badge-warning">{{ cStat.parcours_modifies }}</span>
+                        {% else %}
+                            <span class="text-muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+        <tr class="total-row">
+            <td class="text-left font-bold">TOTAL GÉNÉRAL</td>
+            <td class="text-center font-bold text-success">{{ stats.total_formations_creees }}</td>
+            <td class="text-center font-bold">{{ stats.total_formations_modifiees }}</td>
+            <td class="text-center font-bold text-success">{{ stats.total_parcours_crees }}</td>
+            <td class="text-center font-bold">{{ stats.total_parcours_modifies }}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <div class="page-break"></div>
+
+    {# Détail des évolutions par composante #}
+    <h2>2. Détail des évolutions par composante</h2>
+
+    {% if composantes|length == 0 %}
+        <div class="alert alert-info">
+            Aucune modification ni création d'intitulé ou de régime d'inscription recensée pour cette campagne.
+        </div>
+    {% else %}
+        {% for compEntry in composantes %}
+            <div class="composante-header">
+                <span class="composante-title">{{ compEntry.libelle }}</span>
+                <span class="composante-count">
+                    ({{ compEntry.total_creations }} création{{ compEntry.total_creations > 1 ? 's' : '' }},
+                     {{ compEntry.total_modifications }} modification{{ compEntry.total_modifications > 1 ? 's' : '' }})
+                </span>
+            </div>
+
+            {% for fEntry in compEntry.formations %}
+                {% set formation = fEntry.formation %}
+                <div class="formation-card no-break">
+                    <div class="formation-header">
+                        <div class="formation-name">
+                            {{ formation.displayLong }}
+                            {% if fEntry.is_creation %}
+                                <span class="badge badge-success ml-2">Création de formation</span>
+                            {% endif %}
+                        </div>
+                        <div class="formation-type">
+                            Type de diplôme : {{ formation.typeDiplome ? formation.typeDiplome.libelle : '-' }}
+                            {% if formation.sigle %} &bull; Sigle : <strong>{{ formation.sigle }}</strong>{% endif %}
+                            {% if formation.localisationMention.count > 0 %}
+                                &bull; Lieu(x) :
+                                {% for loc in formation.localisationMention %}
+                                    {{ loc.libelle }}{% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {# Cas 1 : Création de la formation #}
+                    {% if fEntry.is_creation and fEntry.creation_details %}
+                        <div class="change-row">
+                            <span class="change-label">Régimes d'inscription initiaux :</span>
+                            {% if fEntry.creation_details.regimes|length > 0 %}
+                                {% for reg in fEntry.creation_details.regimes %}
+                                    <span class="tag tag-regime">{{ reg }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="text-muted">Non renseignés</span>
+                            {% endif %}
+                        </div>
+                        {% if fEntry.creation_details.justification %}
+                            <div class="justification-box">
+                                <strong>Justification de la création
+                                    :</strong> {{ fEntry.creation_details.justification }}
+                            </div>
+                        {% endif %}
+                    {% endif %}
+
+                    {# Cas 2 : Modifications au niveau de la formation #}
+                    {% if fEntry.modifications|length > 0 %}
+                        {% for modif in fEntry.modifications %}
+                            <div class="change-row">
+                                <span class="badge badge-warning">{{ modif.label }}</span>
+                                {% if modif.type == 'LIBELLE' %}
+                                    <div class="mt-1">
+                                        <span class="diff-original">{{ modif.ancien }}</span>
+                                        &nbsp;&rarr;&nbsp;
+                                        <span class="diff-new">{{ modif.nouveau }}</span>
+                                    </div>
+                                {% elseif modif.type == 'REGIMES' %}
+                                    <div class="mt-1">
+                                        <strong>Avant :</strong>
+                                        {% for r in modif.anciens %}
+                                            <span class="tag tag-regime">{{ r }}</span>
+                                        {% else %}
+                                            <span class="text-muted">Aucun</span>
+                                        {% endfor %}
+                                        &nbsp;&rarr;&nbsp;
+                                        <strong>Après :</strong>
+                                        {% for r in modif.nouveaux %}
+                                            <span class="tag tag-regime">{{ r }}</span>
+                                        {% endfor %}
+                                    </div>
+                                    {% if modif.ajouts|length > 0 or modif.suppressions|length > 0 %}
+                                        <div class="mt-1 text-sm">
+                                            {% for a in modif.ajouts %}
+                                                <span class="tag tag-added">+ {{ a }}</span>
+                                            {% endfor %}
+                                            {% for s in modif.suppressions %}
+                                                <span class="tag tag-removed">- {{ s }}</span>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                                {% if modif.justification %}
+                                    <div class="justification-box">
+                                        <strong>Argumentaire :</strong> {{ modif.justification }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {# Cas 3 : Évolutions sur les parcours rattachés #}
+                    {% if fEntry.parcours|length > 0 %}
+                        <div class="mt-2">
+                            <span class="font-semibold text-sm"
+                                  style="color: #334155;">Évolution(s) sur les parcours :</span>
+                            {% for pEntry in fEntry.parcours %}
+                                {% set parcours = pEntry.parcours %}
+                                <div class="parcours-item">
+                                    <div class="parcours-name">
+                                        Parcours : {{ parcours.libelle ?: parcours.display }}
+                                        {% if pEntry.is_creation %}
+                                            <span class="badge badge-success">Création de parcours</span>
+                                        {% endif %}
+                                    </div>
+
+                                    {# Création de parcours #}
+                                    {% if pEntry.is_creation and pEntry.creation_details %}
+                                        <div class="change-row">
+                                            <span class="change-label">Régimes d'inscription :</span>
+                                            {% for reg in pEntry.creation_details.regimes %}
+                                                <span class="tag tag-regime">{{ reg }}</span>
+                                            {% else %}
+                                                <span class="text-muted">Régimes de la formation</span>
+                                            {% endfor %}
+                                        </div>
+                                        {% if pEntry.creation_details.annees|length > 0 %}
+                                            <div class="change-row">
+                                                <span class="change-label">Spécificités par année :</span>
+                                                {% for aDetail in pEntry.creation_details.annees %}
+                                                    <span class="text-muted">Année {{ aDetail.ordre }} :</span>
+                                                    {% for reg in aDetail.regimes %}
+                                                        <span class="tag tag-regime">{{ reg }}</span>
+                                                    {% endfor %}
+                                                    {% if not loop.last %}&bull;{% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        {% endif %}
+                                    {% endif %}
+
+                                    {# Modifications de parcours #}
+                                    {% if pEntry.modifications|length > 0 %}
+                                        {% for modif in pEntry.modifications %}
+                                            <div class="change-row">
+                                                <span class="badge badge-warning">{{ modif.label }}</span>
+                                                {% if modif.type == 'LIBELLE' %}
+                                                    <div class="mt-1">
+                                                        <span class="diff-original">{{ modif.ancien }}</span>
+                                                        &nbsp;&rarr;&nbsp;
+                                                        <span class="diff-new">{{ modif.nouveau }}</span>
+                                                    </div>
+                                                {% elseif modif.type == 'REGIMES' %}
+                                                    <div class="mt-1">
+                                                        <strong>Avant :</strong>
+                                                        {% for r in modif.anciens %}
+                                                            <span class="tag tag-regime">{{ r }}</span>
+                                                        {% else %}
+                                                            <span class="text-muted">Aucun</span>
+                                                        {% endfor %}
+                                                        &nbsp;&rarr;&nbsp;
+                                                        <strong>Après :</strong>
+                                                        {% for r in modif.nouveaux %}
+                                                            <span class="tag tag-regime">{{ r }}</span>
+                                                        {% endfor %}
+                                                    </div>
+                                                    {% if modif.ajouts|length > 0 or modif.suppressions|length > 0 %}
+                                                        <div class="mt-1 text-sm">
+                                                            {% for a in modif.ajouts %}
+                                                                <span class="tag tag-added">+ {{ a }}</span>
+                                                            {% endfor %}
+                                                            {% for s in modif.suppressions %}
+                                                                <span class="tag tag-removed">- {{ s }}</span>
+                                                            {% endfor %}
+                                                        </div>
+                                                    {% endif %}
+                                                    {% if modif.annees is defined and modif.annees|length > 0 %}
+                                                        <div class="mt-1 text-sm text-muted">
+                                                            <strong>Détail par année :</strong>
+                                                            {% for anneeModif in modif.annees %}
+                                                                <div>
+                                                                    &bull; Année {{ anneeModif.ordre }} :
+                                                                    {% for a in anneeModif.ajouts %}
+                                                                        <span class="tag tag-added">+ {{ a }}</span>
+                                                                    {% endfor %}
+                                                                    {% for s in anneeModif.suppressions %}
+                                                                        <span class="tag tag-removed">- {{ s }}</span>
+                                                                    {% endfor %}
+                                                                </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </div>
+                                        {% endfor %}
+                                    {% endif %}
+
+                                    {% if pEntry.demande_justification %}
+                                        <div class="justification-box">
+                                            <strong>Argumentaire :</strong> {{ pEntry.demande_justification }}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            {% endfor %}
+        {% endfor %}
+    {% endif %}
+{% endblock %}

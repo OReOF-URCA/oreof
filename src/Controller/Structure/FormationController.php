@@ -20,12 +20,12 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/structure/formation', name: 'structure_formation_')]
 class FormationController extends BaseController
 {
-    #[Route('/', name: 'index')]
-    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
-    public function index(): Response
-    {
-        return $this->render('structure/formation/index.html.twig');
-    }
+//    #[Route('/', name: 'index')]
+//    #[Breadcrumb(menuKey: 'offre.detail_mentions')]
+//    public function index(): Response
+//    {
+//        return $this->render('structure/formation/index.html.twig');
+//    }
 
     #[Route('/liste', name: 'liste')]
     public function liste(

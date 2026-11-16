@@ -170,7 +170,8 @@ class ParcoursExportController extends AbstractController
     public function exportMaquetteJsonMinimumv2(
         Parcours $parcours,
         ParcoursExportV2 $exportV2,
-    ) {        
+    ): Response
+    {
         $td = $parcours->getFormation()->getTypeDiplome();
         $jsonData = $exportV2->getMaquetteJsonMinimum($parcours, $td);
         return $this->json($jsonData);

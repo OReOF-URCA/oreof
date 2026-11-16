@@ -29,7 +29,11 @@ final readonly class DpeReopeningOperationHandler implements OperationHandlerInt
         // 'reouvrir_mccc' est géré par ReouvrirMcccOperationHandler (un seul handler par transition).
     ];
 
-    public function __construct(private EntityManagerInterface $entityManager)
+    public function __construct(
+        private EntityManagerInterface           $entityManager,
+        private \App\Service\VersioningParcours  $versioningParcours,
+        private \App\Service\VersioningFormation $versioningFormation,
+    )
     {
     }
 
@@ -88,5 +92,11 @@ final readonly class DpeReopeningOperationHandler implements OperationHandlerInt
 
         $subject->setEtatReconduction($niveauModification);
         $this->entityManager->persist($demande);
+
+        // Sauvegarde de la version de référence pour comparaison ultérieure lors de la clôture
+        $this->versioningParcours->saveVersionOfParcours($parcours, new \DateTimeImmutable('now'), true);
+        if ($parcours->isParcoursDefaut()) {
+            $this->versioningFormation->saveVersionOfFormation($formation, new \DateTimeImmutable('now'), true);
+        }
     }
 }

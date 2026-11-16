@@ -88,7 +88,14 @@ export default class extends Controller {
         if (response.ok) {
           const text = await response.text()
           if (requestController.signal.aborted) return
-          renderStreamMessage(text)
+            if (text.includes('<turbo-stream')) {
+                renderStreamMessage(text)
+            } else if (bodyFrame) {
+                bodyFrame.innerHTML = text
+                if (titleFrame && titleFrame.textContent === 'Chargement…') {
+                    titleFrame.textContent = ''
+                }
+            }
         } else {
           if (bodyFrame) {
             bodyFrame.innerHTML = `<div class="p-4 text-sm text-red-600">Erreur lors du chargement (${response.status} ${response.statusText})</div>`

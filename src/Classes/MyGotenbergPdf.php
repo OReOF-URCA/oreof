@@ -80,7 +80,12 @@ class MyGotenbergPdf
             ->emulatedMediaType(EmulatedMediaType::Print)
             ->printBackground()
             ->paperSize($width, $height)
-            ->margins(1.3, 1.3, 0.8, 0.8)
+            ->margins(
+                (float)$this->options['marginTop'],
+                (float)$this->options['marginBottom'],
+                (float)$this->options['marginLeft'],
+                (float)$this->options['marginRight']
+            )
         ;
 
         if ($this->options['landscape']) {
@@ -118,7 +123,15 @@ class MyGotenbergPdf
             'landscape' => false,
             'paperSize' => 'A4',
             'composante' => null,
+            'marginTop' => 1.3,
+            'marginBottom' => 1.3,
+            'marginLeft' => 0.8,
+            'marginRight' => 0.8,
         ]);
+        $resolver->setAllowedTypes('marginTop', ['float', 'int']);
+        $resolver->setAllowedTypes('marginBottom', ['float', 'int']);
+        $resolver->setAllowedTypes('marginLeft', ['float', 'int']);
+        $resolver->setAllowedTypes('marginRight', ['float', 'int']);
     }
 
     private function valideName(string $name): string

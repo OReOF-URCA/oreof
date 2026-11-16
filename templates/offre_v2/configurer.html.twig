@@ -3,14 +3,16 @@
 {% set header_title = 'offre_v2_configurer.title'|trans({'%formation%': formation.displayLong}, 'header') %}
 {% set header_breadcrumb = true %}
 {% set typeDiplome = formation.typeDiplome %}
+{% set is_classique = formation.isClassique %}
 {% set is_ses_or_admin = is_granted('ROLE_SES') or is_granted('ROLE_ADMIN') %}
 {% set is_brouillon = dpeFormation and dpeFormation.etatValidation.brouillon is defined %}
 {% set is_period_active = campagne and campagne.isPeriodActive() %}
 
-{% set can_edit = is_ses_or_admin or (is_brouillon and is_period_active) %}
+{% set can_edit = is_ses_or_admin or (not is_classique and is_brouillon) or (is_brouillon and is_period_active) %}
+{% set can_add_parcours = is_classique ? can_edit : is_granted('ROLE_ADMIN') %}
 
 {% block bouton_header %}
-    {% if can_edit %}
+    {% if can_add_parcours %}
         <twig:Button variant="success"
                      href="{{ path('offre_v2_parcours_modal_add', {slug: formation.slug}) }}"
                      dataAction="click->modalturbo#open"
@@ -20,7 +22,14 @@
         </twig:Button>
     {% endif %}
     {% set composantePorteuse = formation.composantePorteuse %}
-    <twig:Button variant="primary" href="{{ is_granted('ROLE_ADMIN') or not composantePorteuse ? path('app_offre_index') : path('app_offre_composante_index', { composante: composantePorteuse.id }) }}"
+    {% set comp_param = app.request.query.get('composante') %}
+    {% set target_composante_id = comp_param ?: (not is_granted('ROLE_ADMIN') and composantePorteuse ? composantePorteuse.id : null) %}
+    {% if is_classique %}
+        {% set retour_url = target_composante_id ? path('app_offre_composante_index', { composante: target_composante_id }) : path('app_offre_index') %}
+    {% else %}
+        {% set retour_url = target_composante_id ? path('app_offre_etablissement_composante_index', { composante: target_composante_id }) : path('app_offre_etablissement_index') %}
+    {% endif %}
+    <twig:Button variant="primary" href="{{ retour_url }}"
                  icon="icon:arrow-left"
     >
         Retour à la liste des offres
@@ -32,7 +41,7 @@
         <div class="rounded-lg border border-danger-200 bg-danger-50 p-2.5 text-xs text-danger-800 flex items-center gap-2.5 mb-3 shadow-xs dark:bg-danger-900/30 dark:text-danger-300 dark:border-danger-700">
             <span class="text-base shrink-0">⚠️</span>
             <div class="flex-1">
-                {% if campagne and not campagne.isPeriodActive() %}
+                {% if is_classique and campagne and not campagne.isPeriodActive() %}
                     <strong>Campagne fermée :</strong>
                     {% if campagne.dateOuvertureDpe and date() < campagne.dateOuvertureDpe %}
                         Ouverture le {{ campagne.dateOuvertureDpe|date('d/m/Y à H:i') }}.

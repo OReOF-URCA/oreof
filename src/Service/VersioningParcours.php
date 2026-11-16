@@ -188,30 +188,32 @@ class VersioningParcours
     {
         $this->textDifferences = [];
 
-        if (($this->hasLastVersion($parcours) && $fromLastYear === false)
-            || ($fromLastYear && $parcours->getParcoursOrigineCopie() !== null)
-        ) {
-            if($fromLastYear){
-                $lastVersion = $parcours->getParcoursOrigineCopie();
-            }
-            else {
-                // Données du parcours en JSON
-                $lastVersion = $this->getLastVersion($parcours);
-                if ($lastVersion === null || !$this->versionFilesExist($lastVersion)) {
-                    return $this->textDifferences;
-                }
+        $lastVersion = null;
+        if ($fromLastYear) {
+            $lastVersion = $parcours->getParcoursOrigineCopie();
+        } else {
+            $lastVersionObj = $this->getLastVersion($parcours);
+            if ($lastVersionObj !== null && $this->versionFilesExist($lastVersionObj)) {
                 $fileParcours = file_get_contents(
                     __DIR__ . "/../../versioning_json/parcours/"
-                    . "{$lastVersion->getParcours()?->getId()}/"
-                    . "{$lastVersion->getParcoursFileName()}.json"
+                    . "{$lastVersionObj->getParcours()?->getId()}/"
+                    . "{$lastVersionObj->getParcoursFileName()}.json"
                 );
                 $lastVersion = $fileParcours !== false ? $this->serializer->deserialize($fileParcours, Parcours::class, 'json') : null;
-                if ($lastVersion === null) {
-                    return $this->textDifferences;
-                }
             }
-            // Configuration du calcul des différences
-            $rendererName = 'Combined';
+
+            // Fallback : si aucune version n'a encore été enregistrée pour ce parcours mais qu'il est issu d'une copie de l'année précédente
+            if ($lastVersion === null && $parcours->getParcoursOrigineCopie() !== null) {
+                $lastVersion = $parcours->getParcoursOrigineCopie();
+            }
+        }
+
+        if ($lastVersion === null) {
+            return $this->textDifferences;
+        }
+
+        // Configuration du calcul des différences
+        $rendererName = 'Combined';
             $differOptions = [
                 'context' => 1,
                 'ignoreWhitespace' => true,
@@ -584,7 +586,6 @@ class VersioningParcours
                     )
                 )
             ];
-        }
 
         return $this->textDifferences;
     }
@@ -685,7 +686,7 @@ class VersioningParcours
 
     public function hasLastVersion(Parcours $parcours): bool
     {
-        return $this->getLastVersion($parcours) !== null;
+        return $this->getLastVersion($parcours) !== null || $parcours->getParcoursOrigineCopie() !== null;
     }
 
     public function loadJsonCfvu(Parcours $parcours, ?ParcoursVersioning $lastVersion): ?string
@@ -727,23 +728,39 @@ class VersioningParcours
 
     public function rollbackToLastVersion(?Parcours $parcours): void
     {
-        // si parcours et différences alors remettre dans parcours les données venant de this->textDifferences
-
-        if($parcours && count($this->textDifferences) > 0) {
-            $parcours->setContenuFormation($this->textDifferences['presentationParcoursContenuFormation']);
-            $parcours->setObjectifsParcours($this->textDifferences['presentationParcoursObjectifsParcours']);
-            $parcours->setResultatsAttendus($this->textDifferences['presentationParcoursResultatsAttendus']);
-            $parcours->setRespParcours($this->textDifferences['contactsParcoursResponsableParcours']);
-            $parcours->setCoResponsable($this->textDifferences['contactsParcoursCoResponsableDuParcours']);
-            $parcours->setRegimeInscription($this->textDifferences['regimeInscriptionParcours']);
-            $parcours->setRythmeFormation($this->textDifferences['rythmeFormationParcours']);
-            $parcours->setMemoireText($this->textDifferences['memoireTextParcours']);
-            $parcours->setStageText($this->textDifferences['stageTextParcours']);
-            $parcours->setPrerequis($this->textDifferences['prerequisRecommandesParcours']);
-            $parcours->setDebouches($this->textDifferences['debouchesTextParcours']);
-            $parcours->setPoursuitesEtudes($this->textDifferences['poursuiteEtudesParcours']);
+        if ($parcours === null) {
+            return;
         }
 
+        $oldParcours = null;
+        $lastVersion = $this->getLastVersion($parcours);
+        if ($lastVersion !== null && $this->versionFilesExist($lastVersion)) {
+            try {
+                $versionData = $this->loadParcoursFromVersion($lastVersion);
+                $oldParcours = $versionData['parcours'] ?? null;
+            } catch (\Throwable) {
+                $oldParcours = null;
+            }
+        }
+
+        if ($oldParcours === null && $parcours->getParcoursOrigineCopie() !== null) {
+            $oldParcours = $parcours->getParcoursOrigineCopie();
+        }
+
+        if ($oldParcours instanceof Parcours) {
+            $parcours->setContenuFormation($oldParcours->getContenuFormation());
+            $parcours->setObjectifsParcours($oldParcours->getObjectifsParcours());
+            $parcours->setResultatsAttendus($oldParcours->getResultatsAttendus());
+            $parcours->setRespParcours($oldParcours->getRespParcours());
+            $parcours->setCoResponsable($oldParcours->getCoResponsable());
+            $parcours->setRegimeInscription($oldParcours->getRegimeInscription());
+            $parcours->setRythmeFormation($oldParcours->getRythmeFormation());
+            $parcours->setMemoireText($oldParcours->getMemoireText());
+            $parcours->setStageText($oldParcours->getStageText());
+            $parcours->setPrerequis($oldParcours->getPrerequis());
+            $parcours->setDebouches($oldParcours->getDebouches());
+            $parcours->setPoursuitesEtudes($oldParcours->getPoursuitesEtudes());
+        }
     }
 
     private function getArrayAsHtmlDiffList(array $array, ?string $key) : string {

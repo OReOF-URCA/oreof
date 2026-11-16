@@ -1,0 +1,71 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title = 'app_admin_pilotage_descriptifs_index.title'|trans({}, 'header') %}
+{% set header_description = 'app_admin_pilotage_descriptifs_index.description'|trans({}, 'header') %}
+
+{% block bouton_header %}
+    <twig:Button variant="secondary" icon="icon:arrow-left" href="{{ path('app_section_pilotage') }}">
+        Pilotage
+    </twig:Button>
+{% endblock %}
+
+{% block content %}
+    <div class="space-y-8 pb-12">
+
+        {# Synthèse & Contexte Campagne #}
+        <div class="bg-surface border border-secondary-200 dark:border-secondary-700 rounded-2xl p-6 shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-primary-100 text-primary-800 dark:bg-primary-950 dark:text-primary-300">
+                    Campagne en cours
+                </span>
+                    {% if selectedCampagne and selectedCampagne.anneeUniversitaire %}
+                        <span class="text-xs text-secondary-500 font-mono font-semibold">{{ selectedCampagne.anneeUniversitaire }}</span>
+                    {% endif %}
+                </div>
+                <h2 class="text-xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
+                    {{ selectedCampagne ? selectedCampagne.libelle : 'Campagne non définie' }}
+                </h2>
+                <p class="text-xs text-secondary-500">
+                    Parcours présentant un descriptif automatique (fermeture / non-ouverture) ou un descriptif
+                    spécifique haut de page destiné au catalogue web de l'offre de formation.
+                </p>
+            </div>
+        </div>
+
+        {# KPIs Principaux #}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <twig:Kpi
+                    title="Total avec descriptif"
+                    value="{{ stats.total }}"
+                    description="Parcours avec au moins un texte"
+                    variant="primary"
+                    icon="ph:file-text-light"/>
+
+            <twig:Kpi
+                    title="Descriptif automatique"
+                    value="{{ stats.count_auto }}"
+                    description="Calculé selon l'ouverture du parcours"
+                    variant="info"
+                    icon="mdi:robot-outline"/>
+
+            <twig:Kpi
+                    title="Descriptif manuel"
+                    value="{{ stats.count_manuel }}"
+                    description="Texte spécifique saisi"
+                    variant="warning"
+                    icon="mdi:fountain-pen-tip"/>
+
+            <twig:Kpi
+                    title="Double descriptif"
+                    value="{{ stats.count_both }}"
+                    description="Textes auto et manuel cumulés"
+                    variant="success"
+                    icon="ph:stack-light"/>
+        </div>
+
+        {# UX-DATATABLE CARD #}
+        {{ include('_ui/_datatable_card.html.twig', { table: table }) }}
+
+    </div>
+{% endblock %}

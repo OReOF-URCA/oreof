@@ -1,0 +1,44 @@
+{# Rafraîchissement direct de l'en-tête du parcours si présent sur la page #}
+{% if parcours is defined and parcours is not null %}
+    <turbo-stream action="replace" target="parcours_header_component">
+        <template>
+            <div id="parcours_header_component">
+                <twig:ParcoursHeader
+                        parcoursId="{{ parcours.id }}"
+                        formationId="{{ parcours.formation.id }}"
+                />
+            </div>
+        </template>
+    </turbo-stream>
+
+    <turbo-stream action="replace" target="parcours_voir_actions">
+        <template>
+            {{ include('parcours_v2/_voir_actions.html.twig', {parcours: parcours, dpeParcours: dpeParcours|default(null)}) }}
+        </template>
+    </turbo-stream>
+{% endif %}
+
+{# Affichage du toast standard unifié (Tailwind / Stimulus dans #flash_toasts) #}
+{{ include('_ui/_toast.stream.html.twig', {
+    message: toastMessage|default('Opération effectuée avec succès.'),
+    undo: null,
+    type: 'success'
+}) }}
+
+{# Fermeture propre de la modal #}
+{{ include('_ui/_force_close_modal.html.twig') }}
+
+{# Si l'utilisateur était sur le formulaire de modification, redirection vers la consultation #}
+<turbo-stream action="append" target="flash_toasts">
+    <template>
+        <script>
+            if (window.location.pathname.includes('/modifier')) {
+                if (window.Turbo && typeof window.Turbo.visit === 'function') {
+                    window.Turbo.visit("{{ redirectUrl }}", {action: 'replace'});
+                } else {
+                    window.location.href = "{{ redirectUrl }}";
+                }
+            }
+        </script>
+    </template>
+</turbo-stream>
