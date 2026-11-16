@@ -38,15 +38,15 @@
         ~ ' [&_h1]:mt-3 [&_h1]:mb-1 [&_h1]:text-base [&_h1]:font-semibold [&_h2]:mt-3 [&_h2]:mb-1 [&_h2]:font-semibold [&_h3]:mt-3 [&_h3]:mb-1 [&_h3]:font-semibold'
         ~ ' [&_ul]:mb-2 [&_ul]:list-disc [&_ul]:pl-5 [&_ol]:mb-2 [&_ol]:list-decimal [&_ol]:pl-5' %}
     <div class="assistance-message-corps {{ classes_corps }}">
-        {# HTML nettoyé par le sanitizer « assistance_sanitizer » (à l'enregistrement, puis après découpage) #}
-        {{ this.estHtml ? this.corps|raw : this.corps|nl2br }}
+        {# HTML prêt à afficher : nettoyé par le sanitizer « assistance_sanitizer », ou texte échappé (MessageAssistanceCard) #}
+        {{ this.corps|raw }}
     </div>
 
     {% if this.historique is not null %}
         <details class="assistance-historique mt-2">
             <summary class="cursor-pointer text-xs text-secondary-500 hover:text-primary-600 dark:text-secondary-400">Afficher l'historique</summary>
             <div class="{{ classes_corps }} mt-2 border-l-2 border-secondary-200 pl-3 text-secondary-600 dark:border-secondary-700 dark:text-secondary-300">
-                {{ this.estHtml ? this.historique|raw : this.historique|nl2br }}
+                {{ this.historique|raw }}
             </div>
         </details>
     {% endif %}

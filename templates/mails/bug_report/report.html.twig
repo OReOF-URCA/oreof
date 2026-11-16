@@ -14,7 +14,13 @@
     <ul>
         <li><strong>Formation :</strong> {{ context.formationLabel }}</li>
         <li><strong>Parcours :</strong> {{ context.parcoursLabel }}</li>
-        <li><strong>Page :</strong> {{ context.page is not empty ? context.page : 'Non définie' }}</li>
+        <li><strong>Page :</strong>
+            {% if context.page starts with 'https://' or context.page starts with 'http://' %}
+                <a href="{{ context.page }}">{{ context.page }}</a>
+            {% else %}
+                {{ context.page is not empty ? context.page : 'Non définie' }}
+            {% endif %}
+        </li>
     </ul>
 
     <h3>Contenu</h3>

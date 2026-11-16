@@ -70,7 +70,8 @@ Les messages des demandes listées sont chargés avec la liste (jointure dans `D
 
 Affichage d'un message (`MessageAssistanceCard`) : l'historique cité (« Le … a écrit : », en-têtes Outlook
 « De : … Envoyé : », `blockquote`, `gmail_quote`, message transféré, lignes `>`) est replié derrière « Afficher
-l'historique » (`SeparateurCitation` ; les deux parties du HTML repassent par le sanitizer) ; au-delà de 5
+l'historique » (`SeparateurCitation` ; les deux parties du HTML repassent par le sanitizer) ; les adresses `https`
+écrites en clair deviennent des liens (`LienAutomatique`, nouvel onglet imposé par le sanitizer) ; au-delà de 5
 destinataires, la liste est repliée (« et N autres »).
 
 Fusion : les messages vont sur la demande la plus ancienne, l'autre est supprimée. Assigner un responsable à une

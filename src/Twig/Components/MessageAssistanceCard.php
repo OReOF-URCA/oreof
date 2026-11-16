@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Twig\Components;
 
 use App\Entity\MessageAssistance;
+use App\Service\Assistance\LienAutomatique;
 use App\Service\Assistance\SeparateurCitation;
 use Symfony\Component\DependencyInjection\Attribute\Target;
 use Symfony\Component\HtmlSanitizer\HtmlSanitizerInterface;
@@ -12,8 +13,9 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
 
 /**
  * Un message du fil d'une demande d'assistance (reçu, réponse envoyée ou note interne).
- * L'historique cité par le mail est replié ; les deux parties du HTML repassent par le sanitizer
- * « assistance_sanitizer » (le découpage peut couper des balises).
+ * L'historique cité par le mail est replié et les adresses https sont rendues cliquables. Corps et historique sont
+ * rendus en HTML prêt à afficher : repassés par le sanitizer « assistance_sanitizer » (le découpage peut couper des
+ * balises), ou texte brut échappé.
  *
  * <twig:MessageAssistanceCard :message="message" />
  */
@@ -30,14 +32,10 @@ final class MessageAssistanceCard
 
     public function __construct(
         private readonly SeparateurCitation $separateur,
+        private readonly LienAutomatique $lien,
         #[Target('assistance_sanitizer')]
         private readonly HtmlSanitizerInterface $sanitizer,
     ) {
-    }
-
-    public function estHtml(): bool
-    {
-        return $this->message->getCorpsHtml() !== null;
     }
 
     public function getCorps(): string
@@ -77,14 +75,26 @@ final class MessageAssistanceCard
 
         $html = $this->message->getCorpsHtml();
         if ($html === null) {
-            return $this->parties = $this->separateur->separerTexte($this->message->getCorpsTexte());
+            [$corps, $historique] = $this->separateur->separerTexte($this->message->getCorpsTexte());
+
+            return $this->parties = [$this->texteAffichable($corps), $historique !== null ? $this->texteAffichable($historique) : null];
         }
 
         [$corps, $historique] = $this->separateur->separerHtml($html);
-        if ($historique === null) {
-            return $this->parties = [$html, null];
-        }
 
-        return $this->parties = [$this->sanitizer->sanitize($corps), $this->sanitizer->sanitize($historique)];
+        return $this->parties = [$this->htmlAffichable($corps), $historique !== null ? $this->htmlAffichable($historique) : null];
+    }
+
+    /**
+     * Adresses rendues cliquables, puis nettoyage (le découpage a pu couper des balises ; target/rel imposés sur les liens).
+     */
+    private function htmlAffichable(string $html): string
+    {
+        return $this->sanitizer->sanitize($this->lien->html($html));
+    }
+
+    private function texteAffichable(string $texte): string
+    {
+        return $this->sanitizer->sanitize(nl2br($this->lien->texte($texte), false));
     }
 }

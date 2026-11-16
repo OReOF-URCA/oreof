@@ -334,6 +334,23 @@ class AssistanceControllerTest extends WebTestCase
         self::assertCount(1, $crawler->filter('details:contains("d20@univ-test.fr")'));
     }
 
+    public function testAdressesDesMessagesSontCliquables(): void
+    {
+        $demande = $this->demande('Lien bug assistance');
+        $demande->getMessages()->first()->setCorpsHtml('<ul><li><strong>Page :</strong> https://oreof.univ-reims.fr/offre/composante/3</li></ul>');
+        $this->ajouterReponse($demande, $demande->getMessages()->first(), "Voir https://oreof.univ-reims.fr/aide <ici>", '+1 hour');
+        $this->em->flush();
+        $this->connecterAdmin();
+
+        $crawler = $this->client->request('GET', '/administration/assistance/' . $demande->getId());
+
+        $lien = $crawler->filter('article a[href="https://oreof.univ-reims.fr/offre/composante/3"]');
+        self::assertCount(1, $lien);
+        self::assertSame('_blank', $lien->attr('target'));
+        self::assertCount(1, $crawler->filter('article a[href="https://oreof.univ-reims.fr/aide"]'));
+        self::assertStringContainsString('<ici>', $crawler->filter('article')->last()->text());
+    }
+
     public function testHistoriqueCiteEstReplie(): void
     {
         $demande = $this->demande('Historique assistance');
