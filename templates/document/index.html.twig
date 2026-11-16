@@ -1,28 +1,6 @@
 {% extends 'base.html.twig' %}
 
 {% block content %}
-    {% set sections = [
-        {
-            title: 'Guides de rédaction',
-            description: 'Modèles et aides à la rédaction des fiches (2024-2028).',
-            items: [
-                { label: 'Fiche EC / matière',               file: 'Aide à la rédaction v2 - fiche ec matière 2024-2028.docx',              type: 'word' },
-                { label: 'Fiche EC / matière — hors diplôme', file: 'Aide à la rédaction v2 - fiche ec matière Hors diplôme 2024-2028.docx',  type: 'word' },
-                { label: 'Fiche mention',                     file: 'Aide à la rédaction v2 - fiche formation 2024-2028.docx',               type: 'word' },
-                { label: 'Fiche parcours',                    file: 'Aide à la rédaction v2 - fiche parcours 2024-2028.docx',                type: 'word' },
-                { label: 'Tableau MCCC',                      file: 'Aide à la rédaction - MCCC Tableau mccc 2024-2028.xlsx',                type: 'excel' },
-            ],
-        },
-        {
-            title: 'Replay des présentations',
-            description: 'Rediffusions vidéo des sessions de lancement et de questions / réponses.',
-            items: [
-                { label: 'Lancement d\'ORéOF — 27/03/2023',   file: 'OReOF-27032023.mp4',   type: 'video' },
-                { label: 'Questions / réponses — 02/06/2023', file: 'video1870238167.mp4',  type: 'video' },
-            ],
-        },
-    ] %}
-
     <div class="space-y-10">
         {% for section in sections %}
             <section>
@@ -36,12 +14,15 @@
                         <twig:DownloadCard
                             title="{{ item.label }}"
                             description="{{ item.file }}"
-                            href="{{ asset('docs/' ~ item.file) }}"
+                            meta="{{ item.meta }}"
+                            href="{{ asset('docs/' ~ item.file|url_encode) }}"
                             type="{{ item.type }}"
                         />
                     {% endfor %}
                 </div>
             </section>
+        {% else %}
+            <p class="text-sm text-secondary-500">Aucun document disponible.</p>
         {% endfor %}
     </div>
 {% endblock %}
