@@ -4,7 +4,8 @@
     sortant: 'ml-8 border-primary-200 bg-primary-50 dark:border-primary-700 dark:bg-primary-900/30',
     note: 'mx-4 border-warning-300 bg-warning-50 dark:border-warning-700 dark:bg-warning-900/30',
 } %}
-<article {{ attributes.defaults({class: 'rounded-xl border p-4 shadow-sm ' ~ styles[sens]}) }} id="message-{{ message.id }}">
+{# scroll-mt : l'ancre #message-<id> (liens de la liste) ne passe pas sous l'en-tête collant #}
+<article {{ attributes.defaults({class: 'scroll-mt-44 rounded-xl border p-4 shadow-sm ' ~ styles[sens]}) }} id="message-{{ message.id }}">
     <header class="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
         <span class="font-semibold text-text">{{ message.expediteurNom ?? message.expediteurEmail }}</span>
         {% if message.expediteurNom %}
