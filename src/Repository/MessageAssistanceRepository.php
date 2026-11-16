@@ -21,20 +21,24 @@ class MessageAssistanceRepository extends ServiceEntityRepository
      *
      * @param array<string|null> $ids
      */
-    public function findOneByMessageIds(array $ids): ?MessageAssistance
+    public function findOneByMessageIds(array $ids, ?bool $annonce = null): ?MessageAssistance
     {
         $ids = array_values(array_unique(array_filter(array_map(MessageAssistance::normaliserId(...), $ids))));
         if ($ids === []) {
             return null;
         }
 
-        return $this->createQueryBuilder('m')
+        $qb = $this->createQueryBuilder('m')
             ->where('m.messageId IN (:ids)')
             ->setParameter('ids', $ids)
             ->orderBy('m.dateEnvoi', 'DESC')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
+            ->setMaxResults(1);
+
+        if ($annonce !== null) {
+            $qb->join('m.demande', 'd')->andWhere('d.annonce = :annonce')->setParameter('annonce', $annonce);
+        }
+
+        return $qb->getQuery()->getOneOrNullResult();
     }
 
     public function existe(string $messageId): bool

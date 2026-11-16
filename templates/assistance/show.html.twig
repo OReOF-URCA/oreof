@@ -13,16 +13,28 @@
     <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div class="space-y-4 lg:col-span-2">
             <div class="flex flex-wrap items-center gap-2 text-sm text-secondary-600 dark:text-secondary-300">
-                <twig:Badge :label="demande.statut.libelle" :variant="demande.statut.badgeVariant" />
-                <span>Demandeur : <strong class="text-text">{{ demande.demandeurNom ?? demande.demandeurEmail }}</strong>
-                    {% if demande.demandeurNom %}({{ demande.demandeurEmail }}){% endif %}</span>
+                {% if demande.annonce %}
+                    <twig:Badge label="Annonce" variant="info" icon="mdi:bullhorn-outline" />
+                    <span>Envoyée par <strong class="text-text">{{ demande.demandeurNom ?? demande.demandeurEmail }}</strong></span>
+                {% else %}
+                    <twig:Badge :label="demande.statut.libelle" :variant="demande.statut.badgeVariant" />
+                    <span>Demandeur : <strong class="text-text">{{ demande.demandeurNom ?? demande.demandeurEmail }}</strong>
+                        {% if demande.demandeurNom %}({{ demande.demandeurEmail }}){% endif %}</span>
+                {% endif %}
                 <span>· ouverte le {{ demande.created|date('d/m/Y') }}</span>
             </div>
+
+            {% if demande.annonce %}
+                <p class="rounded-lg border border-info-200 bg-info-50 p-3 text-sm text-info-800 dark:border-info-700 dark:bg-info-900/30 dark:text-info-200">
+                    Mail envoyé à de nombreux destinataires. Chaque usager qui y répond a sa propre demande.
+                </p>
+            {% endif %}
 
             {% for message in demande.messages %}
                 <twig:MessageAssistanceCard :message="message" />
             {% endfor %}
 
+            {% if not demande.annonce %}
             <section class="{{ panneau }}" id="assistance-reponse">
                 <h2 class="{{ titre_panneau }}">{{ ux_icon('icon:mail', {class: 'h-4 w-4 text-primary-600'}) }} Répondre depuis oreof@univ-reims.fr</h2>
                 <form method="post" action="{{ path('app_assistance_repondre', {id: demande.id}) }}" class="space-y-3">
@@ -48,6 +60,7 @@
                     <p class="text-xs text-secondary-500 dark:text-secondary-400">Sans case cochée, la demande passe « en attente de l'usager ». Sa réponse la rouvrira.</p>
                 </form>
             </section>
+            {% endif %}
 
             <section class="{{ panneau }}" id="assistance-note">
                 <h2 class="{{ titre_panneau }}">{{ ux_icon('icon:pencil', {class: 'h-4 w-4 text-warning-600'}) }} Note interne</h2>

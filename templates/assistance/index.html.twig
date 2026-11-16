@@ -78,7 +78,13 @@
                                             {{ demande.demandeurNom ?? demande.demandeurEmail }}
                                             {% if demande.demandeurNom %}<span class="block text-xs text-secondary-500 dark:text-secondary-400">{{ demande.demandeurEmail }}</span>{% endif %}
                                         </td>
-                                        <td class="px-3 py-2"><twig:Badge :label="demande.statut.libelle" :variant="demande.statut.badgeVariant" size="sm" /></td>
+                                        <td class="px-3 py-2">
+                                            {% if demande.annonce %}
+                                                <twig:Badge label="Annonce" variant="info" size="sm" icon="mdi:bullhorn-outline" />
+                                            {% else %}
+                                                <twig:Badge :label="demande.statut.libelle" :variant="demande.statut.badgeVariant" size="sm" />
+                                            {% endif %}
+                                        </td>
                                         <td class="px-3 py-2 text-text">{{ demande.responsable ? demande.responsable.display : '—' }}</td>
                                         <td class="px-3 py-2 text-text">{{ demande.messages|length }}</td>
                                         <td class="px-3 py-2 whitespace-nowrap text-secondary-600 dark:text-secondary-300">{{ demande.dateDernierMessage|date('d/m/Y H:i') }}</td>

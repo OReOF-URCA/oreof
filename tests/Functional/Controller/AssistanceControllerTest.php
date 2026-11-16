@@ -204,6 +204,56 @@ class AssistanceControllerTest extends WebTestCase
         self::assertStringContainsString('attachment', (string) $this->client->getResponse()->headers->get('content-disposition'));
     }
 
+    public function testAnnonceNeProposePasDeRepondre(): void
+    {
+        $demande = $this->demande('Annonce assistance')->setAnnonce(true);
+        $this->em->flush();
+        $this->connecterAdmin();
+        $url = '/administration/assistance/' . $demande->getId();
+
+        $crawler = $this->client->request('GET', $url);
+
+        self::assertResponseIsSuccessful();
+        self::assertCount(0, $crawler->filter('form[action$="/repondre"]'));
+        self::assertStringContainsString('Annonce', $crawler->filter('main')->text());
+
+        $this->client->request('POST', $url . '/repondre', [
+            'destinataires' => 'usager-assistance@univ-test.fr',
+            'corps' => 'Réponse à tous',
+            '_token' => $this->jeton($url, '/note'),
+        ]);
+        self::assertEmailCount(0);
+    }
+
+    public function testDestinatairesNombreuxSontRaccourcis(): void
+    {
+        $demande = $this->demande('Destinataires assistance');
+        $demande->getMessages()->first()->setDestinataires(array_map(static fn (int $i) => sprintf('d%d@univ-test.fr', $i), range(1, 20)));
+        $this->em->flush();
+        $this->connecterAdmin();
+
+        $crawler = $this->client->request('GET', '/administration/assistance/' . $demande->getId());
+
+        self::assertStringContainsString('et 15 autres', $crawler->text());
+        self::assertCount(1, $crawler->filter('details:contains("d20@univ-test.fr")'));
+    }
+
+    public function testHistoriqueCiteEstReplie(): void
+    {
+        $demande = $this->demande('Historique assistance');
+        $demande->getMessages()->first()->setCorpsHtml('<p>Merci pour la correction.</p><p>Le 12/11/2026 à 17:58, Emeline a écrit :</p><blockquote><p>Ancien message cité</p></blockquote>');
+        $this->em->flush();
+        $this->connecterAdmin();
+
+        $crawler = $this->client->request('GET', '/administration/assistance/' . $demande->getId());
+
+        $historique = $crawler->filter('details.assistance-historique');
+        self::assertCount(1, $historique);
+        self::assertStringContainsString('Ancien message cité', $historique->text());
+        self::assertStringNotContainsString('Merci pour la correction', $historique->text());
+        self::assertStringContainsString('Merci pour la correction', $crawler->text());
+    }
+
     public function testRepondreEnvoieLeMailEtEnregistreLaReponse(): void
     {
         $demande = $this->demande('Réponse assistance');

@@ -36,6 +36,10 @@ class ReponseAssistance
      */
     public function repondre(DemandeAssistance $demande, User $auteur, string $corpsHtml, array $destinataires, bool $resoudre = false): MessageAssistance
     {
+        if ($demande->isAnnonce()) {
+            throw new InvalidArgumentException('On ne répond pas à une annonce : répondez depuis la demande de l\'usager.');
+        }
+
         $destinataires = array_values(array_unique(array_filter(
             array_map(static fn (string $email) => mb_strtolower(trim($email)), $destinataires),
             static fn (string $email) => filter_var($email, FILTER_VALIDATE_EMAIL) !== false

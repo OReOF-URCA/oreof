@@ -31,6 +31,11 @@ class IntegrationMailAssistance
 {
     public const FENETRE_SUJET_JOURS = 30;
 
+    /**
+     * Au-delà de ce nombre de destinataires, un mail de l'équipe est une annonce (mail de masse).
+     */
+    public const SEUIL_ANNONCE = 10;
+
     public function __construct(
         private readonly ManagerRegistry $doctrine,
         private readonly DemandeAssistanceRepository $demandeRepository,
@@ -82,8 +87,9 @@ class IntegrationMailAssistance
         }
 
         $sens = $this->estEquipe($mail->expediteurEmail) ? SensMessageAssistanceEnum::SORTANT : SensMessageAssistanceEnum::ENTRANT;
+        $annonce = $sens === SensMessageAssistanceEnum::SORTANT && count($mail->destinataires) > self::SEUIL_ANNONCE;
         $sujetNormalise = $this->sujetNormaliseur->normaliser($mail->sujet);
-        $demande = $this->trouverDemande($mail, $sujetNormalise) ?? $this->nouvelleDemande($mail, $sujetNormalise);
+        $demande = $this->trouverDemande($mail, $sujetNormalise, $annonce) ?? $this->nouvelleDemande($mail, $sujetNormalise, $annonce);
 
         $message = (new MessageAssistance())
             ->setSens($sens)
@@ -145,37 +151,56 @@ class IntegrationMailAssistance
         return $message;
     }
 
-    private function trouverDemande(MailEntrant $mail, string $sujetNormalise): ?DemandeAssistance
+    private function trouverDemande(MailEntrant $mail, string $sujetNormalise, bool $annonce): ?DemandeAssistance
     {
-        $parent = $this->messageRepository->findOneByMessageIds([$mail->inReplyTo, ...$mail->references]);
+        $ids = [$mail->inReplyTo, ...$mail->references];
+
+        if ($annonce) {
+            // une annonce ne rejoint qu'une autre annonce du même fil
+            return $this->messageRepository->findOneByMessageIds($ids, true)?->getDemande();
+        }
+
+        $parent = $this->messageRepository->findOneByMessageIds($ids, false);
         if ($parent !== null) {
             return $parent->getDemande();
         }
 
-        return $this->demandeRepository->findRecenteParSujet(
-            $sujetNormalise,
-            $mail->date->modify(sprintf('-%d days', self::FENETRE_SUJET_JOURS))
-        );
+        $depuis = $mail->date->modify(sprintf('-%d days', self::FENETRE_SUJET_JOURS));
+        if ($this->messageRepository->findOneByMessageIds($ids, true) !== null) {
+            // réponse à une annonce : une demande par usager
+            return $this->demandeRepository->findRecenteParSujet($sujetNormalise, $depuis, $this->interlocuteur($mail)[0]);
+        }
+
+        return $this->demandeRepository->findRecenteParSujet($sujetNormalise, $depuis);
     }
 
-    private function nouvelleDemande(MailEntrant $mail, string $sujetNormalise): DemandeAssistance
+    /**
+     * Usager concerné par le mail : l'expéditeur, ou pour un mail de l'équipe le premier destinataire extérieur.
+     *
+     * @return array{0: string, 1: ?string} email et nom
+     */
+    private function interlocuteur(MailEntrant $mail): array
     {
-        $demandeurEmail = $mail->expediteurEmail;
-        $demandeurNom = $mail->expediteurNom;
-        if ($this->estEquipe($demandeurEmail)) {
-            // mail initié par l'équipe : le demandeur est le premier destinataire extérieur
-            foreach ($mail->destinataires as $destinataire) {
-                if (!$this->estEquipe($destinataire)) {
-                    $demandeurEmail = $destinataire;
-                    $demandeurNom = null;
-                    break;
-                }
+        if (!$this->estEquipe($mail->expediteurEmail)) {
+            return [$mail->expediteurEmail, $mail->expediteurNom];
+        }
+        foreach ($mail->destinataires as $destinataire) {
+            if (!$this->estEquipe($destinataire)) {
+                return [$destinataire, null];
             }
         }
 
+        return [$mail->expediteurEmail, $mail->expediteurNom];
+    }
+
+    private function nouvelleDemande(MailEntrant $mail, string $sujetNormalise, bool $annonce): DemandeAssistance
+    {
+        [$demandeurEmail, $demandeurNom] = $annonce ? [$mail->expediteurEmail, $mail->expediteurNom] : $this->interlocuteur($mail);
+
         return (new DemandeAssistance())
-            // rebond ou réponse automatique hors de tout échange connu : rien à traiter
-            ->setStatut($mail->automatique ? StatutDemandeAssistanceEnum::RESOLUE : StatutDemandeAssistanceEnum::NOUVELLE)
+            ->setAnnonce($annonce)
+            // annonce, rebond ou réponse automatique hors de tout échange connu : rien à traiter
+            ->setStatut($annonce || $mail->automatique ? StatutDemandeAssistanceEnum::RESOLUE : StatutDemandeAssistanceEnum::NOUVELLE)
             ->setSujet($mail->sujet !== '' ? $mail->sujet : '(sans sujet)')
             ->setSujetNormalise($sujetNormalise)
             ->setDemandeurEmail($demandeurEmail)

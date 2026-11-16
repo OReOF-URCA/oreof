@@ -23,21 +23,26 @@ class DemandeAssistanceRepository extends ServiceEntityRepository
     /**
      * Demande la plus récente portant ce sujet normalisé et active depuis $depuis.
      */
-    public function findRecenteParSujet(string $sujetNormalise, DateTimeImmutable $depuis): ?DemandeAssistance
+    public function findRecenteParSujet(string $sujetNormalise, DateTimeImmutable $depuis, ?string $demandeurEmail = null): ?DemandeAssistance
     {
         if ($sujetNormalise === '') {
             return null;
         }
 
-        return $this->createQueryBuilder('d')
+        $qb = $this->createQueryBuilder('d')
             ->where('d.sujetNormalise = :sujet')
             ->andWhere('d.dateDernierMessage >= :depuis')
+            ->andWhere('d.annonce = false')
             ->setParameter('sujet', $sujetNormalise)
             ->setParameter('depuis', $depuis)
             ->orderBy('d.dateDernierMessage', 'DESC')
-            ->setMaxResults(1)
-            ->getQuery()
-            ->getOneOrNullResult();
+            ->setMaxResults(1);
+
+        if ($demandeurEmail !== null) {
+            $qb->andWhere('d.demandeurEmail = :demandeur')->setParameter('demandeur', mb_strtolower($demandeurEmail));
+        }
+
+        return $qb->getQuery()->getOneOrNullResult();
     }
 
     /**

@@ -35,6 +35,11 @@ responsable, des notes internes, et affiche le contexte ORéOF du demandeur. Acc
    (sujet commençant par `[ORéOF]`) sont traitées de même, sauf les signalements de bug `[ORéOF][Bug] …` (vraies
    demandes) ; une réponse « Re: [ORéOF] … » d'un usager rouvre la demande.
    Un mail dont l'expéditeur est `oreof@` ou un `ROLE_ADMIN` est classé « Réponse envoyée ».
+   **Annonces** : un mail de l'équipe à plus de 10 destinataires (`IntegrationMailAssistance::SEUIL_ANNONCE`, To + Cc)
+   est une annonce (`DemandeAssistance::$annonce`, statut « Résolue », badge « Annonce », pas de formulaire de
+   réponse). Elle ne rejoint qu'une autre annonce du même fil, et le regroupement par fil l'ignore : chaque usager qui
+   y répond a sa propre demande (l'usager = l'expéditeur, ou pour un mail de l'équipe le premier destinataire
+   extérieur), retrouvée ensuite par fil ou par sujet + usager.
 3. **Stockage** : HTML nettoyé à l'enregistrement par le sanitizer `assistance_sanitizer` (pas de script, pas d'image
    ni média, liens `https`/`mailto` seulement, entrée jusqu'à 2 Mo : la limite Symfony par défaut de 20 000 caractères
    couperait les mails Outlook) ; identifiants de mail de plus de 255 caractères remplacés par leur empreinte ; pièces jointes sous `var/assistance/AAAA/MM/<aléatoire>`, servies par
@@ -55,6 +60,11 @@ responsable, des notes internes, et affiche le contexte ORéOF du demandeur. Acc
 | `app_assistance_{statut,responsable,note,rattacher,fusionner,repondre}` | POST, jeton CSRF `assistance_<id>` |
 | `app_assistance_relever` | POST, jeton `assistance_relever` |
 
+Affichage d'un message (`MessageAssistanceCard`) : l'historique cité (« Le … a écrit : », en-têtes Outlook
+« De : … Envoyé : », `blockquote`, `gmail_quote`, message transféré, lignes `>`) est replié derrière « Afficher
+l'historique » (`SeparateurCitation` ; les deux parties du HTML repassent par le sanitizer) ; au-delà de 5
+destinataires, la liste est repliée (« et N autres »).
+
 Fusion : les messages vont sur la demande la plus ancienne, l'autre est supprimée. Assigner un responsable à une
 demande « Nouvelle » la passe « En cours ».
 
@@ -64,6 +74,8 @@ Variables (`.env` : valeurs vides ; renseigner dans `.env.local` ou l'environnem
 versionné) : `ASSISTANCE_IMAP_HOST` (vide = relève désactivée), `ASSISTANCE_IMAP_PORT` (993),
 `ASSISTANCE_IMAP_ENCRYPTION` (`ssl`), `ASSISTANCE_IMAP_USER`, `ASSISTANCE_IMAP_PASSWORD`, `ASSISTANCE_IMAP_FOLDER`
 (`INBOX`). Utiliser une **boîte dédiée** (ex. boîte fonctionnelle `oreof@`), jamais une boîte personnelle.
+URCA : hôte `imaps.univ-reims.fr` (le certificat ne couvre pas `mail.univ-reims.fr`), dossiers préfixés `INBOX.`
+(ex. `INBOX.OREOF` pour un dossier alimenté par un filtre Roundcube sur `oreof@univ-reims.fr`).
 
 ## Import d'historique et tests
 
@@ -76,3 +88,6 @@ les mails → « Plus » → « Télécharger (.eml) »). Fixtures : `tests/Fixt
 - Une réponse envoyée depuis un webmail n'apparaît que si `oreof@` est en copie.
 - Le rattachement à une formation/un parcours est manuel.
 - Les images intégrées aux mails ne sont pas affichées (supprimées au nettoyage).
+- Une annonce envoyée en copie cachée (Cci) n'est pas reconnue : les destinataires cachés ne figurent pas dans le mail.
+- Un usager mis en copie d'une réponse de l'équipe et qui poursuit le fil rejoint la demande d'origine ; il n'existe
+  pas d'action pour séparer une demande.

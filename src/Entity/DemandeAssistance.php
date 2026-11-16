@@ -32,6 +32,12 @@ class DemandeAssistance
     #[ORM\Column(length: 30, enumType: StatutDemandeAssistanceEnum::class)]
     private StatutDemandeAssistanceEnum $statut = StatutDemandeAssistanceEnum::NOUVELLE;
 
+    /**
+     * Mail de masse envoyé par l'équipe : pas une demande à traiter, chaque réponse d'usager ouvre sa propre demande.
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $annonce = false;
+
     #[ORM\Column(length: 180)]
     private string $demandeurEmail = '';
 
@@ -111,6 +117,18 @@ class DemandeAssistance
     public function setStatut(StatutDemandeAssistanceEnum $statut): static
     {
         $this->statut = $statut;
+
+        return $this;
+    }
+
+    public function isAnnonce(): bool
+    {
+        return $this->annonce;
+    }
+
+    public function setAnnonce(bool $annonce): static
+    {
+        $this->annonce = $annonce;
 
         return $this;
     }
