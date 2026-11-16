@@ -211,6 +211,67 @@ class IntegrationMailAssistanceTest extends TestCase
         self::assertSame(StatutDemandeAssistanceEnum::EN_COURS, $demande->getStatut());
     }
 
+    private function admin(string $identifiant): \App\Entity\User
+    {
+        $admin = new \App\Entity\User();
+        $admin->setUsername($identifiant);
+        $admin->setEmail($identifiant . '@univ-reims.fr');
+        $admin->setNom('Admin');
+        $admin->setPrenom($identifiant);
+        $admin->setRoles(['ROLE_ADMIN']);
+        $this->persist($admin);
+
+        return $admin;
+    }
+
+    private function reponseWebmail(string $expediteur, string $id): MailEntrant
+    {
+        return new MailEntrant(
+            messageId: '<' . $id . '@univ-reims.fr>',
+            inReplyTo: '<demande-geotp-1@univ-test.fr>',
+            references: ['<demande-geotp-1@univ-test.fr>'],
+            expediteurEmail: $expediteur,
+            expediteurNom: null,
+            destinataires: ['catalin.popa@univ-test.fr', 'oreof@univ-reims.fr'],
+            sujet: 'Re: Demande de mise à jour des informations du parcours LP GEOTP',
+            corpsTexte: 'Bonjour, c\'est fait.',
+            corpsHtml: null,
+            date: new DateTimeImmutable('2026-11-13 12:00'),
+            automatique: false,
+        );
+    }
+
+    public function testReponseDUnAdminDepuisLeWebmailLuiAttribueLaDemande(): void
+    {
+        $demande = $this->integration->integrer($this->mail('01'))->getDemande();
+        $admin = $this->admin('emeline-webmail');
+
+        $this->integration->integrer($this->reponseWebmail('emeline-webmail@univ-reims.fr', 'webmail-1'));
+
+        self::assertSame($admin, $demande->getResponsable());
+    }
+
+    public function testReponseDepuisLAdresseGeneriqueNAttribuePas(): void
+    {
+        $demande = $this->integration->integrer($this->mail('01'))->getDemande();
+
+        $this->integration->integrer($this->reponseWebmail('oreof@univ-reims.fr', 'webmail-2'));
+
+        self::assertNull($demande->getResponsable());
+    }
+
+    public function testReponseWebmailNeRemplacePasLeResponsable(): void
+    {
+        $demande = $this->integration->integrer($this->mail('01'))->getDemande();
+        $responsable = $this->admin('responsable-webmail');
+        $demande->setResponsable($responsable);
+        $this->admin('autre-webmail');
+
+        $this->integration->integrer($this->reponseWebmail('autre-webmail@univ-reims.fr', 'webmail-3'));
+
+        self::assertSame($responsable, $demande->getResponsable());
+    }
+
     public function testSignalementRelayeParLApplicationVientDeLUsager(): void
     {
         $message = $this->integration->integrer($this->mail('09'));

@@ -131,6 +131,14 @@ class IntegrationMailAssistance
 
         $demande->addMessage($message);
 
+        // réponse d'un membre de l'équipe (ex. depuis le webmail, oreof@ en copie) : il prend la demande si personne
+        // ne l'a ; l'adresse générique oreof@ ne désigne personne
+        $auteur = $message->getAuteur();
+        if ($sens === SensMessageAssistanceEnum::SORTANT && $auteur !== null && !$demande->isAnnonce()
+            && $demande->getResponsable() === null && $mail->expediteurEmail !== mb_strtolower(Mailer::MAIL_GENERIC)) {
+            $demande->setResponsable($auteur);
+        }
+
         if ($sens === SensMessageAssistanceEnum::ENTRANT && !$mail->automatique
             && in_array($demande->getStatut(), [StatutDemandeAssistanceEnum::RESOLUE, StatutDemandeAssistanceEnum::EN_ATTENTE_USAGER], true)) {
             $demande->setStatut(StatutDemandeAssistanceEnum::EN_COURS);

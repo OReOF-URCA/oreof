@@ -34,6 +34,8 @@ responsable, des notes internes, et affiche le contexte ORéOF du demandeur. Acc
    hors de tout échange connu, ils créent une demande directement « Résolue ». Les notifications de l'application
    (sujet commençant par `[ORéOF]`) sont traitées de même, sauf les signalements de bug `[ORéOF][Bug] …` (vraies
    demandes) ; une réponse « Re: [ORéOF] … » d'un usager rouvre la demande.
+   Une réponse importée envoyée par un `ROLE_ADMIN` sous sa propre adresse (webmail, `oreof@` en copie) lui attribue
+   la demande si elle n'a pas de responsable ; envoyée sous l'adresse générique `oreof@`, elle ne désigne personne.
    Un mail dont l'expéditeur est `oreof@` ou un `ROLE_ADMIN` est classé « Réponse envoyée », sauf s'il porte un
    `Reply-To` extérieur à l'équipe : c'est alors un mail envoyé par l'application pour le compte d'un usager (ex.
    formulaire « Signaler un bug », `BugReportController`), attribué à l'adresse du `Reply-To` (message reçu, demandeur,
