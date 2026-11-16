@@ -17,7 +17,7 @@
     </div>
     {% for ordre, semestre in semestresActifs %}
         {% set diffSemestre = diffStructure is defined and diffStructure != null ? diffStructure.semestres[ordre] : null %}
-        {{ include('typeDiplome/licence/structure/v2/_structure_semestre.html.twig') }}
+        {{ include('typeDiplome/default/structure/v2/_structure_semestre.html.twig') }}
     {% else %}
         {{ include('_ui/_empty_table.html.twig', {
             message: "Aucun semestre n'est défini pour l'année "~ displayAnnee

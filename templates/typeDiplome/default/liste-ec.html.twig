@@ -25,9 +25,9 @@
 
 
                 {% for ue in semestre.ues %}
-                    {{ include('typeDiplome/licence/liste-ec/_ue.html.twig', {isSemestreRaccroche: semestre.raccroche}) }}
+                    {{ include('typeDiplome/default/liste-ec/_ue.html.twig', {isSemestreRaccroche: semestre.raccroche}) }}
                     {% for uee in ue.uesEnfants %}
-                        {{ include('typeDiplome/licence/liste-ec/_ue.html.twig', {ue:uee, isSemestreRaccroche: semestre.raccroche}) }}
+                        {{ include('typeDiplome/default/liste-ec/_ue.html.twig', {ue:uee, isSemestreRaccroche: semestre.raccroche}) }}
                     {% endfor %}
                 {% endfor %}
 

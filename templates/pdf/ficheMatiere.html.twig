@@ -166,7 +166,7 @@
     <div class="col-12 mt-2">
         <h2>MCCC pour le parcours</h2>
         {% if templateFormMccc matches '/^licence/' %}
-            {{ include('typeDiplome/licence/mccc-non-editable/_show.html.twig',
+            {{ include('typeDiplome/default/mccc-non-editable/_show.html.twig',
                     {
                         mcccs: mcccPdf,
                         hasDisplayComparaison: 'false'

@@ -63,7 +63,7 @@
                     </td>
                 </tr>
             </tbody>
-            {% include 'typeDiplome/licence/structure/v2/_structure_ue_tfoot.html.twig' %}
+            {% include 'typeDiplome/default/structure/v2/_structure_ue_tfoot.html.twig' %}
         </table>
     </div>
 
@@ -73,7 +73,7 @@
     <div class="space-y-4 p-4 bg-secondary-50/30 dark:bg-secondary-900/20">
         {% for ueE in ue.uesEnfants %}
             <div class="overflow-hidden rounded-xl border border-secondary-200 bg-surface shadow-2xs dark:border-secondary-700">
-                {{ include('typeDiplome/licence/structure/v2/_structure_ue.html.twig', {
+                {{ include('typeDiplome/default/structure/v2/_structure_ue.html.twig', {
                     ue: ueE,
                     enfant: true,
                     diffUe: diffUe.uesEnfants[loop.index0] ?? null
@@ -85,7 +85,7 @@
     {# Total de l'UE parente dans son propre tableau #}
     <div class="overflow-x-auto">
         <table class="w-full border-collapse text-left text-sm">
-            {% include 'typeDiplome/licence/structure/v2/_structure_ue_tfoot.html.twig' %}
+            {% include 'typeDiplome/default/structure/v2/_structure_ue_tfoot.html.twig' %}
         </table>
     </div>
 
@@ -128,7 +128,7 @@
             <tbody class="divide-y divide-secondary-100 dark:divide-secondary-800/70">
                 {% for ordEc, ec in ue.elementConstitutifs %}
                     {% set indexEc = loop.index0 %}
-                    {{ include('typeDiplome/licence/structure/v2/_structure_ec.html.twig', {
+                    {{ include('typeDiplome/default/structure/v2/_structure_ec.html.twig', {
                         ec: ec,
                         semestreOrdre: semestreOrdre,
                         ecEnfant: false,
@@ -141,7 +141,7 @@
                     }) }}
                     {% for ordEce, ece in ec.elementsConstitutifsEnfants %}
                         {% set indexEcEnfant = loop.index0 %}
-                        {{ include('typeDiplome/licence/structure/v2/_structure_ec.html.twig', {
+                        {{ include('typeDiplome/default/structure/v2/_structure_ec.html.twig', {
                             ec: ece,
                             semestreOrdre: semestreOrdre,
                             ecEnfant: true,
@@ -156,7 +156,7 @@
                 {% endfor %}
             </tbody>
 
-            {% include 'typeDiplome/licence/structure/v2/_structure_ue_tfoot.html.twig' %}
+            {% include 'typeDiplome/default/structure/v2/_structure_ue_tfoot.html.twig' %}
         </table>
     </div>
 

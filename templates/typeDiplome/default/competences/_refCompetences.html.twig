@@ -2,7 +2,7 @@
         id="bloc-competences"
         class="space-y-3" {{ stimulus_controller('sortable-competences') }}>
     {% for blocCompetence in competences %}
-        {{ include('typeDiplome/licence/competences/_blocCompetences.html.twig', {blocCompetence: blocCompetence, parcours: parcours}) }}
+        {{ include('typeDiplome/default/competences/_blocCompetences.html.twig', {blocCompetence: blocCompetence, parcours: parcours}) }}
 
         {# Ajouter un bloc après chaque bloc existant #}
         {% if not loop.last %}

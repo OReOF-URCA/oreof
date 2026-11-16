@@ -1,4 +1,4 @@
-{% import 'typeDiplome/licence/mccc/_form_fields.html.twig' as fields %}
+{% import 'typeDiplome/default/mccc/_form_fields.html.twig' as fields %}
 
 <h3 class="mb-3 text-lg font-semibold text-secondary-900">1ᵉ Session</h3>
 <input type="hidden" value="cc" name="type_cc">
@@ -42,12 +42,12 @@
 <div id="epreuves_s2_ct" class="space-y-3">
     {% if mcccs[2]['et'] is defined %}
         {% for i in 1..mcccs[2]['et']|length %}
-            {{ include('typeDiplome/licence/mccc/_secondeChance.html.twig', {index:i}) }}
+            {{ include('typeDiplome/default/mccc/_secondeChance.html.twig', {index:i}) }}
         {% else %}
-            {{ include('typeDiplome/licence/mccc/_secondeChance.html.twig',{index:1}) }}
+            {{ include('typeDiplome/default/mccc/_secondeChance.html.twig',{index:1}) }}
         {% endfor %}
     {% else %}
-        {{ include('typeDiplome/licence/mccc/_secondeChance.html.twig',{index:1}) }}
+        {{ include('typeDiplome/default/mccc/_secondeChance.html.twig',{index:1}) }}
     {% endif %}
 </div>
 

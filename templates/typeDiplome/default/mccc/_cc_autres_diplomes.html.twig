@@ -1,11 +1,11 @@
 <h3 class="mb-3 text-lg font-semibold text-secondary-900">1ᵉ Session</h3>
 <input type="hidden" value="cc_autre" name="type_cc">
 <div id="epreuves_cc_autre" class="space-y-3">
-    {{ include('typeDiplome/licence/mccc/_epreuveCc.html.twig', {index: 1, btn: false}) }}
-    {{ include('typeDiplome/licence/mccc/_epreuveCc.html.twig', {index: 2, btn:false}) }}
+    {{ include('typeDiplome/default/mccc/_epreuveCc.html.twig', {index: 1, btn: false}) }}
+    {{ include('typeDiplome/default/mccc/_epreuveCc.html.twig', {index: 2, btn:false}) }}
     {% if mcccs[1]['cc'] is defined and mcccs[1]['cc']|length > 2 %}
         {% for i in 3..mcccs[1]['cc']|length %}
-            {{ include('typeDiplome/licence/mccc/_epreuveCc.html.twig', {index: i, btn: true}) }}
+            {{ include('typeDiplome/default/mccc/_epreuveCc.html.twig', {index: i, btn: true}) }}
         {% endfor %}
     {% endif %}
 </div>
@@ -22,12 +22,12 @@
 <div id="epreuves_s2_ct" class="space-y-3">
     {% if mcccs[2]['et'] is defined %}
         {% for i in 1..mcccs[2]['et']|length %}
-            {{ include('typeDiplome/licence/mccc/_secondeChance.html.twig', {index:i}) }}
+            {{ include('typeDiplome/default/mccc/_secondeChance.html.twig', {index:i}) }}
         {% else %}
-            {{ include('typeDiplome/licence/mccc/_secondeChance.html.twig',{index:1}) }}
+            {{ include('typeDiplome/default/mccc/_secondeChance.html.twig',{index:1}) }}
         {% endfor %}
     {% else %}
-        {{ include('typeDiplome/licence/mccc/_secondeChance.html.twig',{index:1}) }}
+        {{ include('typeDiplome/default/mccc/_secondeChance.html.twig',{index:1}) }}
     {% endif %}
 </div>
 

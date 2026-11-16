@@ -98,7 +98,7 @@
                 </tr>
 
                 {% for ordUe, ue in semestre.ues %}
-                    {{ include('typeDiplome/licence/structure/_structureUe.html.twig', {
+                    {{ include('typeDiplome/default/structure/_structureUe.html.twig', {
                         semestreOrdre:ordre,
                         enfant: false,
                         diffUe: diffSemestre != null ? diffSemestre.ues[ordUe] : null,

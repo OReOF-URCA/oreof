@@ -1,4 +1,4 @@
-{% import "typeDiplome/mccc-non-editable/licence/_compareMcccVersioning.macro.html.twig" as compareMccc %}
+{% import "typeDiplome/default/mccc-non-editable/_compareMcccVersioning.macro.html.twig" as compareMccc %}
 
 {% if hasChangedTypeMccc is not defined %}
     {% set hasChangedTypeMccc = false %}
@@ -67,7 +67,7 @@
 <h3>2ᵉ Session</h3>
 <div>
     {% if mcccs[2]['et'] is defined %}
-        {{ include('typeDiplome/mccc-non-editable/licence/_secondeChance.html.twig',
+        {{ include('typeDiplome/default/mccc-non-editable/_secondeChance.html.twig',
             {
                 mcccs:mcccs[2]['et'],
                 mcccVersioning: mcccVersioning[2]['et'] ?? ""
