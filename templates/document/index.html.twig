@@ -1,5 +1,19 @@
 {% extends 'base.html.twig' %}
 
+{% block bouton_header %}
+    {% if is_granted('ROLE_ADMIN') %}
+        <form method="post" action="{{ path('app_document_upload') }}" enctype="multipart/form-data"
+              {{ stimulus_controller('document-upload') }}>
+            <input type="hidden" name="_token" value="{{ csrf_token('document_upload') }}">
+            <input type="file" name="document" class="sr-only" tabindex="-1" aria-hidden="true"
+                   accept="{{ upload_extensions }}"
+                   data-document-upload-target="input" data-action="change->document-upload#submit">
+            <twig:Button type="button" variant="primary" :soft="false" icon="icon:upload" label="Téléverser un document"
+                         dataAction="click->document-upload#pick" />
+        </form>
+    {% endif %}
+{% endblock %}
+
 {% block content %}
     <div class="space-y-10">
         {% for section in sections %}
@@ -17,7 +31,23 @@
                             meta="{{ item.meta }}"
                             href="{{ asset('docs/' ~ item.file|url_encode) }}"
                             type="{{ item.type }}"
-                        />
+                            previewUrl="{{ asset('docs/' ~ item.file|url_encode) }}"
+                        >
+                            <twig:block name="actions">
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <twig:DeleteButton
+                                    id="doc-{{ item.id }}"
+                                    url="{{ path('app_document_delete') }}"
+                                    csrfTokenId="document_delete"
+                                    size="md"
+                                    :hiddenFields="{ file: item.file }"
+                                    tooltip="Supprimer"
+                                    title="Supprimer le document"
+                                    message="Supprimer définitivement « {{ item.file }} » ? Cette action est irréversible."
+                                />
+                            {% endif %}
+                            </twig:block>
+                        </twig:DownloadCard>
                     {% endfor %}
                 </div>
             </section>
