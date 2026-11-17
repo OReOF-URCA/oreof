@@ -18,14 +18,12 @@ export default class extends Controller {
       }
 
       this.element.querySelectorAll('trix-editor').forEach(editor => {
-          editor.addEventListener('trix-change', this.onTrixEvent)
           editor.addEventListener('trix-blur', this.onTrixEvent)
       })
   }
 
     disconnect() {
         this.element.querySelectorAll('trix-editor').forEach(editor => {
-            editor.removeEventListener('trix-change', this.onTrixEvent)
             editor.removeEventListener('trix-blur', this.onTrixEvent)
         })
 
