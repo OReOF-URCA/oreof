@@ -296,8 +296,15 @@ class Annee
     }
 
     /**
-     * @return list<\App\Enums\RegimeInscriptionEnum>
+     * Retourne uniquement les régimes directement enregistrés en BDD sur cette année.
+     *
+     * @return list<string>
      */
+    public function getDirectRegimeInscriptionValues(): array
+    {
+        return \App\Referentiel\RegimeInscription::normalize($this->regimeInscription ?? []);
+    }
+
     /**
      * @deprecated Returns only legacy enum cases and drops custom referential values.
      *             Use getRegimeInscriptionValues() for all new consumers.
@@ -305,29 +312,7 @@ class Annee
      */
     public function getRegimeInscription(): array
     {
-        if ($this->regimeInscription !== null && count($this->regimeInscription) === 0) {
-            if ($this->getParcours() !== null && count($this->getParcours()->getRegimeInscription()) !== 0) {
-                return array_values($this->getParcours()->getRegimeInscription());
-            }
-        }
-
-        if ($this->regimeInscription === null) {
-            return [];
-        }
-
-        $t = [];
-        foreach ($this->regimeInscription as $value) {
-            if ($value instanceof \App\Enums\RegimeInscriptionEnum) {
-                $t[] = $value;
-            } elseif (is_string($value)) {
-                $case = \App\Enums\RegimeInscriptionEnum::tryFrom($value);
-                if ($case !== null) {
-                    $t[] = $case;
-                }
-            }
-        }
-
-        return $t;
+        return \App\Referentiel\RegimeInscription::legacyCases($this->getRegimeInscriptionValues());
     }
 
     /**
@@ -335,14 +320,36 @@ class Annee
      */
     public function getRegimeInscriptionValues(): array
     {
-        $regimes = $this->getRegimeInscription();
-        return \App\Referentiel\RegimeInscription::normalize($this->regimeInscription ?: ($this->getParcours()?->getRegimeInscriptionValues() ?? []));
+        $direct = $this->getDirectRegimeInscriptionValues();
+        if ($direct !== []) {
+            return $direct;
+        }
+
+        // Fallback transition : si les années des campagnes précédentes ne sont pas complétées,
+        // on se base sur les valeurs en BDD du parcours ou de la formation parente.
+        $parcoursDirect = $this->getParcours()?->getDirectRegimeInscriptionValues() ?? [];
+        if ($parcoursDirect !== []) {
+            return $parcoursDirect;
+        }
+
+        return $this->getParcours()?->getFormation()?->getDirectRegimeInscriptionValues() ?? [];
     }
 
     public function hasRegimeInscription(string|\App\Enums\RegimeInscriptionEnum $regime): bool
     {
         $val = $regime instanceof \App\Enums\RegimeInscriptionEnum ? $regime->value : $regime;
         return in_array($val, $this->getRegimeInscriptionValues(), true);
+    }
+
+    public function isAlternance(): bool
+    {
+        foreach ($this->getRegimeInscriptionValues() as $val) {
+            if (\App\Referentiel\RegimeInscription::isAlternance($val)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

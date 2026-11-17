@@ -32,7 +32,7 @@
 
             <div class="{{ blockClass }}">
                 <dt class="{{ dtClass }}">Modalités de l'alternance</dt>
-                <dd class="{{ ddClass }}">{{ parcours.modalitesAlternance|raw }}</dd>
+                <dd class="{{ ddClass }}">{{ (parcours.displayModalitesAlternance|default(parcours.modalitesAlternance))|raw }}</dd>
             </div>
         </dl>
     </div>
