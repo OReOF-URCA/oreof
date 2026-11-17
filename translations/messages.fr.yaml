@@ -245,3 +245,18 @@ verifier.saisie.parcours.description: 'Synthèse des points de contrôle et éta
 
 validation.changeRf.valider.title: 'Valider la demande de changement de responsable'
 validation.changeRf.valider.subtitle: 'Vérifiez la demande, complétez les informations demandées puis enregistrez.'
+contact.labels.adresse.label: 'Adresse du contact'
+dpe_demande_texte.labels.argumentaireDemande: 'Argumentaire de la demande'
+parcours_duplication.labels.nouveauLibelle: 'Libellé du nouveau parcours'
+parcours_duplication.labels.nouveauSigle: 'Sigle du nouveau parcours'
+parcours_duplication.labels.dupliquerFichesMatieres: 'Dupliquer les fiches matières en fiches autonomes'
+parcours_duplication.labels.dupliquerContacts: 'Recopier les personnes contacts et leurs adresses'
+parcours_duplication.labels.conserverResponsables: 'Conserver le responsable et le co-responsable de parcours'
+referentiel.labels.libelle: 'Libellé'
+referentiel.labels.code: 'Code'
+referentiel.labels.administrable: "Administrable (modifiable depuis l'administration)"
+referentiel.labels.extensible: 'Extensible (ajout de valeurs autorisé)'
+referentiel_valeur.labels.code: 'Code'
+referentiel_valeur.labels.libelle: 'Libellé'
+referentiel_valeur.labels.ordre: "Ordre d'affichage"
+referentiel_valeur.labels.actif: 'Actif'
