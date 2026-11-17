@@ -58,6 +58,27 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
             icon: 'mdi:chart-bar',
             children: [
                 MenuItem::link(
+                    'pilotage.consulter_offre',
+                    'menu.admin.consulter_offre',
+                    'structure_composante_index',
+                    icon: 'mdi:book-search-outline',
+                )->inColumn('menu.admin.menu_offre'),
+
+                MenuItem::link(
+                    'pilotage.gestion_offre',
+                    'menu.admin.gestion_offre',
+                    'app_offre_index',
+                    icon: 'mdi:notebook-edit-outline',
+                )->inColumn('menu.admin.menu_offre'),
+
+                MenuItem::link(
+                    'pilotage.gestion_offre_etablissement',
+                    'menu.admin.gestion_offre_etablissement',
+                    'app_offre_etablissement_index',
+                    icon: 'mdi:school-outline',
+                )->inColumn('menu.admin.menu_offre'),
+
+                MenuItem::link(
                     'pilotage.tour_de_controle',
                     'menu.admin.tour_de_controle',
                     'app_admin_pilotage_campagne_index',
@@ -98,27 +119,6 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                     'app_validation_change_rf_index',
                     icon: 'mdi:account-check-outline',
                 )->inColumn('menu.admin.menu_validation'),
-
-                MenuItem::link(
-                    'pilotage.consulter_offre',
-                    'menu.admin.consulter_offre',
-                    'structure_composante_index',
-                    icon: 'mdi:book-search-outline',
-                )->inColumn('menu.admin.menu_offre'),
-
-                MenuItem::link(
-                    'pilotage.gestion_offre',
-                    'menu.admin.gestion_offre',
-                    'app_offre_index',
-                    icon: 'mdi:notebook-edit-outline',
-                )->inColumn('menu.admin.menu_offre'),
-
-                MenuItem::link(
-                    'pilotage.gestion_offre_etablissement',
-                    'menu.admin.gestion_offre_etablissement',
-                    'app_offre_etablissement_index',
-                    icon: 'mdi:school-outline',
-                )->inColumn('menu.admin.menu_offre'),
 
                 MenuItem::link(
                     'pilotage.controle_lheo',
