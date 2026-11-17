@@ -12,6 +12,14 @@ export default class extends Controller {
   static values = { url: String }
 
   async toggle () {
+      const autosaveForm = document.querySelector('[data-controller~="autosave"]')
+      if (autosaveForm) {
+          const autosaveController = this.application.getControllerForElementAndIdentifier(autosaveForm, 'autosave')
+          if (autosaveController && typeof autosaveController.savePendingFields === 'function') {
+              await autosaveController.savePendingFields()
+          }
+      }
+
     const formData = new FormData(this.element)
 
     const response = await fetch(this.urlValue, {

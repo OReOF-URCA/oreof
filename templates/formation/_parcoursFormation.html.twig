@@ -1,5 +1,5 @@
 <tr id="parcours_{{ formation.id }}" class="bg-secondary-100 dark:bg-secondary-800">
-    <td colspan="5" class="p-0">
+    <td colspan="6" class="p-0">
         <div class="border-l-4 border-info-400 bg-surface p-4 dark:border-info-300 dark:bg-surface">
             {% set nbParcoursTotal = formation.hasParcours ? formation.parcours|filter(parcours => parcours.formation.hasParcours)|length : (formation.parcours|length > 0 ? 1 : 0) %}
             {% set nbParcoursNonOuverts = 0 %}

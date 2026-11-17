@@ -10,6 +10,7 @@ use App\Entity\Ville;
 use App\Enums\CampagnePublicationTagEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Enums\TypeParcoursEnum;
+use App\Referentiel\NiveauFormation;
 use App\Repository\ElementConstitutifRepository;
 use App\TypeDiplome\TypeDiplomeResolver;
 use Doctrine\ORM\EntityManagerInterface;
@@ -86,7 +87,7 @@ class LheoXMLv2 extends LheoXML {
         // Niveau d'entree
         $niveauEntree = -1;
         if (($niveauVal = $parcours->getFormation()?->getNiveauEntreeValue()) !== null) {
-            $legacy = \App\Referentiel\NiveauFormation::legacyCase($niveauVal);
+            $legacy = NiveauFormation::legacyCase($niveauVal);
             $niveauEntree = $legacy !== null ? $legacy->value : (is_numeric($niveauVal) ? (int) $niveauVal : -1);
         }
 

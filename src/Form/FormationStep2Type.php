@@ -25,15 +25,15 @@ class FormationStep2Type extends AbstractType
         $builder
             ->add('objectifsFormation', TextareaAutoSaveType::class, [
                 'help' => '-',
-                'attr' => ['rows' => 10, 'maxlength' => 3000, 'data-action' => 'change->formation--step2#saveObjectifsFormation'],
+                'attr' => ['rows' => 10, 'maxlength' => 3000],
             ])
             ->add('resultatsAttendus', TextareaAutoSaveType::class, [
                 'help' => '-',
-                'attr' => ['rows' => 10, 'maxlength' => 3000, 'data-action' => 'change->formation--step2#saveResultats'],
+                'attr' => ['rows' => 10, 'maxlength' => 3000],
             ])
             ->add('contenuFormation', TextareaAutoSaveType::class, [
                 'help' => '-',
-                'attr' => ['rows' => 20, 'maxlength' => 3000, 'data-action' => 'change->formation--step2#saveContenu'],
+                'attr' => ['rows' => 20, 'maxlength' => 3000],
             ])
             ->add('rythmeFormation', EntityType::class, [
                 'placeholder' => 'Choisissez un rythme de formation ou complétez le champ ci-dessous',
@@ -41,14 +41,13 @@ class FormationStep2Type extends AbstractType
                 'help' => '-',
                 'class' => RythmeFormation::class,
                 'choice_label' => 'libelle',
-                'attr' => ['data-action' => 'change->formation--step2#changeRythme'],
             ])
 
 
             ->add('rythmeFormationTexte', TextareaAutoSaveType::class, [
                 'required' => false,
                 'help' => '-',
-                'attr' => ['rows' => 10, 'maxlength' => 3000, 'data-action' => 'change->formation--step2#saveRythme'],
+                'attr' => ['rows' => 10, 'maxlength' => 3000],
             ]);
     }
 

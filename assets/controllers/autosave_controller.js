@@ -6,40 +6,96 @@ export default class extends Controller {
   connect () {
     this.timer = null
     this.abort = null
-    this.lastTarget = null
+      this.pendingTargets = new Set()
 
-    const editors = this.element.querySelectorAll('trix-editor')
-    editors.forEach(editor => editor.addEventListener('trix-blur', this.queue.bind(this)))
+      this.onTrixEvent = (e) => {
+          const editor = e.target
+          const inputId = editor.getAttribute('input')
+          const input = inputId ? document.getElementById(inputId) : null
+          if (input) {
+              this.queue({target: input})
+          }
+      }
+
+      this.element.querySelectorAll('trix-editor').forEach(editor => {
+          editor.addEventListener('trix-change', this.onTrixEvent)
+          editor.addEventListener('trix-blur', this.onTrixEvent)
+      })
+  }
+
+    disconnect() {
+        this.element.querySelectorAll('trix-editor').forEach(editor => {
+            editor.removeEventListener('trix-change', this.onTrixEvent)
+            editor.removeEventListener('trix-blur', this.onTrixEvent)
+        })
+
+        if (this.timer) {
+            clearTimeout(this.timer)
+            this.timer = null
+            this.savePendingFields()
+        }
+    }
+
+    resolveTarget(el) {
+        if (!el) return null
+        if (el.tagName === 'TRIX-EDITOR') {
+            const inputId = el.getAttribute('input')
+            return inputId ? document.getElementById(inputId) : null
+        }
+        return el
   }
 
   queue (e) {
-    // on garde le dernier champ modifié
-    this.lastTarget = e.target
+      const target = this.resolveTarget(e.target)
+      if (!target || !target.name) return
+
+      if (!this.pendingTargets) this.pendingTargets = new Set()
+      this.pendingTargets.add(target)
 
     clearTimeout(this.timer)
-    this.timer = setTimeout(() => this.saveField(), 650)
+      this.timer = setTimeout(() => this.savePendingFields(), 650)
   }
 
-  async saveField () {
-    if (!this.lastTarget?.name) return
+    async savePendingFields() {
+        if (!this.pendingTargets || this.pendingTargets.size === 0) return
 
-    if (this.abort) this.abort.abort()
-    this.abort = new AbortController()
+        const targets = Array.from(this.pendingTargets)
+        this.pendingTargets.clear()
+
+        for (const target of targets) {
+            await this.saveTarget(target)
+        }
+    }
+
+    // Alias for backward compatibility
+  async saveField () {
+      return this.savePendingFields()
+  }
+
+    async saveTarget(target) {
+        if (!target?.name) return
 
     const fd = new FormData()
-    fd.append('field', this.lastTarget.name)
-    fd.append('value', this.fieldValue(this.lastTarget))
-    fd.append('_token', this.csrfToken()) // optionnel, selon ton choix CSRF
+        fd.append('field', target.name)
+        fd.append('value', this.fieldValue(target))
+        fd.append('_token', this.csrfToken())
 
-    const response = await fetch(this.urlValue, {
-      method: 'POST',
-      headers: { 'Accept': 'text/vnd.turbo-stream.html' },
-      body: fd,
-      signal: this.abort.signal,
-    })
+        try {
+            const response = await fetch(this.urlValue, {
+                method: 'POST',
+                headers: {'Accept': 'text/vnd.turbo-stream.html'},
+                body: fd,
+            })
 
-    const stream = await response.text()
-    Turbo.renderStreamMessage(stream)
+            if (response.ok) {
+                const stream = await response.text()
+                if (stream && stream.trim().startsWith('<turbo-stream')) {
+                    Turbo.renderStreamMessage(stream)
+                }
+            }
+        } catch (err) {
+            console.error('Autosave error:', err)
+        }
   }
 
   fieldValue (el) {
