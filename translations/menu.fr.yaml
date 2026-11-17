@@ -16,6 +16,10 @@ menu.admin.gestion_offre_etablissement: "Offre d'établissement"
 menu.admin.gestion_offre_old: "Gestion de l'offre et capacités"
 menu.admin.impersonation.user: "Impersonation d'un utilisateur"
 menu.admin.logs.applicatifs: "Logs de l'application"
+menu.admin.menu_offre: 'Offre de formation'
+menu.admin.menu_publication: 'Publication et export'
+menu.admin.menu_suivi: 'Suivi de campagne'
+menu.admin.menu_validation: Validation
 menu.admin.pilotage: Pilotage
 menu.admin.statistiques_offre: "Statistiques et synthèse de l'offre"
 menu.admin.tour_de_controle: 'Tour de contrôle & SLA'
