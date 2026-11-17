@@ -5,6 +5,7 @@ Composant DownloadCard — carte de téléchargement d'une ressource.
                      href="{{ asset('docs/aide-fiche-parcours.docx') }}"
                      type="word" />
   <twig:DownloadCard title="Statuts de l'association" href="#" type="pdf" meta="240 Ko" />
+  <twig:DownloadCard title="Guide" href="#" type="pdf" previewUrl="/docs/guide.pdf" />
   <twig:DownloadCard title="Site officiel" href="https://oreof.univ-reims.fr" type="link" />
 #}
 
@@ -23,7 +24,7 @@ Composant DownloadCard — carte de téléchargement d'une ressource.
         </div>
     </div>
 
-    <div class="mt-4 flex grow items-end border-t border-secondary-100 pt-4 dark:border-secondary-800">
+    <div class="mt-4 flex grow items-end gap-2 border-t border-secondary-100 pt-4 dark:border-secondary-800">
         <twig:Button
             :label="this.getResolvedCta()"
             :variant="variant"
@@ -33,5 +34,11 @@ Composant DownloadCard — carte de téléchargement d'une ressource.
             :target="target"
             rel="noopener"
         />
+        <div class="ml-auto flex items-center gap-2">
+            {% if previewUrl %}
+                <twig:DocumentPreview :url="previewUrl" :title="title" :type="type" />
+            {% endif %}
+            {% block actions %}{% endblock %}
+        </div>
     </div>
 </article>

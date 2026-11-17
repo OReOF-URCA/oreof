@@ -18,6 +18,8 @@ use Symfony\UX\TwigComponent\Attribute\AsTwigComponent;
  *       description="Aide à la rédaction v2 - fiche ec matière 2024-2028.docx"
  *       href="{{ asset('docs/aide-fiche-ec.docx') }}"
  *       type="word" />
+ *
+ * Aperçu : `previewUrl="..."` ajoute la loupe. Actions supplémentaires (ex. suppression) : bloc `actions` (<twig:block name="actions">).
  */
 #[AsTwigComponent('DownloadCard', template: 'components/_ui/download_card.html.twig')]
 final class DownloadCard
@@ -48,6 +50,9 @@ final class DownloadCard
 
     /** Attribut target du lien. */
     public string $target = '_blank';
+
+    /** Affiche la loupe d'aperçu (composant DocumentPreview) pointant sur cette URL. Optionnel. */
+    public ?string $previewUrl = null;
 
     /** Classes CSS supplémentaires sur la carte. */
     public string $extraClass = '';
