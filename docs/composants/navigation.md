@@ -34,7 +34,7 @@ Recherche : `NavigationSearchService`.
 | `label`, `description` | **toujours** une clé de traduction (`menu.droits.profils`), jamais un libellé en dur |
 | `icon` | nom UX Icons (`mdi:account`, `icon:*`) affiché dans les pages de section |
 | `position` | 10 Pilotage, 20 Conseils, 30 Droits, 90 Administration |
-| colonnes Administration | `menu.config.menu_etablissement`, `menu_config_globale`, `offre_formation`, `menu.menu_configuration`, `menu.config.menu_developpement` (outils techniques : stats de visites, logs, versioning JSON, styleguide, doc API) |
+| colonnes Administration | `menu.config.menu_etablissement`, `menu_config_globale`, `offre_formation`, `menu.menu_configuration`, `menu.config.menu_assistance` (aides, FAQ, tutoriels vidéo), `menu.config.menu_developpement` (outils techniques : stats de visites, logs, versioning JSON, styleguide, doc API) |
 
 ```php
 MenuItem::section(key: 'droits', label: 'menu.menu_droits', route: 'app_section_droits', children: [

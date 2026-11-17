@@ -51,6 +51,7 @@ menu.config.help: 'Configurations des aides'
 menu.config.langues: Langues
 menu.config.mentions: Mentions
 menu.config.menu_config_globale: 'Configuration globale'
+menu.config.menu_assistance: Assistance
 menu.config.menu_developpement: Développement
 menu.config.menu_etablissement: 'Configuration établissement'
 menu.config.nature_ue: 'Nature des UE/EC'
