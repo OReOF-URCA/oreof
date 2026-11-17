@@ -572,6 +572,10 @@ HTML;
             'informations-pratiques' => $this->cleanString($informationsPratiques),
             'admission' => $this->cleanString($admissionParcours),
             'formation-continue-et-apprentissage' => [],
+            'niveau-entree-code' => $parcours->getFormation()->getNiveauEntreeValue(),
+            'niveau-entree-libelle' => NiveauFormation::legacyCase($parcours->getFormation()->getNiveauEntreeValue())?->libelle() ?? "0",
+            'niveau-sortie-code' => $parcours->getFormation()->getNiveauSortieValue(),
+            'niveau-sortie-libelle' => NiveauFormation::legacyCase($parcours->getFormation()->getNiveauSortieValue())?->libelle() ?? "0",
         ];
 
         // Nouvelle balise extra - organisation pédagogique
