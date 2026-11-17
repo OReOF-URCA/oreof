@@ -100,6 +100,13 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 )->inColumn('menu.admin.menu_validation'),
 
                 MenuItem::link(
+                    'pilotage.consulter_offre',
+                    'menu.admin.consulter_offre',
+                    'structure_composante_index',
+                    icon: 'mdi:book-search-outline',
+                )->inColumn('menu.admin.menu_offre'),
+
+                MenuItem::link(
                     'pilotage.gestion_offre',
                     'menu.admin.gestion_offre',
                     'app_offre_index',

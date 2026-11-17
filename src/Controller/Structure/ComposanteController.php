@@ -9,7 +9,6 @@
 
 namespace App\Controller\Structure;
 
-use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\ComposanteRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,7 +18,6 @@ use Symfony\Component\Routing\Attribute\Route;
 class ComposanteController extends AbstractController
 {
     #[Route('/', name: 'index')]
-    #[Breadcrumb(menuKey: 'pilotage')]
     public function index(): Response
     {
         return $this->render('structure/composante/index.html.twig');
