@@ -16,6 +16,7 @@ use App\Entity\Formation;
 use App\Entity\User;
 use App\Entity\Ville;
 use App\Enums\RegimeInscriptionEnum;
+use App\Form\Type\RegimeInscriptionType;
 use App\Form\Type\TextareaAutoSaveType;
 use App\Repository\ComposanteRepository;
 use App\Repository\VilleRepository;
@@ -86,12 +87,18 @@ class FormationStep1Type extends AbstractType
                         ->orderBy('comp.libelle', 'ASC');
                 },
             ])
-            ->add('regimeInscription', \App\Form\Type\RegimeInscriptionType::class, [
+            ->add('regimeInscription', RegimeInscriptionType::class, [
                 'translation_domain' => 'form',
                 'getter' => static fn ($entity): array => $entity->getRegimeInscriptionValues(),
                 'setter' => static function ($entity, array $values): void { $entity->setRegimeInscription($values); },
                 'multiple' => true,
                 'expanded' => true,
+                'choice_attr' => function ($choice) {
+                    return [
+                        'data-conditional-field-target' => 'trigger',
+                        'data-action' => 'change->conditional-field#toggle',
+                    ];
+                },
             ])
             ->add('modalitesAlternance', TextareaAutoSaveType::class, [
                 'help' => 'Indiquez en 3000 caractères maximum les périodes et leurs durées en centre ou en entreprise.',

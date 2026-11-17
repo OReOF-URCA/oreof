@@ -98,10 +98,24 @@ final class FormationFieldUpdater extends AbstractFieldUpdater
                 );
             },
             'formation_step1[regimeInscription][]' => function (Formation $p, $v) {
-                $p->setRegimeInscription(\App\Referentiel\RegimeInscription::normalize($this->toArray($v)));
+                $regimes = \App\Referentiel\RegimeInscription::normalize($this->toArray($v));
+                $p->setRegimeInscription($regimes);
+                if ($p->isHasParcours() === false) {
+                    $premierParcours = $p->getParcours()->first();
+                    if ($premierParcours instanceof Parcours) {
+                        $premierParcours->setRegimeInscription($regimes);
+                    }
+                }
             },
             'formation_step1[modalitesAlternance]' => function (Formation $p, $v) {
-                $p->setModalitesAlternance($this->toString($v));
+                $texte = $this->toString($v);
+                $p->setModalitesAlternance($texte);
+                if ($p->isHasParcours() === false) {
+                    $premierParcours = $p->getParcours()->first();
+                    if ($premierParcours instanceof Parcours) {
+                        $premierParcours->setModalitesAlternance($texte);
+                    }
+                }
             },
             // ----------------- STEP 2 (presentation) -----------------
             // EnumType : si ton setter attend un enum, adapte via toEnum()

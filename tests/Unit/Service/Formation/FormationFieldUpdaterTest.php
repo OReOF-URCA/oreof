@@ -78,10 +78,19 @@ class FormationFieldUpdaterTest extends TestCase
     public function testApplyRegimeInscriptionWithJsonArray(): void
     {
         $formation = new Formation();
-        $json = json_encode(['Formation Initiale', 'Formation Continue']);
+        $formation->setHasParcours(false);
+        $parcours = new Parcours();
+        $formation->addParcour($parcours);
+
+        $json = json_encode(['Formation Initiale', 'Formation Initiale en apprentissage']);
 
         $this->updater->applyForTab($formation, 'localisation', 'formation_step1[regimeInscription][]', $json);
-        $this->assertSame(['Formation Initiale', 'Formation Continue'], $formation->getRegimeInscriptionValues());
+        $this->assertSame(['Formation Initiale', 'Formation Initiale en apprentissage'], $formation->getRegimeInscriptionValues());
+        $this->assertSame(['Formation Initiale', 'Formation Initiale en apprentissage'], $parcours->getRegimeInscriptionValues());
+
+        $this->updater->applyForTab($formation, 'localisation', 'formation_step1[modalitesAlternance]', '<p>2 semaines CFA / 2 semaines entreprise</p>');
+        $this->assertSame('<p>2 semaines CFA / 2 semaines entreprise</p>', $formation->getModalitesAlternance());
+        $this->assertSame('<p>2 semaines CFA / 2 semaines entreprise</p>', $parcours->getModalitesAlternance());
     }
 
     protected function setUp(): void
