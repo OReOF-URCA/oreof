@@ -15,15 +15,16 @@ use App\Repository\FormationRepository;
 use App\Repository\UserRepository;
 use App\Service\Assistance\FilMessagesAssistance;
 use App\Service\Assistance\FusionDemandesAssistance;
-use App\Service\Assistance\IntegrationMailAssistance;
+use App\Service\Assistance\ReleveWebAssistance;
 use App\Service\Assistance\ReponseAssistance;
 use App\Service\Assistance\Source\ImapSource;
 use App\Service\Assistance\StockagePieceJointe;
-use App\Service\Assistance\VerrouReleveAssistance;
 use DateTimeImmutable;
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
@@ -75,7 +76,7 @@ class AssistanceController extends AbstractController
     }
 
     #[Route('/relever', name: 'relever', methods: ['POST'])]
-    public function relever(Request $request, ImapSource $source, IntegrationMailAssistance $integration, VerrouReleveAssistance $verrou): Response
+    public function relever(Request $request, ImapSource $source, ReleveWebAssistance $releve): Response
     {
         if (!$this->isCsrfTokenValid('assistance_relever', $request->request->getString('_token'))) {
             return $this->redirectToRoute('app_assistance_index');
@@ -87,23 +88,43 @@ class AssistanceController extends AbstractController
             return $this->redirectToRoute('app_assistance_index');
         }
 
-        if (!$verrou->acquerir()) {
-            $this->addFlash('info', 'Une relève est déjà en cours, réessayez dans quelques instants.');
-
-            return $this->redirectToRoute('app_assistance_index');
-        }
-
         try {
-            // fenêtre courte : la relève complète (7 jours) est faite par le cron, hors requête web
-            $nombre = $integration->integrerTout($source, new DateTimeImmutable('-1 day'));
-            $this->addFlash('success', sprintf('%d nouveau(x) mail(s) relevé(s).', $nombre));
+            $nombre = $releve->relever(true);
+            if ($nombre === null) {
+                $this->addFlash('info', 'Une relève est déjà en cours, réessayez dans quelques instants.');
+            } else {
+                $this->addFlash('success', sprintf('%d nouveau(x) mail(s) relevé(s).', $nombre));
+            }
         } catch (Throwable $e) {
             $this->addFlash('error', $e->getMessage());
-        } finally {
-            $verrou->liberer();
         }
 
         return $this->redirectToRoute('app_assistance_index');
+    }
+
+    /**
+     * Relève lancée en arrière-plan à l'ouverture de la liste (contrôleur Stimulus « assistance-releve »).
+     * Répond `{"nouveaux": n}` ; `null` si la relève n'a pas eu lieu (boîte non configurée, trop récente, en cours).
+     */
+    #[Route('/relever-auto', name: 'relever_auto', methods: ['POST'])]
+    public function releverAuto(Request $request, ImapSource $source, ReleveWebAssistance $releve, LoggerInterface $logger): JsonResponse
+    {
+        if (!$this->isCsrfTokenValid('assistance_relever', $request->request->getString('_token'))) {
+            return $this->json(['erreur' => 'Jeton invalide.'], Response::HTTP_FORBIDDEN);
+        }
+
+        if (!$source->estConfiguree()) {
+            return $this->json(['nouveaux' => null]);
+        }
+
+        try {
+            return $this->json(['nouveaux' => $releve->relever()]);
+        } catch (Throwable $e) {
+            // la page reste utilisable : l'erreur est journalisée, le cron et le bouton prendront le relais
+            $logger->error('Relève automatique de l\'assistance impossible : ' . $e->getMessage(), ['exception' => $e]);
+
+            return $this->json(['nouveaux' => null, 'erreur' => 'Relève impossible.']);
+        }
     }
 
     #[Route('/piece-jointe/{id}', name: 'piece_jointe', requirements: ['id' => '\d+'], methods: ['GET'])]

@@ -130,6 +130,37 @@ class AssistanceControllerTest extends WebTestCase
         self::assertCount(1, $formulaire->filter('input[name="q"][data-action~="input->auto-submit#debouncedSubmit"]'));
     }
 
+    public function testListeLanceLaReleveEnArrierePlan(): void
+    {
+        $this->connecterAdmin();
+
+        $crawler = $this->client->request('GET', '/administration/assistance');
+
+        $formulaire = $crawler->filter('form[data-controller~="assistance-releve"]');
+        self::assertCount(1, $formulaire);
+        self::assertStringEndsWith('/administration/assistance/relever-auto', (string) $formulaire->attr('data-assistance-releve-url-value'));
+    }
+
+    public function testReleveAutoSansJetonEstRefusee(): void
+    {
+        $this->connecterAdmin();
+
+        $this->client->request('POST', '/administration/assistance/relever-auto', ['_token' => 'faux']);
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testReleveAutoBoiteNonConfigureeNeReleveRien(): void
+    {
+        $this->connecterAdmin();
+        $jeton = $this->jeton('/administration/assistance', '/relever');
+
+        $this->client->request('POST', '/administration/assistance/relever-auto', ['_token' => $jeton]);
+
+        self::assertResponseIsSuccessful();
+        self::assertSame(['nouveaux' => null], json_decode((string) $this->client->getResponse()->getContent(), true));
+    }
+
     private function ajouterReponse(DemandeAssistance $demande, MessageAssistance $parent, string $texte, string $date): MessageAssistance
     {
         $reponse = (new MessageAssistance())

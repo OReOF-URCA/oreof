@@ -1,8 +1,11 @@
 {% extends 'base.html.twig' %}
 
 {% block bouton_header %}
-    <form method="post" action="{{ path('app_assistance_relever') }}" class="inline">
+    <form method="post" action="{{ path('app_assistance_relever') }}" class="inline-flex items-center gap-3"
+          data-controller="assistance-releve"
+          data-assistance-releve-url-value="{{ path('app_assistance_relever_auto') }}">
         <input type="hidden" name="_token" value="{{ csrf_token('assistance_relever') }}">
+        <span class="text-sm text-secondary-500 dark:text-secondary-400" data-assistance-releve-target="statut" role="status" hidden></span>
         <twig:Button label="Relever maintenant" variant="primary" icon="icon:refresh" type="submit" />
     </form>
 {% endblock %}

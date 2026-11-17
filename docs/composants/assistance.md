@@ -16,7 +16,8 @@ responsable, des notes internes, et affiche le contexte ORéOF du demandeur. Acc
 
 ## Fonctionnement
 
-1. **Relève** (`app:assistance:relever`, cron toutes les 5 min sur 7 jours ; bouton « Relever maintenant » sur 1 jour) :
+1. **Relève** (`app:assistance:relever`, cron toutes les 5 min sur 7 jours ; bouton « Relever maintenant » et ouverture
+   de la liste sur 1 jour, via `ReleveWebAssistance`) :
    lecture IMAP via `webklex/php-imap` (pur PHP, pas d'extension `imap`). La boîte n'est jamais modifiée (lecture
    « peek » avec flags : l'état lu/non lu est conservé). Les en-têtes sont lus d'abord : le corps et les pièces jointes
    ne sont téléchargés que pour les `Message-ID` inconnus ; sans `Message-ID`, un identifiant est calculé (expéditeur
@@ -65,6 +66,7 @@ responsable, des notes internes, et affiche le contexte ORéOF du demandeur. Acc
 | `app_assistance_show` | fil de la demande en arbre, réponse, note interne, statut, responsable, formation/parcours, fusion, contexte |
 | `app_assistance_{statut,responsable,note,rattacher,fusionner,repondre}` | POST, jeton CSRF `assistance_<id>` |
 | `app_assistance_relever` | POST, jeton `assistance_relever` |
+| `app_assistance_relever_auto` | POST, jeton `assistance_relever`, réponse JSON `{"nouveaux": n\|null}` ; appelé par le contrôleur Stimulus `assistance-releve` à l'ouverture de la liste, qui recharge la page si de nouveaux mails arrivent. Relève espacée d'au moins `ReleveWebAssistance::INTERVALLE_MINIMUM` = 60 s (date de la dernière relève dans `cache.app`, tous administrateurs confondus) ; boîte non configurée, relève en cours ou erreur IMAP → `null` (erreur journalisée), la page reste utilisable |
 
 Fil en arbre (`FilMessagesAssistance`, façon Thunderbird) : chaque message est placé sous celui auquel il répond
 (`In-Reply-To` au sein de la demande) ; parent absent, sans `In-Reply-To` ou note interne → racine ; tri par date ;
