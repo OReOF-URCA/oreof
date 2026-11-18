@@ -56,6 +56,10 @@ class ParcoursStep1Type extends AbstractType
                 'placeholder' => 'Choisir dans la liste ou choisir "+ Créer Nouveau" pour ajouter un utilisateur',
                 'new_placeholder' => 'Email du co-responsable du parcours'
             ])
+            ->add('contenuFormation', TextareaAutoSaveType::class, [
+                'attr' => ['rows' => 20, 'maxlength' => 3000,],
+            ])
+
             ->add('objectifsParcours', TextareaAutoSaveType::class, [
                 'attr' => [
                     'rows' => 10,
@@ -70,9 +74,6 @@ class ParcoursStep1Type extends AbstractType
             ])
             ->add('resultatsAttendus', TextareaAutoSaveType::class, [
                 'attr' => ['rows' => 10, 'maxlength' => 3000,],
-            ])
-            ->add('contenuFormation', TextareaAutoSaveType::class, [
-                'attr' => ['rows' => 20, 'maxlength' => 3000,],
             ])
             ->add('rythmeFormation', EntityType::class, [
                 'placeholder' => 'Choisissez un rythme de formation ou complétez le champ ci-dessous',
