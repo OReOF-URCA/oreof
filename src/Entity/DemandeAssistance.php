@@ -38,6 +38,13 @@ class DemandeAssistance
     #[ORM\Column(options: ['default' => false])]
     private bool $annonce = false;
 
+    /**
+     * Notification système (mail automatique : « [ORéOF] … », no-reply, rebond…) hors de tout échange :
+     * affichée à part, jamais comptée comme demande. Redevient une demande si un usager y répond.
+     */
+    #[ORM\Column(options: ['default' => false])]
+    private bool $notification = false;
+
     #[ORM\Column(length: 180)]
     private string $demandeurEmail = '';
 
@@ -129,6 +136,18 @@ class DemandeAssistance
     public function setAnnonce(bool $annonce): static
     {
         $this->annonce = $annonce;
+
+        return $this;
+    }
+
+    public function isNotification(): bool
+    {
+        return $this->notification;
+    }
+
+    public function setNotification(bool $notification): static
+    {
+        $this->notification = $notification;
 
         return $this;
     }

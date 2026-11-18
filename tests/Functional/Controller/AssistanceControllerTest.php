@@ -130,6 +130,77 @@ class AssistanceControllerTest extends WebTestCase
         self::assertCount(1, $formulaire->filter('input[name="q"][data-action~="input->auto-submit#debouncedSubmit"]'));
     }
 
+    public function testOngletsSeparentDemandesNotificationsEtAnnonces(): void
+    {
+        $this->demande('Vraie demande onglet');
+        $this->em->flush();
+        $notification = $this->demande('[ORéOF] Nouvel ajout onglet', StatutDemandeAssistanceEnum::RESOLUE)->setNotification(true);
+        $annonce = $this->demande('Annonce onglet', StatutDemandeAssistanceEnum::RESOLUE)->setAnnonce(true);
+        $this->em->flush();
+        $this->connecterAdmin();
+
+        $crawler = $this->client->request('GET', '/administration/assistance?statut=toutes');
+        self::assertStringContainsString('Vraie demande onglet', $crawler->text());
+        self::assertStringNotContainsString('Nouvel ajout onglet', $crawler->text());
+        self::assertStringNotContainsString('Annonce onglet', $crawler->text());
+        self::assertSame('1', $crawler->filter('[data-onglet="notifications"] [data-compteur]')->text());
+
+        $crawler = $this->client->request('GET', '/administration/assistance?vue=notifications');
+        self::assertStringContainsString('Nouvel ajout onglet', $crawler->text());
+        self::assertStringNotContainsString('Vraie demande onglet', $crawler->text());
+        self::assertCount(1, $crawler->filter('[data-onglet="notifications"][aria-current="page"]'));
+
+        $crawler = $this->client->request('GET', '/administration/assistance?vue=annonces');
+        self::assertStringContainsString('Annonce onglet', $crawler->text());
+        self::assertNotNull($notification->getId());
+        self::assertNotNull($annonce->getId());
+    }
+
+    public function testLignesColoreesSelonStatutEtMesDemandesMisesEnAvant(): void
+    {
+        $admin = $this->connecterAdmin();
+        $this->demande('Demande nouvelle couleur');
+        $this->demande('Demande à moi couleur', StatutDemandeAssistanceEnum::EN_COURS)->setResponsable($admin);
+        $this->em->flush();
+
+        $crawler = $this->client->request('GET', '/administration/assistance');
+
+        self::assertStringContainsString('Demande nouvelle couleur', $crawler->filter('tr[data-statut="nouvelle"]')->text());
+        $mienne = $crawler->filter('tr[data-a-moi]');
+        self::assertCount(1, $mienne);
+        self::assertStringContainsString('Demande à moi couleur', $mienne->text());
+        self::assertStringContainsString('Vous', $mienne->text());
+    }
+
+    public function testIndicateursCliquables(): void
+    {
+        $admin = $this->connecterAdmin();
+        $this->demande('Indicateur nouvelle');
+        $this->demande('Indicateur à moi', StatutDemandeAssistanceEnum::EN_COURS)->setResponsable($admin);
+        $this->em->flush();
+
+        $crawler = $this->client->request('GET', '/administration/assistance');
+
+        $aMoi = $crawler->filter('[data-indicateur="a_moi"]');
+        self::assertStringContainsString('1', $aMoi->text());
+        self::assertStringContainsString('responsable=moi', (string) $aMoi->filter('a')->attr('href'));
+        self::assertStringContainsString('statut=nouvelle', (string) $crawler->filter('[data-indicateur="nouvelles"] a')->attr('href'));
+        self::assertCount(1, $crawler->filter('[data-indicateur="sans_responsable"]'));
+    }
+
+    public function testFiltreSansResponsable(): void
+    {
+        $admin = $this->connecterAdmin();
+        $this->demande('Demande libre filtre');
+        $this->demande('Demande prise filtre')->setResponsable($admin);
+        $this->em->flush();
+
+        $crawler = $this->client->request('GET', '/administration/assistance?responsable=aucun');
+
+        self::assertStringContainsString('Demande libre filtre', $crawler->text());
+        self::assertStringNotContainsString('Demande prise filtre', $crawler->text());
+    }
+
     public function testListeLanceLaReleveEnArrierePlan(): void
     {
         $this->connecterAdmin();

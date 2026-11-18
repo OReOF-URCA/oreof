@@ -49,18 +49,23 @@ class AssistanceController extends AbstractController
     #[Route('', name: 'index', methods: ['GET'])]
     public function index(Request $request, DemandeAssistanceRepository $repository, UserRepository $userRepository, FilMessagesAssistance $fil): Response
     {
+        $vue = $request->query->getString('vue', 'demandes');
+        if (!in_array($vue, DemandeAssistanceRepository::VUES, true)) {
+            $vue = 'demandes';
+        }
         $statut = $request->query->getString('statut', 'ouvertes');
         $filtreResponsable = $request->query->getString('responsable');
         $recherche = $request->query->getString('q');
         $page = max(1, $request->query->getInt('page', 1));
+        $moi = $this->getUser() instanceof User ? $this->getUser() : null;
 
         $responsable = match (true) {
-            $filtreResponsable === 'moi' => $this->getUser() instanceof User ? $this->getUser() : null,
+            $filtreResponsable === 'moi' => $moi,
             ctype_digit($filtreResponsable) => $userRepository->find((int) $filtreResponsable),
             default => null,
         };
 
-        $demandes = $repository->rechercher($statut, $responsable, $recherche, $page, self::PAR_PAGE);
+        $demandes = $repository->rechercher($vue, $statut, $responsable, $filtreResponsable === 'aucun', $recherche, $page, self::PAR_PAGE);
 
         return $this->render('assistance/index.html.twig', [
             'demandes' => $demandes,
@@ -68,8 +73,11 @@ class AssistanceController extends AbstractController
             'total' => count($demandes),
             'page' => $page,
             'pages' => max(1, (int) ceil(count($demandes) / self::PAR_PAGE)),
-            'ouvertes' => $repository->compterOuvertes(),
-            'filtres' => ['statut' => $statut, 'responsable' => $filtreResponsable, 'q' => $recherche],
+            'vue' => $vue,
+            'onglets' => $repository->compterParVue(),
+            'indicateurs' => $repository->indicateurs($moi),
+            'moi' => $moi,
+            'filtres' => ['vue' => $vue, 'statut' => $statut, 'responsable' => $filtreResponsable, 'q' => $recherche],
             'statuts' => StatutDemandeAssistanceEnum::cases(),
             'equipe' => $userRepository->findByRole('ROLE_ADMIN'),
         ]);

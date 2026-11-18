@@ -12,13 +12,52 @@
 
 {% block content %}
     <div class="space-y-6">
+        {# indicateurs des demandes à traiter (notifications et annonces exclues) ; chaque carte filtre la liste #}
+        {% set lien = path('app_assistance_index') %}
         <div class="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-            <twig:Kpi title="Ouvertes" :value="ouvertes" description="Demandes à traiter" variant="warning" icon="mdi:lifebuoy" />
+            <div data-indicateur="a_moi">
+                <twig:Kpi title="À moi" :value="indicateurs.a_moi" description="Ouvertes, dont je suis responsable" variant="primary" icon="mdi:account-check-outline" href="{{ lien }}?responsable=moi" extraClass="{{ indicateurs.a_moi > 0 ? 'ring-2 ring-primary-300 dark:ring-primary-700' }}" />
+            </div>
+            <div data-indicateur="nouvelles">
+                <twig:Kpi title="Nouvelles" :value="indicateurs.nouvelles" description="Pas encore traitées" variant="danger" icon="mdi:email-alert-outline" href="{{ lien }}?statut=nouvelle" />
+            </div>
+            <div data-indicateur="en_cours">
+                <twig:Kpi title="En cours" :value="indicateurs.en_cours" description="En traitement" variant="warning" icon="mdi:progress-clock" href="{{ lien }}?statut=en_cours" />
+            </div>
+            <div data-indicateur="en_attente_usager">
+                <twig:Kpi title="En attente" :value="indicateurs.en_attente_usager" description="Réponse de l'usager attendue" variant="info" icon="mdi:account-clock-outline" href="{{ lien }}?statut=en_attente_usager" />
+            </div>
+            <div data-indicateur="sans_responsable">
+                <twig:Kpi title="Sans responsable" :value="indicateurs.sans_responsable" description="Ouvertes, à prendre en charge" variant="secondary" icon="mdi:account-question-outline" href="{{ lien }}?responsable=aucun" />
+            </div>
+            <div data-indicateur="ouvertes">
+                <twig:Kpi title="Ouvertes" :value="indicateurs.ouvertes" description="Total à traiter" variant="default" icon="mdi:lifebuoy" href="{{ lien }}" />
+            </div>
         </div>
 
         <section class="rounded-xl border border-secondary-200 bg-surface shadow-sm dark:border-secondary-700">
+            {# onglets : vraies demandes / notifications système / annonces de l'équipe #}
+            {% set libellesOnglets = {demandes: ['Demandes', 'mdi:lifebuoy'], notifications: ['Notifications système', 'mdi:robot-outline'], annonces: ['Annonces', 'mdi:bullhorn-outline']} %}
+            <nav class="flex gap-1 overflow-x-auto border-b border-secondary-200 px-4 dark:border-secondary-700" aria-label="Type d'éléments">
+                {% for cle, onglet in libellesOnglets %}
+                    {% set actif = vue == cle %}
+                    <a href="{{ path('app_assistance_index', cle == 'demandes' ? {} : {vue: cle}) }}"
+                       data-onglet="{{ cle }}" {% if actif %}aria-current="page"{% endif %}
+                       class="-mb-px inline-flex items-center gap-2 whitespace-nowrap border-b-2 px-3 py-3 text-sm font-medium {{ actif ? 'border-primary-500 text-primary-700 dark:text-primary-300' : 'border-transparent text-secondary-500 hover:border-secondary-300 hover:text-text dark:text-secondary-400' }}">
+                        {{ ux_icon(onglet[1], {class: 'h-4 w-4'}) }}
+                        {{ onglet[0] }}
+                        <span data-compteur class="rounded-full px-2 py-0.5 text-xs {{ actif ? 'bg-primary-100 text-primary-700 dark:bg-primary-900 dark:text-primary-200' : 'bg-secondary-100 text-secondary-600 dark:bg-secondary-800 dark:text-secondary-300' }}">{{ onglets[cle] }}</span>
+                    </a>
+                {% endfor %}
+            </nav>
             <div class="p-4">
+                {% if vue == 'notifications' %}
+                    <p class="mb-4 text-sm text-secondary-500 dark:text-secondary-400">Mails envoyés automatiquement (notifications ORéOF, adresses no-reply, rebonds…). Rien à traiter : une notification redevient une demande dès qu'une personne y répond.</p>
+                {% elseif vue == 'annonces' %}
+                    <p class="mb-4 text-sm text-secondary-500 dark:text-secondary-400">Mails de masse envoyés par l'équipe. Chaque réponse d'un usager ouvre sa propre demande.</p>
+                {% endif %}
                 <form method="get" class="mb-4 grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-12" data-controller="auto-submit">
+                    {% if vue != 'demandes' %}<input type="hidden" name="vue" value="{{ vue }}">{% endif %}
                     <div class="lg:col-span-4">
                         <label for="assistance-q" class="sr-only">Rechercher</label>
                         <div class="relative">
@@ -29,6 +68,7 @@
                                    data-action="input->auto-submit#debouncedSubmit">
                         </div>
                     </div>
+                    {% if vue == 'demandes' %}
                     <div class="lg:col-span-3">
                         <label for="assistance-statut" class="sr-only">Statut</label>
                         <select id="assistance-statut" name="statut" class="app-filter-select app-select-required" data-action="change->auto-submit#submit"
@@ -46,19 +86,21 @@
                                 {{ stimulus_controller('symfony/ux-autocomplete/autocomplete') }}>
                             <option value="">Tous les responsables</option>
                             <option value="moi" {{ filtres.responsable == 'moi' ? 'selected' }}>Mes demandes</option>
+                            <option value="aucun" {{ filtres.responsable == 'aucun' ? 'selected' }}>Sans responsable</option>
                             {% for membre in equipe %}
                                 <option value="{{ membre.id }}" {{ filtres.responsable == membre.id ~ '' ? 'selected' }}>{{ membre.display }}</option>
                             {% endfor %}
                         </select>
                     </div>
+                    {% endif %}
                     <div class="flex flex-wrap items-center gap-2 lg:col-span-2">
                         <twig:Button label="Filtrer" variant="primary" type="submit" icon="icon:search" size="sm" />
-                        <twig:Button label="Réinitialiser" variant="secondary" :outline="true" size="sm" href="{{ path('app_assistance_index') }}" />
+                        <twig:Button label="Réinitialiser" variant="secondary" :outline="true" size="sm" href="{{ path('app_assistance_index', vue == 'demandes' ? {} : {vue: vue}) }}" />
                     </div>
                 </form>
 
                 {% if total == 0 %}
-                    <p class="py-8 text-center text-secondary-400">Aucune demande.</p>
+                    <p class="py-8 text-center text-secondary-400">{{ vue == 'notifications' ? 'Aucune notification.' : (vue == 'annonces' ? 'Aucune annonce.' : 'Aucune demande.') }}</p>
                 {% else %}
                     <div class="overflow-x-auto">
                         <table class="table w-full text-sm">
@@ -73,14 +115,20 @@
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-secondary-200 dark:divide-secondary-700">
+                                {# bandeau de couleur par statut (mêmes couleurs que les indicateurs) ; mes demandes surlignées #}
+                                {% set bandeaux = {nouvelle: 'border-l-rose-500', en_cours: 'border-l-amber-500', en_attente_usager: 'border-l-cyan-500', resolue: 'border-l-emerald-500'} %}
                                 {% for demande in demandes %}
-                                    <tr class="hover:bg-secondary-50 dark:hover:bg-secondary-800">
-                                        <td class="px-3 py-2">
+                                    {% set aMoi = moi is not null and demande.responsable is not null and demande.responsable.id == moi.id and demande.statut.estOuverte %}
+                                    {% set nouvelle = demande.statut.value == 'nouvelle' and not demande.annonce and not demande.notification %}
+                                    <tr data-statut="{{ demande.statut.value }}" {% if aMoi %}data-a-moi{% endif %}
+                                        class="{{ aMoi ? 'bg-primary-100 hover:bg-primary-200/70 dark:bg-primary-900/40 dark:hover:bg-primary-900/60' : 'hover:bg-secondary-50 dark:hover:bg-secondary-800' }}">
+                                        <td class="border-l-4 px-3 py-2 {{ demande.annonce or demande.notification ? 'border-l-secondary-300 dark:border-l-secondary-600' : bandeaux[demande.statut.value] }}">
                                             {% set nombre = demande.messages|length %}
                                             <details class="assistance-fil group">
                                                 <summary class="flex cursor-pointer list-none items-baseline gap-2 [&::-webkit-details-marker]:hidden">
                                                     <span class="text-secondary-400 transition-transform group-open:rotate-90" aria-hidden="true">▸</span>
-                                                    <a href="{{ path('app_assistance_show', {id: demande.id}) }}" class="font-medium text-primary-700 hover:underline dark:text-primary-300">{{ demande.sujet }}</a>
+                                                    {% if nouvelle %}<span class="h-2 w-2 shrink-0 self-center rounded-full bg-rose-500" title="Nouvelle demande"></span>{% endif %}
+                                                    <a href="{{ path('app_assistance_show', {id: demande.id}) }}" class="{{ nouvelle ? 'font-bold' : 'font-medium' }} text-primary-700 hover:underline dark:text-primary-300">{{ demande.sujet }}</a>
                                                     <span class="whitespace-nowrap text-xs text-secondary-500 dark:text-secondary-400">{{ nombre }} message{{ nombre > 1 ? 's' }}</span>
                                                 </summary>
                                                 <ul class="mt-2 space-y-0.5 border-l border-secondary-200 dark:border-secondary-700">
@@ -113,11 +161,23 @@
                                         <td class="px-3 py-2">
                                             {% if demande.annonce %}
                                                 <twig:Badge label="Annonce" variant="info" size="sm" icon="mdi:bullhorn-outline" />
+                                            {% elseif demande.notification %}
+                                                <twig:Badge label="Notification" variant="secondary" size="sm" icon="mdi:robot-outline" />
                                             {% else %}
                                                 <twig:Badge :label="demande.statut.libelle" :variant="demande.statut.badgeVariant" size="sm" />
                                             {% endif %}
                                         </td>
-                                        <td class="px-3 py-2 text-text">{{ demande.responsable ? demande.responsable.display : '—' }}</td>
+                                        <td class="px-3 py-2 text-text">
+                                            {% if aMoi %}
+                                                <twig:Badge label="Vous" variant="primary" size="sm" icon="mdi:account-check-outline" />
+                                            {% elseif demande.responsable %}
+                                                {{ demande.responsable.display }}
+                                            {% elseif demande.statut.estOuverte and not demande.annonce and not demande.notification %}
+                                                <span class="text-xs italic text-secondary-500 dark:text-secondary-400">À prendre</span>
+                                            {% else %}
+                                                —
+                                            {% endif %}
+                                        </td>
                                         <td class="px-3 py-2 text-text">{{ demande.messages|length }}</td>
                                         <td class="px-3 py-2 whitespace-nowrap text-secondary-600 dark:text-secondary-300">{{ demande.dateDernierMessage|date('d/m/Y H:i') }}</td>
                                     </tr>

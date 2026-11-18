@@ -211,6 +211,32 @@ class IntegrationMailAssistanceTest extends TestCase
         self::assertSame(StatutDemandeAssistanceEnum::EN_COURS, $demande->getStatut());
     }
 
+    public function testNotificationSystemeEstSepareeDesDemandes(): void
+    {
+        $demande = $this->integration->integrer($this->mail('07'))->getDemande();
+
+        self::assertTrue($demande->isNotification());
+        self::assertFalse($this->integration->integrer($this->mail('01'))->getDemande()->isNotification());
+    }
+
+    public function testReponseHumaineAUneNotificationEnFaitUneDemande(): void
+    {
+        $demande = $this->integration->integrer($this->mail('07'))->getDemande();
+
+        $this->integration->integrer($this->mail('08'));
+
+        self::assertFalse($demande->isNotification());
+    }
+
+    public function testRebondDansUneDemandeNEnFaitPasUneNotification(): void
+    {
+        $demande = $this->integration->integrer($this->mail('01'))->getDemande();
+
+        $this->integration->integrer($this->mail('06'));
+
+        self::assertFalse($demande->isNotification());
+    }
+
     private function admin(string $identifiant): \App\Entity\User
     {
         $admin = new \App\Entity\User();

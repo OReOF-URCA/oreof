@@ -17,6 +17,7 @@
                     <twig:Badge label="Annonce" variant="info" icon="mdi:bullhorn-outline" />
                     <span>Envoyée par <strong class="text-text">{{ demande.demandeurNom ?? demande.demandeurEmail }}</strong></span>
                 {% else %}
+                    {% if demande.notification %}<twig:Badge label="Notification système" variant="secondary" icon="mdi:robot-outline" />{% endif %}
                     <twig:Badge :label="demande.statut.libelle" :variant="demande.statut.badgeVariant" />
                     <span>Demandeur : <strong class="text-text">{{ demande.demandeurNom ?? demande.demandeurEmail }}</strong>
                         {% if demande.demandeurNom %}({{ demande.demandeurEmail }}){% endif %}</span>
@@ -27,6 +28,10 @@
             {% if demande.annonce %}
                 <p class="rounded-lg border border-info-200 bg-info-50 p-3 text-sm text-info-800 dark:border-info-700 dark:bg-info-900/30 dark:text-info-200">
                     Mail envoyé à de nombreux destinataires. Chaque usager qui y répond a sa propre demande.
+                </p>
+            {% elseif demande.notification %}
+                <p class="rounded-lg border border-secondary-200 bg-secondary-50 p-3 text-sm text-secondary-700 dark:border-secondary-700 dark:bg-secondary-800/40 dark:text-secondary-200">
+                    Mail envoyé automatiquement : rien à traiter. Il redeviendra une demande si quelqu'un y répond.
                 </p>
             {% endif %}
 

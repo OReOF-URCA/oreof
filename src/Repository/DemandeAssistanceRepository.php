@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\DemandeAssistance;
 use App\Entity\User;
 use App\Enums\StatutDemandeAssistanceEnum;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -54,7 +55,13 @@ class DemandeAssistanceRepository extends ServiceEntityRepository
      *
      * @return Paginator<DemandeAssistance>
      */
-    public function rechercher(string $statut, ?User $responsable, ?string $recherche, int $page, int $parPage = 30): Paginator
+    public const VUES = ['demandes', 'notifications', 'annonces'];
+
+    /**
+     * @param string $vue « demandes » (échanges à traiter), « notifications » (mails système) ou « annonces » (mails de masse)
+     * @param string $statut « ouvertes », « toutes » ou une valeur de StatutDemandeAssistanceEnum (vue « demandes » seulement)
+     */
+    public function rechercher(string $vue, string $statut, ?User $responsable, bool $sansResponsable, ?string $recherche, int $page, int $parPage = 30): Paginator
     {
         $qb = $this->createQueryBuilder('d')
             ->leftJoin('d.responsable', 'r')->addSelect('r')
@@ -64,14 +71,16 @@ class DemandeAssistanceRepository extends ServiceEntityRepository
             ->setFirstResult(max(0, $page - 1) * $parPage)
             ->setMaxResults($parPage);
 
-        if ($statut === 'ouvertes') {
-            $qb->andWhere('d.statut != :resolue')->setParameter('resolue', StatutDemandeAssistanceEnum::RESOLUE);
-        } elseif (($enum = StatutDemandeAssistanceEnum::tryFrom($statut)) !== null) {
-            $qb->andWhere('d.statut = :statut')->setParameter('statut', $enum);
-        }
+        match ($vue) {
+            'notifications' => $qb->andWhere('d.notification = true'),
+            'annonces' => $qb->andWhere('d.annonce = true'),
+            default => $this->filtrerDemandes($qb, $statut),
+        };
 
         if ($responsable !== null) {
             $qb->andWhere('d.responsable = :responsable')->setParameter('responsable', $responsable);
+        } elseif ($sansResponsable) {
+            $qb->andWhere('d.responsable IS NULL');
         }
 
         if ($recherche !== null && trim($recherche) !== '') {
@@ -82,14 +91,69 @@ class DemandeAssistanceRepository extends ServiceEntityRepository
         return new Paginator($qb->getQuery());
     }
 
+    private function filtrerDemandes(QueryBuilder $qb, string $statut): void
+    {
+        $qb->andWhere('d.annonce = false')->andWhere('d.notification = false');
+
+        if ($statut === 'ouvertes') {
+            $qb->andWhere('d.statut != :resolue')->setParameter('resolue', StatutDemandeAssistanceEnum::RESOLUE);
+        } elseif (($enum = StatutDemandeAssistanceEnum::tryFrom($statut)) !== null) {
+            $qb->andWhere('d.statut = :statut')->setParameter('statut', $enum);
+        }
+    }
+
     public function compterOuvertes(): int
     {
-        return (int) $this->createQueryBuilder('d')
-            ->select('COUNT(d.id)')
-            ->where('d.statut != :resolue')
+        return $this->indicateurs(null)['ouvertes'];
+    }
+
+    /**
+     * Compteurs des demandes à traiter (annonces et notifications exclues).
+     *
+     * @return array{ouvertes: int, a_moi: int, nouvelles: int, en_cours: int, en_attente_usager: int, sans_responsable: int}
+     */
+    public function indicateurs(?User $moi): array
+    {
+        $ligne = $this->createQueryBuilder('d')
+            ->select(
+                'SUM(CASE WHEN d.statut != :resolue THEN 1 ELSE 0 END) AS ouvertes',
+                'SUM(CASE WHEN d.statut != :resolue AND d.responsable = :moi THEN 1 ELSE 0 END) AS a_moi',
+                'SUM(CASE WHEN d.statut = :nouvelle THEN 1 ELSE 0 END) AS nouvelles',
+                'SUM(CASE WHEN d.statut = :en_cours THEN 1 ELSE 0 END) AS en_cours',
+                'SUM(CASE WHEN d.statut = :en_attente THEN 1 ELSE 0 END) AS en_attente_usager',
+                'SUM(CASE WHEN d.statut != :resolue AND d.responsable IS NULL THEN 1 ELSE 0 END) AS sans_responsable',
+            )
+            ->where('d.annonce = false')
+            ->andWhere('d.notification = false')
+            ->setParameter('resolue', StatutDemandeAssistanceEnum::RESOLUE)
+            ->setParameter('nouvelle', StatutDemandeAssistanceEnum::NOUVELLE)
+            ->setParameter('en_cours', StatutDemandeAssistanceEnum::EN_COURS)
+            ->setParameter('en_attente', StatutDemandeAssistanceEnum::EN_ATTENTE_USAGER)
+            ->setParameter('moi', $moi?->getId() ?? 0)
+            ->getQuery()
+            ->getSingleResult();
+
+        return array_map(static fn (mixed $valeur): int => (int) $valeur, $ligne);
+    }
+
+    /**
+     * Nombre d'éléments de chaque onglet : demandes ouvertes, notifications et annonces.
+     *
+     * @return array{demandes: int, notifications: int, annonces: int}
+     */
+    public function compterParVue(): array
+    {
+        $ligne = $this->createQueryBuilder('d')
+            ->select(
+                'SUM(CASE WHEN d.annonce = false AND d.notification = false AND d.statut != :resolue THEN 1 ELSE 0 END) AS demandes',
+                'SUM(CASE WHEN d.notification = true THEN 1 ELSE 0 END) AS notifications',
+                'SUM(CASE WHEN d.annonce = true THEN 1 ELSE 0 END) AS annonces',
+            )
             ->setParameter('resolue', StatutDemandeAssistanceEnum::RESOLUE)
             ->getQuery()
-            ->getSingleScalarResult();
+            ->getSingleResult();
+
+        return array_map(static fn (mixed $valeur): int => (int) $valeur, $ligne);
     }
 
     /**

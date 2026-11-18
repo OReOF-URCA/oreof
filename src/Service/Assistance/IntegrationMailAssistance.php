@@ -144,6 +144,11 @@ class IntegrationMailAssistance
             $demande->setStatut(StatutDemandeAssistanceEnum::EN_COURS);
         }
 
+        // quelqu'un répond à une notification système : c'est désormais un échange à traiter
+        if (!$mail->automatique) {
+            $demande->setNotification(false);
+        }
+
         $entityManager = $this->doctrine->getManager();
         assert($entityManager instanceof EntityManagerInterface);
         $entityManager->persist($demande);
@@ -212,6 +217,7 @@ class IntegrationMailAssistance
 
         return (new DemandeAssistance())
             ->setAnnonce($annonce)
+            ->setNotification(!$annonce && $mail->automatique)
             // annonce, rebond ou réponse automatique hors de tout échange connu : rien à traiter
             ->setStatut($annonce || $mail->automatique ? StatutDemandeAssistanceEnum::RESOLUE : StatutDemandeAssistanceEnum::NOUVELLE)
             ->setSujet($mail->sujet !== '' ? $mail->sujet : '(sans sujet)')

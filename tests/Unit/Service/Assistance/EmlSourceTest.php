@@ -45,6 +45,23 @@ class EmlSourceTest extends TestCase
         self::assertFalse($mails['09']->automatique, 'Un signalement de bug est une vraie demande');
     }
 
+    public function testExpediteurNoReplyOuRobotEstAutomatique(): void
+    {
+        $factory = new MailEntrantFactory();
+        foreach (['no-reply@vellasu.store' => true, 'noreply@x.fr' => true, 'robot@tapir.ws' => true, 'ne-pas-repondre@x.fr' => true, 'norbert@x.fr' => false] as $expediteur => $attendu) {
+            $eml = "Message-ID: <a@x>\r\nDate: Fri, 13 Nov 2026 08:00:00 +0100\r\nFrom: {$expediteur}\r\nTo: oreof@univ-reims.fr\r\nSubject: Test\r\nContent-Type: text/plain; charset=UTF-8\r\n\r\nBonjour";
+            $fichier = tempnam(sys_get_temp_dir(), 'eml') . '.eml';
+            file_put_contents($fichier, $eml);
+            try {
+                $mail = iterator_to_array((new EmlSource($fichier, $factory))->lire(new DateTimeImmutable()), false)[0];
+            } finally {
+                unlink($fichier);
+            }
+
+            self::assertSame($attendu, $mail->automatique, $expediteur);
+        }
+    }
+
     public function testReplyToEstLu(): void
     {
         $mails = $this->lire();

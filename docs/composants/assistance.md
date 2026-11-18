@@ -25,6 +25,10 @@ responsable, des notes internes, et affiche le contexte ORéOF du demandeur. Acc
    simultanées. Un mail illisible (date invalide → date du jour, contenu introuvable) ou en erreur à l'intégration est
    journalisé et ignoré : la relève continue (le gestionnaire d'entités est réinitialisé si besoin, les pièces jointes
    déjà écrites sont supprimées).
+   Mail **automatique** : en-tête `Auto-Submitted`, expéditeur `mailer-daemon@`, `postmaster@`, `no-reply@`/`noreply@`,
+   `ne-pas-repondre@`, `robot@`, ou sujet « [ORéOF] … » (hors « [ORéOF][Bug] »). Une demande créée par un mail automatique
+   est une **notification système** (`DemandeAssistance::notification`, statut résolue) : onglet à part, jamais comptée
+   comme demande ; elle redevient une demande dès qu'un mail non automatique la rejoint (réponse d'un usager ou de l'équipe).
 2. **Regroupement** (`IntegrationMailAssistance`), dans l'ordre :
    - `In-Reply-To` / `References` pointant vers un message connu → même demande ;
    - sinon même sujet normalisé (`SujetNormaliseur` : sans `Re:`, `TR:`, `Fwd:`, `[ORéOF]`, `***IMPORTANT***`, casse)
@@ -62,7 +66,7 @@ responsable, des notes internes, et affiche le contexte ORéOF du demandeur. Acc
 
 | Route | Rôle |
 |---|---|
-| `app_assistance_index` | liste filtrable (statut, responsable, recherche ; appliqués à la saisie par le contrôleur Stimulus `auto-submit`), compteur des demandes ouvertes ; chaque demande se déplie (`<details>`) sur l'arbre de ses messages (une ligne par message : expéditeur, extrait sans historique, date ; lien vers `#message-<id>`) |
+| `app_assistance_index` | onglets `vue` = `demandes` (défaut) / `notifications` / `annonces` avec compteurs (`DemandeAssistanceRepository::compterParVue`) ; liste filtrable (statut, responsable dont « Mes demandes » et « Sans responsable » = `responsable=aucun`, recherche ; appliqués à la saisie par le contrôleur Stimulus `auto-submit`) ; indicateurs cliquables des demandes à traiter (`indicateurs()` : à moi, nouvelles, en cours, en attente, sans responsable, ouvertes ; annonces et notifications exclues) ; bandeau de couleur par statut (rose nouvelle, ambre en cours, cyan en attente, vert résolue), sujet en gras pour une nouvelle, ligne surlignée et « Vous » pour mes demandes ouvertes ; chaque demande se déplie (`<details>`) sur l'arbre de ses messages (une ligne par message : expéditeur, extrait sans historique, date ; lien vers `#message-<id>`) |
 | `app_assistance_show` | fil de la demande en arbre, réponse, note interne, statut, responsable, formation/parcours, fusion, contexte |
 | `app_assistance_{statut,responsable,note,rattacher,fusionner,repondre}` | POST, jeton CSRF `assistance_<id>` |
 | `app_assistance_relever` | POST, jeton `assistance_relever` |

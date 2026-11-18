@@ -52,6 +52,8 @@ class MailEntrantFactory
         $automatique = ($autoSubmitted !== '' && $autoSubmitted !== 'no')
             || str_starts_with($expediteurEmail, 'mailer-daemon@')
             || str_starts_with($expediteurEmail, 'postmaster@')
+            // adresse d'envoi automatique : no-reply, noreply, ne-pas-repondre, robot…
+            || preg_match('/^(no-?reply|ne-?pas-?repondre|robot)@/', $expediteurEmail) === 1
             // notification envoyée par l'application (« [ORéOF] … ») ; restent à traiter une réponse « Re: [ORéOF] … »
             // et un signalement de bug « [ORéOF][Bug] … » envoyé depuis le formulaire de l'application
             || preg_match('/^\[OR[ée]OF\](?!\s*\[Bug\])/iu', $sujet) === 1;
