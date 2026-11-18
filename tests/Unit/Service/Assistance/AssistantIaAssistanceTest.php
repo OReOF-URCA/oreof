@@ -6,7 +6,9 @@ namespace App\Tests\Unit\Service\Assistance;
 
 use App\Entity\DemandeAssistance;
 use App\Entity\MessageAssistance;
+use App\Entity\User;
 use App\Enums\SensMessageAssistanceEnum;
+use App\Enums\StatutDemandeAssistanceEnum;
 use App\Service\Ai\FicheMatiereAiSynthesizer;
 use App\Service\Assistance\AssistantIaAssistance;
 use App\Service\Assistance\ContexteUsagerAssistance;
@@ -88,6 +90,24 @@ class AssistantIaAssistanceTest extends TestCase
         $conversation = $this->assistant()->conversation($this->demande());
 
         self::assertStringContainsString("Usager : Jean Dupont\n\nContexte ORéOF de l'usager :\n- Profils : Responsable de parcours", $conversation);
+    }
+
+    public function testConversationIndiqueStatutEtResponsable(): void
+    {
+        $demande = $this->demande()->setStatut(StatutDemandeAssistanceEnum::EN_ATTENTE_USAGER);
+        $responsable = new User();
+        $responsable->setPrenom('Marie');
+        $responsable->setNom('Curie');
+        $demande->setResponsable($responsable);
+
+        $conversation = $this->assistant()->conversation($demande);
+
+        self::assertStringContainsString("Sujet : Accès MCCC\nStatut : En attente de l'usager\nResponsable dans l'équipe : CURIE Marie\nUsager : Jean Dupont", $conversation);
+    }
+
+    public function testConversationSansResponsable(): void
+    {
+        self::assertStringContainsString("Responsable dans l'équipe : aucun", $this->assistant()->conversation($this->demande()));
     }
 
     public function testChangementDeContexteInvalideLeCache(): void

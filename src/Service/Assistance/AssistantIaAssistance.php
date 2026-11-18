@@ -71,7 +71,12 @@ class AssistantIaAssistance
      */
     public function conversation(DemandeAssistance $demande): string
     {
-        $lignes = ['Sujet : ' . $demande->getSujet(), 'Usager : ' . ($demande->getDemandeurNom() ?? 'non renseigné')];
+        $lignes = [
+            'Sujet : ' . $demande->getSujet(),
+            'Statut : ' . $demande->getStatut()->getLibelle(),
+            'Responsable dans l\'équipe : ' . ($demande->getResponsable()?->getDisplay() ?? 'aucun'),
+            'Usager : ' . ($demande->getDemandeurNom() ?? 'non renseigné'),
+        ];
         if ($demande->getFormation() !== null) {
             $lignes[] = 'Formation : ' . $demande->getFormation()->getDisplay()
                 . ($demande->getParcours() !== null ? ' / ' . $demande->getParcours()->getDisplay() : '');
