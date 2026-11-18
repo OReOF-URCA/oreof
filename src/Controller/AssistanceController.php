@@ -13,6 +13,7 @@ use App\Enums\StatutDemandeAssistanceEnum;
 use App\Repository\DemandeAssistanceRepository;
 use App\Repository\FormationRepository;
 use App\Repository\UserRepository;
+use App\Service\Assistance\AssistantIaAssistance;
 use App\Service\Assistance\FilMessagesAssistance;
 use App\Service\Assistance\FusionDemandesAssistance;
 use App\Service\Assistance\ReleveWebAssistance;
@@ -159,9 +160,11 @@ class AssistanceController extends AbstractController
         FormationRepository $formationRepository,
         ReponseAssistance $reponse,
         FilMessagesAssistance $fil,
+        AssistantIaAssistance $ia,
     ): Response {
         return $this->render('assistance/show.html.twig', [
             'demande' => $demande,
+            'iaDisponible' => $ia->estConfigure(),
             'arbre' => $fil->arbre($demande->getMessages()),
             'statuts' => StatutDemandeAssistanceEnum::cases(),
             'equipe' => $userRepository->findByRole('ROLE_ADMIN'),
@@ -169,6 +172,29 @@ class AssistanceController extends AbstractController
             'candidatesFusion' => $repository->candidatesFusion($demande),
             'destinatairesProposes' => $reponse->destinatairesProposes($demande),
         ]);
+    }
+
+    /**
+     * Résumé (`resume`) ou brouillon de réponse (`brouillon`) par l'IA de l'établissement.
+     * Répond `{"texte": …, "html": …}`, ou `{"erreur": …}` en 502 si l'IA est absente ou en échec.
+     */
+    #[Route('/{id}/ia/{type}', name: 'ia', requirements: ['id' => '\d+', 'type' => 'resume|brouillon'], methods: ['POST'])]
+    public function ia(Request $request, DemandeAssistance $demande, string $type, AssistantIaAssistance $ia, LoggerInterface $logger): JsonResponse
+    {
+        if (!$this->jetonValide($request, $demande)) {
+            return $this->json(['erreur' => 'Jeton invalide.'], Response::HTTP_FORBIDDEN);
+        }
+
+        try {
+            $forcer = $request->request->getBoolean('forcer');
+            $texte = $type === 'resume' ? $ia->resumer($demande, $forcer) : $ia->suggererReponse($demande, $forcer);
+        } catch (Throwable $e) {
+            $logger->warning('Assistant IA de l\'assistance indisponible : ' . $e->getMessage(), ['demande' => $demande->getId()]);
+
+            return $this->json(['erreur' => 'IA indisponible : ' . $e->getMessage()], Response::HTTP_BAD_GATEWAY);
+        }
+
+        return $this->json(['texte' => $texte, 'html' => AssistantIaAssistance::enHtml($texte)]);
     }
 
     #[Route('/{id}/repondre', name: 'repondre', requirements: ['id' => '\d+'], methods: ['POST'])]

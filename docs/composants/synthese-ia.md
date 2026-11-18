@@ -32,6 +32,11 @@ La configuration est double et hiérarchisée :
 | `AI_API_KEY` | *(vide)* | Clé individuelle `sk-...` obtenue auprès de ROMEO ou du fournisseur. Si vide (hors endpoint `localhost`), le moteur local déterministe est utilisé sans erreur. |
 | `AI_MODEL` | `mistral-small-3.2-24b` | Identifiant du modèle utilisé sur ROMEO / Oratio (ex: `mistral-small-3.2-24b`, `gpt-oss-120b`, `ilaas/llama-3.3-70b`). |
 
+## Autres usages
+
+La résolution de configuration (`resolveConfig()`, `isAiConfigured()`) est réutilisée par l'assistant IA du module
+Assistance (`App\Service\Assistance\AssistantIaAssistance`, voir `docs/composants/assistance.md`).
+
 ## Règles
 
 - Le calcul des écarts (volumes horaires, ECTS, MCCC, textes) reste **100 % déterministe** dans `FicheMatiereDiffAnalyzer` ; le LLM ne reçoit que les champs ayant réellement changé (`FicheMatiereChangeReport`).

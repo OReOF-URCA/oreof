@@ -10,10 +10,12 @@ use App\Entity\PieceJointeAssistance;
 use App\Entity\User;
 use App\Enums\SensMessageAssistanceEnum;
 use App\Enums\StatutDemandeAssistanceEnum;
+use App\Service\Assistance\AssistantIaAssistance;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Filesystem\Filesystem;
+use RuntimeException;
 
 class AssistanceControllerTest extends WebTestCase
 {
@@ -230,6 +232,99 @@ class AssistanceControllerTest extends WebTestCase
 
         self::assertResponseIsSuccessful();
         self::assertSame(['nouveaux' => null], json_decode((string) $this->client->getResponse()->getContent(), true));
+    }
+
+    private function iaSimulee(bool $configuree = true, ?\Throwable $erreur = null): void
+    {
+        $ia = $this->createStub(AssistantIaAssistance::class);
+        $ia->method('estConfigure')->willReturn($configuree);
+        if ($erreur !== null) {
+            $ia->method('resumer')->willThrowException($erreur);
+        } else {
+            $ia->method('resumer')->willReturn("Problème : pas d'accès.\nReste à faire : vérifier ses droits.");
+            $ia->method('suggererReponse')->willReturn("Bonjour,\n\nVoici <la> réponse.");
+        }
+        $this->client->disableReboot();
+        static::getContainer()->set(AssistantIaAssistance::class, $ia);
+    }
+
+    public function testFicheSansIaConfigureeNeProposePasLAssistant(): void
+    {
+        $this->connecterAdmin();
+        $demande = $this->demande('Sans IA');
+
+        $crawler = $this->client->request('GET', '/administration/assistance/' . $demande->getId());
+
+        self::assertResponseIsSuccessful();
+        self::assertCount(0, $crawler->filter('[data-controller~="assistance-ia"]'));
+    }
+
+    public function testFicheAvecIaProposeResumeEtBrouillon(): void
+    {
+        $this->connecterAdmin();
+        $this->iaSimulee();
+        $demande = $this->demande('Avec IA');
+
+        $crawler = $this->client->request('GET', '/administration/assistance/' . $demande->getId());
+
+        $panneau = $crawler->filter('[data-controller~="assistance-ia"]');
+        self::assertCount(1, $panneau);
+        self::assertStringEndsWith('/' . $demande->getId() . '/ia/resume', (string) $panneau->attr('data-assistance-ia-resume-url-value'));
+        self::assertStringEndsWith('/' . $demande->getId() . '/ia/brouillon', (string) $panneau->attr('data-assistance-ia-brouillon-url-value'));
+        self::assertCount(1, $crawler->filter('[data-action~="assistance-ia#brouillon"]'));
+    }
+
+    public function testResumeIaRenvoieLeTexte(): void
+    {
+        $this->connecterAdmin();
+        $this->iaSimulee();
+        $demande = $this->demande('Résumé IA');
+        $jeton = $this->jeton('/administration/assistance/' . $demande->getId(), '/note');
+
+        $this->client->request('POST', '/administration/assistance/' . $demande->getId() . '/ia/resume', ['_token' => $jeton]);
+
+        self::assertResponseIsSuccessful();
+        $json = json_decode((string) $this->client->getResponse()->getContent(), true);
+        self::assertSame("Problème : pas d'accès.\nReste à faire : vérifier ses droits.", $json['texte']);
+    }
+
+    public function testBrouillonIaRenvoieTexteEtHtmlPourLEditeur(): void
+    {
+        $this->connecterAdmin();
+        $this->iaSimulee();
+        $demande = $this->demande('Brouillon IA');
+        $jeton = $this->jeton('/administration/assistance/' . $demande->getId(), '/note');
+
+        $this->client->request('POST', '/administration/assistance/' . $demande->getId() . '/ia/brouillon', ['_token' => $jeton]);
+
+        self::assertResponseIsSuccessful();
+        $json = json_decode((string) $this->client->getResponse()->getContent(), true);
+        self::assertSame('<div>Bonjour,</div><div><br></div><div>Voici &lt;la&gt; réponse.</div>', $json['html']);
+    }
+
+    public function testIaSansJetonEstRefusee(): void
+    {
+        $this->connecterAdmin();
+        $this->iaSimulee();
+        $demande = $this->demande('IA sans jeton');
+
+        $this->client->request('POST', '/administration/assistance/' . $demande->getId() . '/ia/resume', ['_token' => 'faux']);
+
+        self::assertResponseStatusCodeSame(403);
+    }
+
+    public function testIaEnErreurRenvoieUnMessage(): void
+    {
+        $this->connecterAdmin();
+        $this->iaSimulee(erreur: new RuntimeException('délai dépassé'));
+        $demande = $this->demande('IA en panne');
+        $jeton = $this->jeton('/administration/assistance/' . $demande->getId(), '/note');
+
+        $this->client->request('POST', '/administration/assistance/' . $demande->getId() . '/ia/resume', ['_token' => $jeton]);
+
+        self::assertResponseStatusCodeSame(502);
+        $json = json_decode((string) $this->client->getResponse()->getContent(), true);
+        self::assertStringContainsString('délai dépassé', $json['erreur']);
     }
 
     private function ajouterReponse(DemandeAssistance $demande, MessageAssistance $parent, string $texte, string $date): MessageAssistance

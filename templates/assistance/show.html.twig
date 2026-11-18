@@ -35,6 +35,25 @@
                 </p>
             {% endif %}
 
+            {% if iaDisponible and not demande.annonce %}
+                <section class="rounded-xl border border-primary-200 bg-primary-50/60 p-4 dark:border-primary-800 dark:bg-primary-900/20"
+                         data-controller="assistance-ia"
+                         data-assistance-ia-resume-url-value="{{ path('app_assistance_ia', {id: demande.id, type: 'resume'}) }}"
+                         data-assistance-ia-brouillon-url-value="{{ path('app_assistance_ia', {id: demande.id, type: 'brouillon'}) }}"
+                         data-assistance-ia-jeton-value="{{ jeton }}">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <h2 class="mr-auto flex items-center gap-2 text-sm font-semibold text-text">{{ ux_icon('mdi:creation-outline', {class: 'h-4 w-4 text-primary-600'}) }} Assistant IA</h2>
+                        <twig:Button label="Résumer la demande" variant="primary" size="sm" icon="mdi:text-box-outline" dataAction="assistance-ia#resumer" />
+                        <twig:Button label="Proposer une réponse" variant="primary" size="sm" icon="mdi:creation-outline" dataAction="assistance-ia#brouillon" />
+                    </div>
+                    <p class="mt-2 text-sm text-secondary-500 dark:text-secondary-400" data-assistance-ia-target="statut" hidden></p>
+                    <div class="mt-3 hidden whitespace-pre-line rounded-lg bg-surface p-3 text-sm text-text shadow-sm" data-assistance-ia-target="resume"></div>
+                    <p class="mt-2 text-xs text-secondary-500 dark:text-secondary-400">
+                        Généré par l'IA de l'université à partir des messages (sans adresses ni pièces jointes) : à relire avant tout envoi.
+                    </p>
+                </section>
+            {% endif %}
+
             {# fil en arbre : réponses décalées sous le message auquel elles répondent (profondeur plafonnée à 3) #}
             {% set decalages = ['', 'ml-6 border-l-2 border-secondary-200 pl-3 dark:border-secondary-700', 'ml-12 border-l-2 border-secondary-200 pl-3 dark:border-secondary-700', 'ml-18 border-l-2 border-secondary-200 pl-3 dark:border-secondary-700'] %}
             {% for noeud in arbre %}

@@ -6,6 +6,7 @@ Assistance, de la réponse depuis ORéOF ou du panneau « contexte ORéOF du dem
 `src/Enums/{StatutDemandeAssistanceEnum,SensMessageAssistanceEnum}.php`, `src/Service/Assistance/`,
 `src/DTO/Assistance/`, `src/Controller/AssistanceController.php`, `src/Command/Assistance*Command.php`,
 `src/Twig/Components/{MessageAssistanceCard,ContexteUsagerAssistance}.php`, `templates/assistance/`,
+`assets/controllers/assistance_{releve,ia}_controller.js`,
 `templates/components/{message_assistance_card,contexte_usager_assistance}.html.twig`,
 `config/packages/html_sanitizer.yaml`, variables `ASSISTANCE_IMAP_*`.
 
@@ -63,6 +64,14 @@ responsable, des notes internes, et affiche le contexte ORéOF du demandeur. Acc
    « toutes ouvertes jusqu'au … », « toutes fermées », ou « ouvertes, sauf : » suivi des seuls modules fermés), pour la
    campagne par défaut et les campagnes des profils encore actives (une saisie ouverte ou à venir ; les campagnes
    passées sont masquées), 5 dernières `DpeDemande`, liens fiche utilisateur et « se connecter en tant que ».
+6. **Assistant IA** (`AssistantIaAssistance`, contrôleur Stimulus `assistance-ia`) : sur la fiche d'une demande (hors
+   annonce), « Résumer la demande » (Problème / Déjà fait / Reste à faire) et « Proposer une réponse » (brouillon chargé
+   dans l'éditeur Trix du formulaire de réponse, jamais envoyé seul ; `[à compléter]` là où l'information manque).
+   LLM de l'établissement (Oratio / ROMEO), même configuration que la synthèse IA des fiches matières
+   (`docs/composants/synthese-ia.md`) ; sans IA configurée, le panneau n'est pas affiché. Envoyé au modèle : sujet, nom
+   de l'usager, formation/parcours rattachés et les 20 derniers messages et notes internes, contenu propre seulement
+   (historique cité retiré, adresses mail masquées, 3 000 caractères par message, pas de pièce jointe). Résultat en cache
+   7 jours selon le contenu (un nouveau message en produit un nouveau) ; un second clic régénère (`forcer`).
 
 ## Pages et actions
 
@@ -72,6 +81,7 @@ responsable, des notes internes, et affiche le contexte ORéOF du demandeur. Acc
 | `app_assistance_show` | fil de la demande en arbre, réponse, note interne, statut, responsable, formation/parcours, fusion, contexte |
 | `app_assistance_{statut,responsable,note,rattacher,fusionner,repondre}` | POST, jeton CSRF `assistance_<id>` |
 | `app_assistance_relever` | POST, jeton `assistance_relever` |
+| `app_assistance_ia` | POST `/{id}/ia/{resume\|brouillon}`, jeton `assistance_<id>`, option `forcer` ; réponse JSON `{"texte", "html"}`, ou `{"erreur"}` en 502 (IA absente ou en échec, erreur journalisée) |
 | `app_assistance_relever_auto` | POST, jeton `assistance_relever`, réponse JSON `{"nouveaux": n\|null}` ; appelé par le contrôleur Stimulus `assistance-releve` à l'ouverture de la liste, qui recharge la page si de nouveaux mails arrivent. Relève espacée d'au moins `ReleveWebAssistance::INTERVALLE_MINIMUM` = 60 s (date de la dernière relève dans `cache.app`, tous administrateurs confondus) ; boîte non configurée, relève en cours ou erreur IMAP → `null` (erreur journalisée), la page reste utilisable |
 
 Fil en arbre (`FilMessagesAssistance`, façon Thunderbird) : chaque message est placé sous celui auquel il répond
