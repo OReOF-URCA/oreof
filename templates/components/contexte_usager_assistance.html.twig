@@ -42,21 +42,32 @@
                 {% endif %}
             </div>
 
-            {% for bloc in contexte.campagnes %}
+            {# une ligne par campagne ; seuls les modules fermés alors que d'autres sont ouverts sont détaillés #}
+            {% if contexte.campagnes is not empty %}
                 <div>
-                    <h3 class="mb-1 text-xs font-semibold uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
-                        Périodes de saisie — {{ bloc.campagne.libelle }}{% if bloc.campagne.defaut %} (par défaut){% endif %}
-                    </h3>
+                    <h3 class="mb-1 text-xs font-semibold uppercase tracking-wider text-secondary-500 dark:text-secondary-400">Périodes de saisie</h3>
                     <ul class="space-y-1">
-                        {% for statut in bloc.modules %}
-                            <li class="flex items-start gap-2">
-                                <twig:Dot :variant="statut.isOpen ? 'success' : 'danger'" />
-                                <span class="text-text"><strong>{{ statut.module.label }}</strong> : {{ statut.message }}</span>
+                        {% for bloc in contexte.campagnes %}
+                            <li class="text-text" data-campagne="{{ bloc.campagne.id }}">
+                                <div class="flex items-start gap-2">
+                                    <twig:Dot :variant="bloc.etat == 'ouvertes' ? 'success' : (bloc.etat == 'mixte' ? 'warning' : 'danger')" />
+                                    <span><strong>{{ bloc.campagne.libelle }}</strong>{% if bloc.campagne.defaut %} <span class="text-secondary-500 dark:text-secondary-400">(par défaut)</span>{% endif %} : {{ bloc.resume }}</span>
+                                </div>
+                                {% if bloc.details is not empty %}
+                                    <ul class="ml-5 mt-1 space-y-0.5">
+                                        {% for statut in bloc.details %}
+                                            <li class="flex items-start gap-2 text-danger-700 dark:text-danger-300">
+                                                <twig:Dot variant="danger" />
+                                                <span><strong>{{ statut.module.label }}</strong> : {{ statut.message }}</span>
+                                            </li>
+                                        {% endfor %}
+                                    </ul>
+                                {% endif %}
                             </li>
                         {% endfor %}
                     </ul>
                 </div>
-            {% endfor %}
+            {% endif %}
 
             {% if contexte.demandesAcces is not empty %}
                 <div>

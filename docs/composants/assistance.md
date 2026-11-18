@@ -58,9 +58,11 @@ responsable, des notes internes, et affiche le contexte ORéOF du demandeur. Acc
    `In-Reply-To`/`References` du dernier message et un `Message-ID` enregistré : la réponse de l'usager revient dans
    le même fil. Statut → « En attente de l'usager », ou « Résolue » si la case est cochée. Sans responsable, la demande
    est attribuée à l'auteur de la réponse (un responsable déjà désigné est conservé).
-5. **Contexte du demandeur** (`ContexteUsagerAssistance`) : compte, rôles, profils (`UserProfil`), état de chaque
-   module (`CampagneAccessibilityService::getModuleStatus`) pour la campagne par défaut et celles des profils,
-   5 dernières `DpeDemande`, liens fiche utilisateur et « se connecter en tant que ».
+5. **Contexte du demandeur** (`ContexteUsagerAssistance`) : compte, rôles, profils (`UserProfil`), périodes de saisie
+   résumées en une ligne par campagne (`ResumePeriodesSaisie` sur `CampagneAccessibilityService::getModuleStatus` :
+   « toutes ouvertes jusqu'au … », « toutes fermées », ou « ouvertes, sauf : » suivi des seuls modules fermés), pour la
+   campagne par défaut et les campagnes des profils encore actives (une saisie ouverte ou à venir ; les campagnes
+   passées sont masquées), 5 dernières `DpeDemande`, liens fiche utilisateur et « se connecter en tant que ».
 
 ## Pages et actions
 

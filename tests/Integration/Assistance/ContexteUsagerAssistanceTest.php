@@ -7,11 +7,14 @@ namespace App\Tests\Integration\Assistance;
 use App\Entity\CampagneCollecte;
 use App\Entity\DemandeAssistance;
 use App\Entity\Profil;
+use App\Entity\TimelineDate;
 use App\Entity\User;
 use App\Entity\UserProfil;
+use App\Enums\CampagneModuleEnum;
 use App\Service\Assistance\ContexteUsagerAssistance;
 use App\Tests\Support\DatabaseTrait;
 use App\Tests\Support\TestCase;
+use DateTime;
 
 class ContexteUsagerAssistanceTest extends TestCase
 {
@@ -62,29 +65,47 @@ class ContexteUsagerAssistanceTest extends TestCase
         self::assertNull($this->getService(ContexteUsagerAssistance::class)->pour($this->demande('inconnu@univ-test.fr')));
     }
 
-    public function testCampagneSansEtapeAfficheAucunePeriode(): void
+    private function campagneOuverte(): CampagneCollecte
+    {
+        $campagne = (new CampagneCollecte())->setLibelle('Campagne ouverte test')->setAnnee(2098)->setCodeApogee('U');
+        $etape = (new TimelineDate())
+            ->setLibelle('Saisie')
+            ->setIcone('mdi:pencil')
+            ->setInTimeline(true)
+            ->setDateDebut(new DateTime('-1 day'))
+            ->setDate(new DateTime('+10 days'))
+            ->setModulesActifs(array_map(static fn (CampagneModuleEnum $m) => $m->value, CampagneModuleEnum::cases()));
+        $campagne->addTimelineDate($etape);
+        $this->persistAll([$campagne, $etape]);
+
+        return $campagne;
+    }
+
+    public function testCampagnePasseeDUnProfilEstMasquee(): void
     {
         $campagne = $this->campagneSansEtape();
         $this->usagerAvecProfilSur($campagne);
 
         $contexte = $this->getService(ContexteUsagerAssistance::class)->pour($this->demande('usager-contexte@univ-test.fr'));
 
-        $bloc = array_values(array_filter($contexte['campagnes'], static fn (array $c) => $c['campagne'] === $campagne))[0];
-        self::assertCount(5, $bloc['modules']);
-        self::assertSame('Aucune période de saisie configurée pour ce module.', $bloc['modules'][0]['message']);
+        self::assertNotContains($campagne, array_map(static fn (array $c) => $c['campagne'], $contexte['campagnes']));
         self::assertCount(1, $contexte['profils']);
     }
 
-    public function testCampagnesDesProfilsSontIncluses(): void
+    public function testCampagneOuverteDUnProfilEstResumeeEnUneLigne(): void
     {
         $defaut = $this->entityManager->getRepository(CampagneCollecte::class)->findOneBy(['defaut' => true]);
         self::assertNotNull($defaut, 'Les fixtures de test doivent fournir une campagne par défaut.');
-        $campagne = $this->campagneSansEtape();
+        $campagne = $this->campagneOuverte();
         $user = $this->usagerAvecProfilSur($campagne);
 
         $contexte = $this->getService(ContexteUsagerAssistance::class)->pour($this->demande('usager-contexte@univ-test.fr'));
 
         self::assertSame($user, $contexte['user']);
         self::assertSame([$defaut, $campagne], array_map(static fn (array $c) => $c['campagne'], $contexte['campagnes']));
+        $bloc = $contexte['campagnes'][1];
+        self::assertSame('ouvertes', $bloc['etat']);
+        self::assertSame(sprintf('Toutes les saisies sont ouvertes jusqu\'au %s.', (new DateTime('+10 days'))->format('d/m/Y')), $bloc['resume']);
+        self::assertSame([], $bloc['details']);
     }
 }

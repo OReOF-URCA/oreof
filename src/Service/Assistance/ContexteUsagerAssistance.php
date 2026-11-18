@@ -13,8 +13,8 @@ use App\Repository\UserRepository;
 use App\Service\CampagneAccessibilityService;
 
 /**
- * Contexte ORéOF du demandeur d'une demande d'assistance : compte, profils, ouverture des modules
- * pour la campagne par défaut et les campagnes de ses profils, dernières demandes d'accès.
+ * Contexte ORéOF du demandeur d'une demande d'assistance : compte, profils, ouverture des modules résumée
+ * pour la campagne par défaut et les campagnes encore actives de ses profils, dernières demandes d'accès.
  */
 class ContexteUsagerAssistance
 {
@@ -22,6 +22,7 @@ class ContexteUsagerAssistance
         private readonly UserRepository $userRepository,
         private readonly CampagneCollecteRepository $campagneRepository,
         private readonly CampagneAccessibilityService $campagneAccessibility,
+        private readonly ResumePeriodesSaisie $resumePeriodes,
     ) {
     }
 
@@ -31,7 +32,7 @@ class ContexteUsagerAssistance
      *     roles: list<string>,
      *     compteValide: bool,
      *     profils: list<UserProfil>,
-     *     campagnes: list<array{campagne: CampagneCollecte, modules: list<array<string, mixed>>}>,
+     *     campagnes: list<array{campagne: CampagneCollecte, etat: string, resume: string, details: list<array<string, mixed>>, active: bool}>,
      *     demandesAcces: list<DpeDemande>
      * }|null
      */
@@ -62,7 +63,12 @@ class ContexteUsagerAssistance
             foreach (CampagneModuleEnum::cases() as $module) {
                 $modules[] = $this->campagneAccessibility->getModuleStatus($module, $campagne);
             }
-            $blocs[] = ['campagne' => $campagne, 'modules' => $modules];
+            $resume = $this->resumePeriodes->resumer($modules);
+            // campagne d'un profil sans saisie ouverte ni à venir (campagne passée) : rien d'utile à afficher
+            if ($campagne->isDefaut() !== true && !$resume['active']) {
+                continue;
+            }
+            $blocs[] = ['campagne' => $campagne] + $resume;
         }
 
         $demandesAcces = $user->getDpeDemandes()->toArray();
