@@ -264,7 +264,9 @@ export default class extends Controller {
   }
 
   async addCode (event) {
-    event.preventDefault()
+      if (event && typeof event.preventDefault === 'function') {
+          event.preventDefault()
+      }
 
     const codeInput = this.hasCodeInputTarget
       ? this.codeInputTarget.value.trim()
@@ -327,6 +329,31 @@ export default class extends Controller {
     if (event.key !== 'Enter') {
       return
     }
+      event.preventDefault()
+
+      const rawInput = (this.hasCodeInputTarget ? this.codeInputTarget.value : '').trim()
+      if (!rawInput) {
+          return
+      }
+
+      if (this.hasSearchResultsTarget && !this.searchResultsTarget.classList.contains('hidden')) {
+          const codeUpper = rawInput.toUpperCase()
+          const exactBtn = this.searchResultsTarget.querySelector(`button[data-code="${codeUpper}"]:not([disabled])`)
+          if (exactBtn) {
+              exactBtn.click()
+              return
+          }
+
+          const romeRegex = /^[A-Z]\d{4}$/
+          if (!romeRegex.test(codeUpper)) {
+              const firstAvailableBtn = this.searchResultsTarget.querySelector('button[data-code]:not([disabled])')
+              if (firstAvailableBtn) {
+                  firstAvailableBtn.click()
+                  return
+              }
+          }
+      }
+
     this.addCode(event)
   }
 
