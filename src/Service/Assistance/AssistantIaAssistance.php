@@ -15,8 +15,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * Résumé d'une demande d'assistance et brouillon de réponse par le LLM de l'établissement (Oratio / ROMEO),
  * avec la configuration IA commune (Établissement > APIs tierces, sinon variables AI_*).
  *
- * Seul le contenu propre des messages est envoyé (sans historique cité, sans adresse mail ni pièce jointe).
- * Le résultat est mis en cache selon le contenu : un nouveau message produit un nouveau résultat.
+ * Envoyé : contexte ORéOF de l'usager (profils, périodes de saisie…) et contenu propre des messages (sans historique
+ * cité, sans adresse mail ni pièce jointe). Résultat en cache selon ce contenu : un nouveau message ou un changement de
+ * contexte produit un nouveau résultat.
  */
 class AssistantIaAssistance
 {
@@ -29,7 +30,8 @@ class AssistantIaAssistance
     private const CONSIGNE_COMMUNE = 'Tu assistes l\'équipe support d\'ORéOF, application de gestion de l\'offre de formation '
         . '(maquettes, parcours, fiches matières, MCCC, campagnes de saisie, workflows de validation) de l\'Université de Reims '
         . 'Champagne-Ardenne. Tu reçois l\'échange complet d\'une demande d\'assistance : messages des usagers, réponses et notes '
-        . 'internes de l\'équipe. N\'invente jamais de fonctionnalité, de procédure, de date ni de lien. Réponds en français, '
+        . 'internes de l\'équipe, précédé du contexte ORéOF de l\'usager (profils, périodes de saisie ouvertes ou fermées, '
+        . 'demandes de modification) : appuie-toi dessus. N\'invente jamais de fonctionnalité, de procédure, de date ni de lien. Réponds en français, '
         . 'en texte brut sans Markdown.';
 
     private const CONSIGNE_RESUME = self::CONSIGNE_COMMUNE . ' Résume la demande pour un membre de l\'équipe qui la découvre, '
@@ -45,6 +47,7 @@ class AssistantIaAssistance
         private readonly CacheInterface $cache,
         private readonly FicheMatiereAiSynthesizer $configurationIa,
         private readonly SeparateurCitation $separateur,
+        private readonly ContexteUsagerAssistance $contexteUsager,
     ) {
     }
 
@@ -73,6 +76,8 @@ class AssistantIaAssistance
             $lignes[] = 'Formation : ' . $demande->getFormation()->getDisplay()
                 . ($demande->getParcours() !== null ? ' / ' . $demande->getParcours()->getDisplay() : '');
         }
+        $lignes[] = '';
+        $lignes[] = $this->contexteUsager->enTexte($demande);
 
         $messages = $demande->getMessages()->toArray();
         usort($messages, static fn (MessageAssistance $a, MessageAssistance $b) => $a->getDateEnvoi() <=> $b->getDateEnvoi());

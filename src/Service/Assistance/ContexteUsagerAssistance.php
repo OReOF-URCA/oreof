@@ -83,4 +83,52 @@ class ContexteUsagerAssistance
             'demandesAcces' => array_slice($demandesAcces, 0, 5),
         ];
     }
+
+    /**
+     * Même contexte en texte brut pour l'assistant IA (sans adresse mail ni identifiant de connexion).
+     */
+    public function enTexte(DemandeAssistance $demande): string
+    {
+        $contexte = $this->pour($demande);
+        if ($contexte === null) {
+            return "Contexte ORéOF de l'usager : aucun compte ORéOF.";
+        }
+
+        $roles = array_values(array_filter($contexte['roles'], static fn (string $r) => $r !== 'ROLE_USER'));
+        $lignes = [
+            "Contexte ORéOF de l'usager :",
+            '- ' . ($contexte['compteValide'] ? 'Compte actif' : 'Compte non activé')
+                . ($roles !== [] ? ', rôles : ' . implode(', ', $roles) : ''),
+        ];
+
+        $profils = array_map(static function (UserProfil $p): string {
+            $texte = $p->getProfil()?->getLibelle() ?? '—';
+            if ($p->getDisplayCentre()) {
+                $texte .= ' sur ' . $p->getDisplayCentre();
+            }
+
+            return $texte . ($p->getCampagneCollecte() !== null ? ' (' . $p->getCampagneCollecte()->getLibelle() . ')' : '');
+        }, $contexte['profils']);
+        $lignes[] = '- Profils : ' . ($profils !== [] ? implode(' ; ', $profils) : 'aucun');
+
+        if ($contexte['campagnes'] !== []) {
+            $lignes[] = '- Périodes de saisie :';
+            foreach ($contexte['campagnes'] as $bloc) {
+                $lignes[] = sprintf('  - %s%s : %s', $bloc['campagne']->getLibelle(), $bloc['campagne']->isDefaut() === true ? ' (par défaut)' : '', $bloc['resume']);
+                foreach ($bloc['details'] as $statut) {
+                    $lignes[] = sprintf('    - %s : %s', $statut['module']->getLabel(), $statut['message']);
+                }
+            }
+        }
+
+        if ($contexte['demandesAcces'] !== []) {
+            $lignes[] = '- Dernières demandes de modification :';
+            foreach ($contexte['demandesAcces'] as $dpe) {
+                $objet = $dpe->getParcours()?->getDisplay() ?? $dpe->getFormation()?->getDisplay() ?? '—';
+                $lignes[] = sprintf('  - %s %s%s', $dpe->getDateDemande()?->format('d/m/Y') ?? '', $objet, $dpe->getEtatDemande() !== null ? ' (' . $dpe->getEtatDemande()->getLibelle() . ')' : '');
+            }
+        }
+
+        return implode("\n", $lignes);
+    }
 }

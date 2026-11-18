@@ -69,9 +69,11 @@ responsable, des notes internes, et affiche le contexte ORéOF du demandeur. Acc
    dans l'éditeur Trix du formulaire de réponse, jamais envoyé seul ; `[à compléter]` là où l'information manque).
    LLM de l'établissement (Oratio / ROMEO), même configuration que la synthèse IA des fiches matières
    (`docs/composants/synthese-ia.md`) ; sans IA configurée, le panneau n'est pas affiché. Envoyé au modèle : sujet, nom
-   de l'usager, formation/parcours rattachés et les 20 derniers messages et notes internes, contenu propre seulement
+   de l'usager, formation/parcours rattachés, contexte du demandeur en texte (`ContexteUsagerAssistance::enTexte` :
+   compte, rôles, profils, périodes de saisie résumées, dernières demandes de modification ; sans adresse ni
+   identifiant), et les 20 derniers messages et notes internes, contenu propre seulement
    (historique cité retiré, adresses mail masquées, 3 000 caractères par message, pas de pièce jointe). Résultat en cache
-   7 jours selon le contenu (un nouveau message en produit un nouveau) ; un second clic régénère (`forcer`).
+   7 jours selon le contenu (un nouveau message ou un changement de contexte en produit un nouveau) ; un second clic régénère (`forcer`).
 
 ## Pages et actions
 

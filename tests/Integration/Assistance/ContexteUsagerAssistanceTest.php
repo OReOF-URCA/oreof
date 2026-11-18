@@ -108,4 +108,25 @@ class ContexteUsagerAssistanceTest extends TestCase
         self::assertSame(sprintf('Toutes les saisies sont ouvertes jusqu\'au %s.', (new DateTime('+10 days'))->format('d/m/Y')), $bloc['resume']);
         self::assertSame([], $bloc['details']);
     }
+
+    public function testTexteIaSansCompte(): void
+    {
+        self::assertSame(
+            "Contexte ORéOF de l'usager : aucun compte ORéOF.",
+            $this->getService(ContexteUsagerAssistance::class)->enTexte($this->demande('inconnu@univ-test.fr')),
+        );
+    }
+
+    public function testTexteIaResumeCompteProfilsEtPeriodes(): void
+    {
+        $campagne = $this->campagneOuverte();
+        $this->usagerAvecProfilSur($campagne);
+
+        $texte = $this->getService(ContexteUsagerAssistance::class)->enTexte($this->demande('usager-contexte@univ-test.fr'));
+
+        self::assertStringStartsWith("Contexte ORéOF de l'usager :\n- Compte non activé", $texte);
+        self::assertStringContainsString('- Profils : Responsable DPE test (Campagne ouverte test)', $texte);
+        self::assertStringContainsString(sprintf('Campagne ouverte test : Toutes les saisies sont ouvertes jusqu\'au %s.', (new DateTime('+10 days'))->format('d/m/Y')), $texte);
+        self::assertStringNotContainsString('@', $texte);
+    }
 }

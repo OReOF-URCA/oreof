@@ -9,6 +9,7 @@ use App\Entity\MessageAssistance;
 use App\Enums\SensMessageAssistanceEnum;
 use App\Service\Ai\FicheMatiereAiSynthesizer;
 use App\Service\Assistance\AssistantIaAssistance;
+use App\Service\Assistance\ContexteUsagerAssistance;
 use App\Service\Assistance\SeparateurCitation;
 use DateTimeImmutable;
 use PHPUnit\Framework\TestCase;
@@ -21,6 +22,8 @@ class AssistantIaAssistanceTest extends TestCase
 {
     /** @var list<array<string, mixed>> */
     private array $requetes = [];
+
+    private string $contexteUsager = "Contexte ORéOF de l'usager :\n- Profils : Responsable de parcours";
 
     private function assistant(?string $cle = 'sk-test', ?string $reponse = 'Texte généré'): AssistantIaAssistance
     {
@@ -38,7 +41,10 @@ class AssistantIaAssistanceTest extends TestCase
             envAiModel: 'mistral-small-3.2-24b',
         );
 
-        return new AssistantIaAssistance($http, new ArrayAdapter(), $config, new SeparateurCitation());
+        $contexte = $this->createStub(ContexteUsagerAssistance::class);
+        $contexte->method('enTexte')->willReturnCallback(fn () => $this->contexteUsager);
+
+        return new AssistantIaAssistance($http, new ArrayAdapter(), $config, new SeparateurCitation(), $contexte);
     }
 
     private function message(SensMessageAssistanceEnum $sens, string $nom, string $email, string $texte, string $date): MessageAssistance
@@ -75,6 +81,25 @@ class AssistantIaAssistanceTest extends TestCase
         self::assertStringContainsString("Note interne de l'équipe (Admin ORéOF) :\nVérifier ses droits sur le parcours.", $conversation);
         self::assertStringNotContainsString('vieux message cité', $conversation);
         self::assertStringNotContainsString('@', $conversation, 'Les adresses mail ne sont pas envoyées au modèle');
+    }
+
+    public function testConversationInclutLeContexteDeLUsager(): void
+    {
+        $conversation = $this->assistant()->conversation($this->demande());
+
+        self::assertStringContainsString("Usager : Jean Dupont\n\nContexte ORéOF de l'usager :\n- Profils : Responsable de parcours", $conversation);
+    }
+
+    public function testChangementDeContexteInvalideLeCache(): void
+    {
+        $assistant = $this->assistant();
+        $demande = $this->demande();
+        $assistant->resumer($demande);
+
+        $this->contexteUsager = "Contexte ORéOF de l'usager :\n- Périodes de saisie : toutes fermées";
+        $assistant->resumer($demande);
+
+        self::assertCount(2, $this->requetes);
     }
 
     public function testResumeAppelleOratioAvecLaConversation(): void
