@@ -1,0 +1,68 @@
+{# templates/formation_v2/_actions_modifier_menu.html.twig #}
+{# Menu partagé des actions de modification (utilisé dans la sidebar et le bouton flottant) #}
+
+<div class="py-1">
+    <div class="px-3 py-1.5 text-[10px] font-black uppercase tracking-wider text-secondary-400 dark:text-secondary-500">
+        Formation (Mention)
+    </div>
+    {% if canEditFormation %}
+        <a href="{{ path('formation_v2_modifier', {slug: formation.slug}) }}"
+           role="menuitem"
+           class="flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-secondary-800 hover:bg-warning-50 hover:text-warning-900 transition dark:text-secondary-200 dark:hover:bg-warning-950/40 dark:hover:text-warning-300">
+            <span class="flex items-center gap-2 truncate">
+                {{ ux_icon('icon:edit', {class: 'h-3.5 w-3.5 text-warning-600 dark:text-warning-400 shrink-0'}) }}
+                <span class="truncate">Modifier le DPE</span>
+            </span>
+            <span class="inline-flex items-center rounded-full bg-success-100 px-2 py-0.5 text-[10px] font-semibold text-success-800 dark:bg-success-900/40 dark:text-success-300 shrink-0">
+                Ouvert
+            </span>
+        </a>
+    {% else %}
+        <div class="flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-xs font-medium text-secondary-400 opacity-60 cursor-not-allowed dark:text-secondary-500"
+                {{ stimulus_controller('tooltip') }}
+             title="Formation verrouillée">
+            <span class="flex items-center gap-2 truncate">
+                {{ ux_icon('icon:lock', {class: 'h-3.5 w-3.5 shrink-0'}) }}
+                <span class="truncate">Modifier le DPE</span>
+            </span>
+            <span class="text-[10px] font-bold uppercase tracking-wider shrink-0">Verrouillé</span>
+        </div>
+    {% endif %}
+
+    {% if formation.hasParcours == true and formation.parcours|length > 0 %}
+        <div class="my-2 border-t border-secondary-100 dark:border-secondary-800"></div>
+        <div class="flex items-center justify-between px-3 py-1 text-[10px] font-black uppercase tracking-wider text-secondary-400 dark:text-secondary-500">
+            <span>Parcours</span>
+            <span class="rounded-full bg-secondary-100 px-1.5 py-0.2 text-[10px] font-bold text-secondary-600 dark:bg-secondary-800 dark:text-secondary-400">{{ formation.parcours|length }}</span>
+        </div>
+        <div class="space-y-0.5 max-h-60 overflow-y-auto pr-1">
+            {% for p in formation.parcours %}
+                {% set canEditP = isOuvert(p) and isEditable(p) and (is_granted('ROLE_ADMIN') or is_granted('EDIT', p)) %}
+                {% if canEditP %}
+                    <a href="{{ path('parcours_v2_modifier', {parcours: p.id}) }}"
+                       role="menuitem"
+                       class="group flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-xs font-semibold text-secondary-800 hover:bg-warning-50 hover:text-warning-900 transition dark:text-secondary-200 dark:hover:bg-warning-950/40 dark:hover:text-warning-300">
+                        <span class="flex items-center gap-2 truncate">
+                            {{ ux_icon('icon:edit', {class: 'h-3.5 w-3.5 text-warning-600 group-hover:scale-110 transition-transform dark:text-warning-400 shrink-0'}) }}
+                            <span class="truncate">{{ p.libelle }}</span>
+                        </span>
+                        {% set pBadge = p.typeParcours|badgeTypeParcours %}
+                        {% if pBadge is not null %}
+                            <span class="shrink-0 text-[10px]">{{ component('Badge', { dto: pBadge }) }}</span>
+                        {% endif %}
+                    </a>
+                {% else %}
+                    <div class="flex items-center justify-between gap-2 rounded-xl px-3 py-2 text-xs font-medium text-secondary-400 opacity-60 cursor-not-allowed dark:text-secondary-500"
+                            {{ stimulus_controller('tooltip') }}
+                         title="Parcours verrouillé">
+                        <span class="flex items-center gap-2 truncate">
+                            {{ ux_icon('icon:lock', {class: 'h-3.5 w-3.5 shrink-0'}) }}
+                            <span class="truncate">{{ p.libelle }}</span>
+                        </span>
+                        <span class="text-[10px] font-bold uppercase tracking-wider shrink-0">Verrouillé</span>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
