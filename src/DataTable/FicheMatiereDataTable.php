@@ -162,7 +162,7 @@ class FicheMatiereDataTable extends AbstractAppDataTable
             ]);
 
         $editAction = Action::edit('Modifier', self::BTN_EDIT_CLASS)
-            ->linkToRoute('fiche_matiere_v2_modifier', static fn(FicheMatiere $fm): array => ['slug' => $fm->getSlug()])
+            ->linkToRoute('fiche_matiere_v2_modifier', static fn(FicheMatiere $fm): array => ['id' => $fm->getId()])
             ->icon(Icon::Pencil)
             ->setPermission('EDIT_FICHE_MATIERE', static fn(mixed $fm): mixed => $fm)
             ->htmlAttributes([

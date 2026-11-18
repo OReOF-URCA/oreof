@@ -27,16 +27,18 @@
 
 {% block bouton_header %}
     <div class="flex flex-wrap gap-3">
-        <twig:Button
-                href="{{ path('fiche_matiere_v2_voir', {slug: fiche_matiere.slug}) }}"
-                variant="info"
-                :soft="false"
-                :outline="true"
-                size="sm"
-                icon="icon:eye"
-                label="Voir la fiche EC/matière"
-                tooltip="Voir la fiche EC/matière"
-        />
+        <div id="btn_voir_fiche_matiere">
+            <twig:Button
+                    href="{{ path('fiche_matiere_v2_voir', {slug: fiche_matiere.slug}) }}"
+                    variant="info"
+                    :soft="false"
+                    :outline="true"
+                    size="sm"
+                    icon="icon:eye"
+                    label="Voir la fiche EC/matière"
+                    tooltip="Voir la fiche EC/matière"
+            />
+        </div>
 
         {% if source == 'liste' %}
             <twig:Button
@@ -88,7 +90,7 @@
                 </div>
 
                 <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-surface transition group"
-                   href="{{ path('fiche_matiere_v2_tabs', { slug: fiche_matiere.slug, tab: 'identite' }) }}"
+                   href="{{ path('fiche_matiere_v2_tabs', { id: fiche_matiere.id, tab: 'identite' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
                    data-tabs-target="tab">
@@ -101,7 +103,7 @@
                 </a>
 
                 <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-surface transition group"
-                   href="{{ path('fiche_matiere_v2_tabs', { slug: fiche_matiere.slug, tab: 'mutualisation' }) }}"
+                   href="{{ path('fiche_matiere_v2_tabs', { id: fiche_matiere.id, tab: 'mutualisation' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
                    data-tabs-target="tab">
@@ -114,7 +116,7 @@
                 </a>
 
                 <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-surface transition group"
-                   href="{{ path('fiche_matiere_v2_tabs', { slug: fiche_matiere.slug, tab: 'presentation' }) }}"
+                   href="{{ path('fiche_matiere_v2_tabs', { id: fiche_matiere.id, tab: 'presentation' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
                    data-tabs-target="tab">
@@ -127,7 +129,7 @@
                 </a>
 
                 <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-surface transition group"
-                   href="{{ path('fiche_matiere_v2_tabs', { slug: fiche_matiere.slug, tab: 'competences' }) }}"
+                   href="{{ path('fiche_matiere_v2_tabs', { id: fiche_matiere.id, tab: 'competences' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
                    data-tabs-target="tab">
@@ -140,7 +142,7 @@
                 </a>
 
                 <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-surface transition group"
-                   href="{{ path('fiche_matiere_v2_tabs', { slug: fiche_matiere.slug, tab: 'volumes_horaires' }) }}"
+                   href="{{ path('fiche_matiere_v2_tabs', { id: fiche_matiere.id, tab: 'volumes_horaires' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
                    data-tabs-target="tab">
@@ -153,7 +155,7 @@
                 </a>
 
                 <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-surface transition group"
-                   href="{{ path('fiche_matiere_v2_tabs', { slug: fiche_matiere.slug, tab: 'mccc' }) }}"
+                   href="{{ path('fiche_matiere_v2_tabs', { id: fiche_matiere.id, tab: 'mccc' }) }}"
                    data-turbo-frame="tab-content"
                    data-turbo-action="advance"
                    data-tabs-target="tab">

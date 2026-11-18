@@ -123,6 +123,10 @@ class ParcoursController extends BaseController
         BreadcrumbService      $breadcrumb,
     ): Response
     {
+        if (!$this->isGranted('SHOW', $parcours)) {
+            throw $this->createAccessDeniedException('Vous n\'avez pas accès à ce parcours.');
+        }
+
         $formation = $parcours->getFormation();
         if ($formation === null) {
             throw $this->createNotFoundException();

@@ -139,7 +139,7 @@
                 :outline="true"
                 size="sm"
                 icon="icon:edit"
-                href="{{ canEditFicheMatiere ? path('fiche_matiere_v2_modifier', {slug: ficheMatiere.slug}) : '' }}"
+                href="{{ canEditFicheMatiere ? path('fiche_matiere_v2_modifier', {id: ficheMatiere.id}) : '' }}"
                 :disabled="not canEditFicheMatiere"
                 tooltip="{{ canEditFicheMatiere ? 'Modifier une fiche EC/matière' : 'Fiche matière verrouillée' }}"
         />

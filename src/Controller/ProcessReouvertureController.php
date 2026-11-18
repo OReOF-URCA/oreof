@@ -51,6 +51,11 @@ class ProcessReouvertureController extends BaseController
         if ($request->isMethod('POST')) {
             $data = $request->request->all();
 
+            $argumentaire = $request->request->getString('argumentaire_demande_reouverture');
+            if (mb_strlen(preg_replace('/\s+/', '', $argumentaire)) < 5) {
+                return JsonReponse::error('Le commentaire doit comporter au moins 5 caractères (hors espaces).');
+            }
+
             $dpe = GetDpeParcours::getFromParcours($parcours);
             if ($dpe === null) {
                 return JsonReponse::error('DPE non trouvé');
@@ -177,6 +182,12 @@ class ProcessReouvertureController extends BaseController
 
         if ($request->isMethod('POST')) {
             $data = $request->request->all();
+
+            $argumentaire = $request->request->getString('argumentaire_demande_reouverture');
+            if (mb_strlen(preg_replace('/\s+/', '', $argumentaire)) < 5) {
+                return JsonReponse::error('Le commentaire doit comporter au moins 5 caractères (hors espaces).');
+            }
+
             if ($data['demandeReouverture'] === 'MODIFICATION_TEXTE') {
                 $etat = TypeModificationDpeEnum::MODIFICATION_TEXTE;
                 $texte = 'DPE ouvert pour modification des textes';

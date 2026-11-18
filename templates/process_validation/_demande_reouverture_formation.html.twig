@@ -62,9 +62,12 @@
                   class="form-control"
                   required
                   minlength="5"
+                  oninput="const clean = this.value.replace(/\s+/g, ''); if(clean.length < 5) { this.setCustomValidity('Veuillez saisir au moins 5 caractères (hors espaces).'); } else { this.setCustomValidity(''); }"
+                  placeholder="Saisissez votre commentaire (au moins 5 caractères hors espaces)..."
                   id="argumentaire_demande_reouverture"
                   rows="5"
         ></textarea>
+        <div class="form-text text-secondary-500 text-xs mt-1">Au minimum 5 caractères requis (hors espaces).</div>
     </div>
 
 

@@ -21,3 +21,24 @@
         </div>
     </template>
 </turbo-stream>
+
+<turbo-stream action="update" target="fiche_matiere_libelle">
+    <template>{{ fiche_matiere.libelle }}</template>
+</turbo-stream>
+
+<turbo-stream action="replace" target="btn_voir_fiche_matiere">
+    <template>
+        <div id="btn_voir_fiche_matiere">
+            <twig:Button
+                    href="{{ path('fiche_matiere_v2_voir', {slug: fiche_matiere.slug}) }}"
+                    variant="info"
+                    :soft="false"
+                    :outline="true"
+                    size="sm"
+                    icon="icon:eye"
+                    label="Voir la fiche EC/matière"
+                    tooltip="Voir la fiche EC/matière"
+            />
+        </div>
+    </template>
+</turbo-stream>
