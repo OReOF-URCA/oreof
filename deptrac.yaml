@@ -1,0 +1,28 @@
+deptrac:
+  paths:
+    - ./src
+    - ./packages/workflow-operations-bundle/src
+  exclude_files:
+    - '#.*Test\.php$#'
+  layers:
+    - name: TypeDiplome
+      collectors:
+        - type: classLike
+          value: '^App\\TypeDiplome\\.*'
+    - name: Workflow
+      collectors:
+        - type: classLike
+          value: '^App\\Workflow\\.*'
+        - type: classLike
+          value: '^Dannebicque\\WorkflowOperationsBundle\\.*'
+    - name: Controller
+      collectors:
+        - type: classLike
+          value: '^App\\Controller\\.*'
+  ruleset:
+    TypeDiplome: []
+    Workflow: []
+    Controller:
+      - TypeDiplome
+      - Workflow
+  skip_violations: {}
