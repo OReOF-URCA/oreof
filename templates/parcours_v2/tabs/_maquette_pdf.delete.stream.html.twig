@@ -1,0 +1,11 @@
+<turbo-stream action="update" target="currentFileName">
+    <template>
+        <h5 class="text-gray-700 text-base italic text-center">Aucun fichier actuellement enregistré</h5>
+    </template>
+</turbo-stream>
+
+{{ include('_ui/_toast.stream.html.twig', {
+        message: 'Suppression effectuée',
+        toast_type: 'info'
+    }) 
+}}
