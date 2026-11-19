@@ -238,7 +238,18 @@ HTML;
                 foreach ($competences as $comp) {
                     $competencesHTML = "";
                     foreach ($comp->getButNiveaux() as $niveau) {
-                        $competencesHTML .= "<li>Niveau {$niveau->getOrdre()} - {$niveau->getLibelle()}</li>";
+                        $acHTML = "";
+                        if ($niveau->getButApprentissageCritiques()->count() > 0) {
+                            $acHTML = "<ul>";
+                            foreach ($niveau->getButApprentissageCritiques() as $ac) {
+                                $acLibelle = $ac->getCode() !== null && $ac->getCode() !== ''
+                                    ? "{$ac->getCode()} - {$ac->getLibelle()}"
+                                    : (string)$ac->getLibelle();
+                                $acHTML .= "<li>{$acLibelle}</li>";
+                            }
+                            $acHTML .= "</ul>";
+                        }
+                        $competencesHTML .= "<li>Niveau {$niveau->getOrdre()} - {$niveau->getLibelle()}{$acHTML}</li>";
                     }
                     $competencesAcquisesExtra .= <<<HTML
                     <li>
