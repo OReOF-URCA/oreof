@@ -197,7 +197,7 @@
                                 <dt class="text-xs font-black uppercase tracking-[0.18em] text-secondary-400 dark:text-secondary-500">
                                     Texte haut de page (automatique)
                                 </dt>
-                                <dd class="leading-7 text-secondary-700 dark:text-secondary-200">{{ parcours.descriptifHautPageAutomatique|raw }}</dd>
+                                <dd class="texte-riche leading-7 text-secondary-700 dark:text-secondary-200">{{ parcours.descriptifHautPageAutomatique|raw }}</dd>
                             </div>
                         {% endif %}
                         {% if (parcours.descriptifHautPage != '' and parcours.descriptifHautPage != null) %}
@@ -205,7 +205,7 @@
                                 <dt class="text-xs font-black uppercase tracking-[0.18em] text-secondary-400 dark:text-secondary-500">
                                     Texte haut de page
                                 </dt>
-                                <dd class="leading-7 text-secondary-700 dark:text-secondary-200">{{ parcours.descriptifHautPage|raw }}</dd>
+                                <dd class="texte-riche leading-7 text-secondary-700 dark:text-secondary-200">{{ parcours.descriptifHautPage|raw }}</dd>
                             </div>
                         {% endif %}
                         {% if (parcours.descriptifBasPage != '' and parcours.descriptifBasPage != null) %}
@@ -213,7 +213,7 @@
                                 <dt class="text-xs font-black uppercase tracking-[0.18em] text-secondary-400 dark:text-secondary-500">
                                     Texte bas de page
                                 </dt>
-                                <dd class="leading-7 text-secondary-700 dark:text-secondary-200">{{ parcours.descriptifBasPage|raw }}</dd>
+                                <dd class="texte-riche leading-7 text-secondary-700 dark:text-secondary-200">{{ parcours.descriptifBasPage|raw }}</dd>
                             </div>
                         {% endif %}
                     </dl>
