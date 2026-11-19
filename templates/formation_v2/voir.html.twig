@@ -287,9 +287,9 @@
                         href="{{ canEditFormation ? path('formation_v2_modifier', {slug:formation.slug}) : '' }}"
                         variant="warning"
                         icon="icon:edit"
-                        label="Modifier le DPE"
+                        label="Modifier la formation"
                         :disabled="not canEditFormation"
-                        tooltip="{{ canEditFormation ? 'Modifier le DPE' : 'Formation verrouillée' }}"
+                        tooltip="{{ canEditFormation ? 'Modifier la formation' : 'Formation verrouillée' }}"
                 />
             {% endif %}
         {% else %}
@@ -299,9 +299,9 @@
                         href="{{ canEditFormation ? path('formation_v2_modifier', {slug:formation.slug}) : '' }}"
                         variant="warning"
                         icon="icon:edit"
-                        label="Modifier le DPE"
+                        label="Modifier la formation"
                         :disabled="not canEditFormation"
-                        tooltip="{{ canEditFormation ? 'Modifier le DPE' : 'Formation verrouillée' }}"
+                        tooltip="{{ canEditFormation ? 'Modifier la formation' : 'Formation verrouillée' }}"
                 />
             {% endif %}
         {% endif %}
