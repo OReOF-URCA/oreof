@@ -2,6 +2,57 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.8.0](https://github.com/OReOF-URCA/oreof/compare/v2.7.0...v2.8.0) (2026-11-20)
+
+
+### Features
+
+* **access:** ajout du champ classique/non classique ([50962dd](https://github.com/OReOF-URCA/oreof/commit/50962dd481c7416e5bfe1b71e0dc42e6619964af))
+* **access:** enhance resource access control with support for multiple routes and timeline checks ([f6dd3b9](https://github.com/OReOF-URCA/oreof/commit/f6dd3b9ba94d18d6337d45db92b5004ba8b54fc2))
+* **access:** enhance transition management with timeline module checks and update recipient lists ([a6562cc](https://github.com/OReOF-URCA/oreof/commit/a6562cc349c4aae99d6b0a218fca20a186b7883d))
+* **autosave:** enhance autosave functionality with support for multiple pending fields and improved event handling ([4461d53](https://github.com/OReOF-URCA/oreof/commit/4461d535b510a051186e3a175c5e4950df22561e))
+* **bcc:** implement BCC cross-reference templates and update PDF export functionality ([900ee4c](https://github.com/OReOF-URCA/oreof/commit/900ee4c092c02555fa536b9b655999b0dfaca916))
+* **compétences:** implement management for transverse competencies with import and new UI components ([d3467cd](https://github.com/OReOF-URCA/oreof/commit/d3467cdeca3d4abce1367839c0b23ba669a6853d))
+* **conditional-fields:** enhance regimeInscription handling with conditional display and update logic ([fedcafa](https://github.com/OReOF-URCA/oreof/commit/fedcafaab32d4498e4c8e78c3bc2245df62fe8e4))
+* **descriptifs:** add management for parcours descriptifs with automatic and manual options ([7b76bc1](https://github.com/OReOF-URCA/oreof/commit/7b76bc122f3e946c356596366fb53f5b4750064e))
+* **documents:** CRUD admin et aperçu des documents ([1374884](https://github.com/OReOF-URCA/oreof/commit/13748843ac4ec2a39295b1a658db1b4643bd7786))
+* **documents:** CRUD admin et aperçu des documents ([5fcc4f5](https://github.com/OReOF-URCA/oreof/commit/5fcc4f504c55b69d854e3dba72fdd27c15697a91))
+* **documents:** page documents dynamique et aides à la rédaction V2 ([3b8e76e](https://github.com/OReOF-URCA/oreof/commit/3b8e76efbcb673e05d233cc9e747248f2c3218ec))
+* **documents:** page lisant public/docs, aides à la rédaction adaptées à la V2 ([79f0eda](https://github.com/OReOF-URCA/oreof/commit/79f0eda170b55fd05540b5523c1dab4d0de6ac58))
+* **etablissement:** implement management for establishment offers with new routes and validation transitions ([7fb0370](https://github.com/OReOF-URCA/oreof/commit/7fb0370a70bad0916f42bc1f95dfc1df32467acb))
+* **export:** add PDF export for modifications summary of offers ([59bf6bb](https://github.com/OReOF-URCA/oreof/commit/59bf6bb94ff8ca52abf7757f7b5e053575286ed7))
+* **floating-actions:** implement floating action menu for quick edits and scroll to top functionality ([c8436f7](https://github.com/OReOF-URCA/oreof/commit/c8436f7bbc02b76d9bb7fd9c8136ef93dbd8839e))
+* **floating-actions:** implement floating action menu for quick edits and scroll to top functionality ([ebba331](https://github.com/OReOF-URCA/oreof/commit/ebba331632e09bc2f390442603e8c7ef88289fc4))
+* **lien-court:** add 'lien_court' field to parcours and implement management features ([c144bae](https://github.com/OReOF-URCA/oreof/commit/c144baee61740d4d04a241c9eb38d7ff081eabcc))
+* **navigation:** catégorie Assistance dans le menu Administration ([dd95e20](https://github.com/OReOF-URCA/oreof/commit/dd95e202ae328617db1c3f4b535b577e77c4bdd9))
+* **navigation:** catégorie Assistance et Pilotage en mega-menu ([62f7d14](https://github.com/OReOF-URCA/oreof/commit/62f7d1477e9e8098e489058f81f8a052be04b925))
+* **navigation:** Pilotage en mega-menu à 4 colonnes ([4c92537](https://github.com/OReOF-URCA/oreof/commit/4c9253755e53e6f24a93791f4c7d5ed3599bee57))
+* **parcours:** enhance state management with new workflow options and validation updates ([29cebb2](https://github.com/OReOF-URCA/oreof/commit/29cebb2d10186f401a8b75b140beb709899342a9))
+* **regime-inscription:** refactor regime inscription handling to improve data retrieval and display logic ([854cd78](https://github.com/OReOF-URCA/oreof/commit/854cd783149473ec3ee722cda81fb7a279445190))
+* **reouverture:** add management for reopening requests with new UI components and validation ([d750358](https://github.com/OReOF-URCA/oreof/commit/d750358f50a30d4d8a2aaa7d057e48a390edb6f0))
+* **reouverture:** add management for reopening requests with new UI components and validation ([defec56](https://github.com/OReOF-URCA/oreof/commit/defec56f37cf978d47f9e791cc897789b4a03bc0))
+* **reouverture:** update success messages and unify toast notifications in closure handling ([0f04f44](https://github.com/OReOF-URCA/oreof/commit/0f04f44327d7924bf97428a9fa05ca0345282e83))
+
+
+### Bug Fixes
+
+* **actions:** update label from 'Modifier le DPE' to 'Modifier la formation' ([afadc8e](https://github.com/OReOF-URCA/oreof/commit/afadc8ee1bef291c5437c979aa746aad077dbf8e))
+* **autosave:** sur blur pour les trix editor/textarea ([dc19f87](https://github.com/OReOF-URCA/oreof/commit/dc19f87aa7d7d3f19cffbfa7b9c4f3cb2528d8e6))
+* **formation:** « Modifier le DPE » et bannière respectent le verrou du workflow ([56adeeb](https://github.com/OReOF-URCA/oreof/commit/56adeeb674a501206d7f71cb0fefa59023bd575e))
+* **LheoXMLv2:** enhance competence display with detailed learning objectives ([8ac5cba](https://github.com/OReOF-URCA/oreof/commit/8ac5cba0332d13e0c6c5c7cd96fa6ff1906b2557))
+* **modifier:** adjust HTML structure for better readability and maintainability ([229a064](https://github.com/OReOF-URCA/oreof/commit/229a06446cd094c45f60d426ca4d657b7ede809c))
+* **navigation:** remet « Consulter l'offre de formation » dans Pilotage ([9ff1d21](https://github.com/OReOF-URCA/oreof/commit/9ff1d217a939468e30a292244b7c5ff77b937bc9))
+* **parcours:** add contenuFormation field to ParcoursStep1Type for better user input ([e271b57](https://github.com/OReOF-URCA/oreof/commit/e271b57cb99b1afd1a709147cc9620bc5b6ad806))
+* **parcours:** update terminology from DPE to parcours for consistency ([616ff38](https://github.com/OReOF-URCA/oreof/commit/616ff38335ddca4ff9d731c8fc427eceab09f4eb))
+* **rome:** enhance event handling for code input and improve search result interaction ([25c3a4e](https://github.com/OReOF-URCA/oreof/commit/25c3a4e0c0ec169d63f035cd173d5767631a4572))
+* **translations:** ajouter les traductions manquantes ([22bd48c](https://github.com/OReOF-URCA/oreof/commit/22bd48c4a91a370856df4f8054e7ba5a27507a26))
+* **translations:** ajouter les traductions manquantes affichées comme clés ([bbf4a2a](https://github.com/OReOF-URCA/oreof/commit/bbf4a2a718bb0948a44371defe3fc625873d0657))
+* **translations:** update validation messages for clarity and consistency ([941b790](https://github.com/OReOF-URCA/oreof/commit/941b7908d7f63fdca0fb7c78c72bde337af996f4))
+* **ui:** puces, numérotation et liens visibles dans les champs texte riche ([05929d9](https://github.com/OReOF-URCA/oreof/commit/05929d994311862a1752a81359728908b531f7d9))
+* **ui:** puces, numérotation et liens visibles dans les champs texte riche ([6e93f44](https://github.com/OReOF-URCA/oreof/commit/6e93f44d5afecf76b0464b2ef6715d3018971ab3))
+* **versioning:** remove duplicate niveau entry and exit codes in LheoXMLv2.php; add unit test for VersioningFormation service ([e843edc](https://github.com/OReOF-URCA/oreof/commit/e843edcb1014f0418ee3fb685fd128251dd0d91d))
+* **versioning:** update regime inscription handling to support BackedEnum and reset formation text differences ([d030e66](https://github.com/OReOF-URCA/oreof/commit/d030e664fb2243a8916a5603b73d91684d386a1a))
+
 ## [2.7.0](https://github.com/OReOF-URCA/oreof/compare/v2.6.0...v2.7.0) (2026-11-13)
 
 
