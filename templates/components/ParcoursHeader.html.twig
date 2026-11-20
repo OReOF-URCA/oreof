@@ -171,11 +171,11 @@
                     <p class="text-sm font-semibold">{{ this.editable ? 'Parcours en cours de modification.' : 'Parcours verrouillé.' }}</p>
                     <p class="text-xs opacity-80">
                         {% if this.editable %}
-                            Suivez l'avancement et les actions disponibles pour ce DPE.
+                            Suivez l'avancement et les actions disponibles pour ce parcours.
                         {% elseif not can_edit_timeline() %}
                             Période de saisie fermée pour cette campagne.
                         {% else %}
-                            Suivez l'avancement et les actions disponibles pour ce DPE.
+                            Suivez l'avancement et les actions disponibles pour ce parcours.
                         {% endif %}
                     </p>
                 </div>
@@ -233,7 +233,7 @@
                                 data-action="click->navbar-dropdown#toggle"
                                 aria-expanded="false">
                             {{ ux_icon('icon:check', {class: 'h-4 w-4'}) }}
-                            <span>Gestion du DPE</span>
+                            <span>Gestion du parcours</span>
                             {{ ux_icon('icon:chevron-down', {class: 'h-4 w-4'}) }}
                         </button>
                         <ul data-navbar-dropdown-target="content"
@@ -286,7 +286,7 @@
                             {{ stimulus_controller('tooltip') }}
                             title="{{ not isTimelineOpen ? 'Aucune étape de la timeline n\'autorise d\'action actuellement.' : 'Aucune action disponible pour le statut actuel.' }}">
                         {{ ux_icon('icon:check', {class: 'h-4 w-4'}) }}
-                        <span>Gestion du DPE</span>
+                        <span>Gestion du parcours</span>
                     </button>
                 {% endif %}
 
@@ -622,7 +622,7 @@
                                        data-turbo="true"
                                        href="{{ path('parcours_ses_changer_etat', { dpeParcours: dpeParcours.id }) }}">
                                         {{ ux_icon('icon:wrench', {class: 'h-4 w-4'}) }}
-                                        <span>Changer état DPE</span>
+                                        <span>Changer état du parcours</span>
                                     </a>
                                 </div>
                                 <div>
@@ -665,7 +665,7 @@
                                             {{ stimulus_controller('tooltip') }}
                                             title="Aucun DPE associé à ce parcours.">
                                         {{ ux_icon('icon:wrench', {class: 'h-4 w-4'}) }}
-                                        <span>Changer état DPE</span>
+                                        <span>Changer état du parcours</span>
                                     </button>
                                 </div>
                                 <div>

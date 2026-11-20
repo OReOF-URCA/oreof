@@ -86,26 +86,6 @@ class FormationStep1Type extends AbstractType
                     return $composanteRepository->createQueryBuilder('comp')
                         ->orderBy('comp.libelle', 'ASC');
                 },
-            ])
-            ->add('regimeInscription', RegimeInscriptionType::class, [
-                'translation_domain' => 'form',
-                'getter' => static fn ($entity): array => $entity->getRegimeInscriptionValues(),
-                'setter' => static function ($entity, array $values): void { $entity->setRegimeInscription($values); },
-                'multiple' => true,
-                'expanded' => true,
-                'choice_attr' => function ($choice) {
-                    return [
-                        'data-conditional-field-target' => 'trigger',
-                        'data-action' => 'change->conditional-field#toggle',
-                    ];
-                },
-            ])
-            ->add('modalitesAlternance', TextareaAutoSaveType::class, [
-                'help' => 'Indiquez en 3000 caractères maximum les périodes et leurs durées en centre ou en entreprise.',
-                'attr' => [
-                    'rows' => 10,
-                    'maxlength' => 3000,
-                ],
             ]);
     }
 

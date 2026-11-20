@@ -145,6 +145,7 @@ class Parcours
 
     #[Groups('parcours_json_versioning')]
     #[ORM\Column(nullable: true)]
+    /** @deprecated Conservé pour la transition (campagnes précédentes). La donnée officielle est désormais portée par Annee. */
     private ?array $regimeInscription = [];
 
     #[Groups('parcours_json_versioning')]
@@ -771,49 +772,60 @@ class Parcours
     }
 
     /**
+     * Retourne uniquement les régimes directement enregistrés en BDD sur ce parcours (valeur de transition).
+     *
+     * @return list<string>
+     * @deprecated Méthode de transition interne. Utiliser getRegimeInscriptionValues() qui reconstruit dynamiquement depuis les années.
+     */
+    public function getDirectRegimeInscriptionValues(): array
+    {
+        return \App\Referentiel\RegimeInscription::normalize($this->regimeInscription ?? []);
+    }
+
+    /**
      * @deprecated Returns only legacy enum cases and drops custom referential values.
      *             Use getRegimeInscriptionValues() for all new consumers.
      * @return list<\App\Enums\RegimeInscriptionEnum>
      */
     public function getRegimeInscription(): array
     {
-        if ($this->regimeInscription !== null && count($this->regimeInscription) === 0) {
-            $formaRegimes = $this->getFormation()?->getRegimeInscription() ?? [];
-            if (count($formaRegimes) !== 0) {
-                return $formaRegimes;
-            }
-        }
-
-        if ($this->regimeInscription === null) {
-            return $this->getFormation()?->getRegimeInscription() ?? [];
-        }
-
-        $t = [];
-        foreach ($this->regimeInscription as $value) {
-            if ($value instanceof RegimeInscriptionEnum) {
-                $t[] = $value;
-            } elseif (is_string($value)) {
-                $case = RegimeInscriptionEnum::tryFrom($value);
-                if ($case !== null) {
-                    $t[] = $case;
-                }
-            }
-        }
-
-        return $t;
+        return \App\Referentiel\RegimeInscription::legacyCases($this->getRegimeInscriptionValues());
     }
 
     /** @return list<string> */
     public function getRegimeInscriptionValues(): array
     {
-        $values = $this->regimeInscription;
-        if (($values === null || $values === []) && $this->getFormation() !== null) {
-            return $this->getFormation()->getRegimeInscriptionValues();
+        // 1. Reconstruire depuis les années si elles sont renseignées (seule donnée officielle)
+        $regimesFromAnnees = [];
+        foreach ($this->getAnnees() as $annee) {
+            foreach ($annee->getDirectRegimeInscriptionValues() as $val) {
+                $regimesFromAnnees[] = $val;
+            }
         }
 
-        return \App\Referentiel\RegimeInscription::normalize($values ?? []);
+        if ($regimesFromAnnees !== []) {
+            return \App\Referentiel\RegimeInscription::normalize($regimesFromAnnees);
+        }
+
+        // 2. Fallback transition : valeurs en BDD du parcours si existantes (campagnes précédentes non complétées)
+        $direct = $this->getDirectRegimeInscriptionValues();
+        if ($direct !== []) {
+            return $direct;
+        }
+
+        // 3. Fallback transition : valeurs en BDD de la formation parente si existantes
+        return $this->getFormation()?->getDirectRegimeInscriptionValues() ?? [];
     }
 
+    public function hasRegimeInscription(string|RegimeInscriptionEnum $regime): bool
+    {
+        $val = $regime instanceof RegimeInscriptionEnum ? $regime->value : $regime;
+        return in_array($val, $this->getRegimeInscriptionValues(), true);
+    }
+
+    /**
+     * @deprecated Le régime d'inscription doit désormais être configuré sur chaque Annee (source officielle).
+     */
     public function setRegimeInscription(?array $regimeInscription): self
     {
         $this->regimeInscription = $regimeInscription === null ? [] : \App\Referentiel\RegimeInscription::normalize($regimeInscription);
@@ -1381,9 +1393,94 @@ class Parcours
 
     public function isAlternance(): bool
     {
-        // regarder si dans le tableau regimeInscription il y a les valeurs alternance ou apprentissage
+        foreach ($this->getRegimeInscriptionValues() as $val) {
+            if (\App\Referentiel\RegimeInscription::isAlternance($val)) {
+                return true;
+            }
+        }
+
         return in_array(RegimeInscriptionEnum::FI_APPRENTISSAGE, $this->getRegimeInscription(), true) ||
             in_array(RegimeInscriptionEnum::FC_CONTRAT_PRO, $this->getRegimeInscription(), true);
+    }
+
+    /**
+     * @return list<Annee>
+     */
+    public function getAnneesAlternance(): array
+    {
+        $annees = [];
+        foreach ($this->getAnnees() as $annee) {
+            if ($annee->isAlternance()) {
+                $annees[] = $annee;
+            }
+        }
+
+        usort($annees, static fn(Annee $a, Annee $b) => ($a->getOrdre() ?? 0) <=> ($b->getOrdre() ?? 0));
+
+        return $annees;
+    }
+
+    /**
+     * Phrase indiquant par défaut les années proposées en alternance.
+     * Ex : "L'alternance est proposée en 2e et 3e année."
+     */
+    public function getPhraseAnneesAlternance(): ?string
+    {
+        if (!$this->isAlternance()) {
+            return null;
+        }
+
+        $anneesAlt = $this->getAnneesAlternance();
+        if ($anneesAlt === []) {
+            return "L'alternance est proposée pour ce parcours.";
+        }
+
+        $ordresLabels = [];
+        foreach ($anneesAlt as $annee) {
+            $ordre = $annee->getOrdre();
+            $ordresLabels[] = match ($ordre) {
+                1 => '1re',
+                default => $ordre . 'e',
+            };
+        }
+
+        if (count($ordresLabels) === 1) {
+            return sprintf("L'alternance est proposée en %s année.", $ordresLabels[0]);
+        }
+
+        $dernier = array_pop($ordresLabels);
+        return sprintf("L'alternance est proposée en %s et %s année.", implode(', ', $ordresLabels), $dernier);
+    }
+
+    /**
+     * Retourne la phrase par défaut des années en alternance complétée par le texte libre saisi par les collègues.
+     */
+    public function getDisplayModalitesAlternance(): ?string
+    {
+        if (!$this->isAlternance()) {
+            return null;
+        }
+
+        $phrase = $this->getPhraseAnneesAlternance();
+        $texte = $this->modalitesAlternance !== null ? trim($this->modalitesAlternance) : '';
+
+        if ($phrase === null && $texte === '') {
+            return null;
+        }
+
+        if ($texte === '') {
+            return $phrase !== null ? '<p>' . htmlspecialchars($phrase, ENT_NOQUOTES, 'UTF-8') . '</p>' : null;
+        }
+
+        if ($phrase === null) {
+            return $texte;
+        }
+
+        if (str_contains($texte, $phrase)) {
+            return $texte;
+        }
+
+        return '<p>' . htmlspecialchars($phrase, ENT_NOQUOTES, 'UTF-8') . '</p>' . $texte;
     }
 
     public function getDisplay(): string

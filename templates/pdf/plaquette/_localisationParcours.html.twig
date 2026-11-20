@@ -9,7 +9,8 @@
     </ul>
 </div>
 
-<p><strong>Modalités de l'alternance</strong> : {{ parcours.modalitesAlternance|raw }}</p>
+<p><strong>Modalités de l'alternance</strong>
+    : {{ (parcours.displayModalitesAlternance|default(parcours.modalitesAlternance))|raw }}</p>
 
 <div><strong>Inscription</strong> :
     {% if parcours.composanteInscription != null %}

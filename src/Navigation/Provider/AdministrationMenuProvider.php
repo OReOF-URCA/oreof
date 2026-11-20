@@ -158,27 +158,6 @@ final readonly class AdministrationMenuProvider implements MenuProviderInterface
                     )->inColumn('menu.menu_configuration'),
 
                     MenuItem::link(
-                        key: 'administration.help',
-                        label: 'menu.config.help',
-                        route: 'app_help_index',
-                        icon: 'mdi:help-circle-outline',
-                    )->inColumn('menu.menu_configuration'),
-
-                    MenuItem::link(
-                        key: 'administration.faq',
-                        label: 'menu.config.faq',
-                        route: 'app_faq_index',
-                        icon: 'mdi:chat-question-outline',
-                    )->inColumn('menu.menu_configuration'),
-
-                    MenuItem::link(
-                        key: 'administration.tutoriels',
-                        label: 'menu.config.tutoriels',
-                        route: 'app_tutoriel_admin_index',
-                        icon: 'mdi:youtube',
-                    )->inColumn('menu.menu_configuration'),
-
-                    MenuItem::link(
                         key: 'administration.workflows',
                         label: 'menu.config.workflows',
                         route: 'app_admin_workflow_index',
@@ -191,6 +170,27 @@ final readonly class AdministrationMenuProvider implements MenuProviderInterface
                         route: 'app_admin_duplication_campagne_index',
                         icon: 'mdi:content-duplicate',
                     )->inColumn('menu.menu_configuration'),
+
+                    MenuItem::link(
+                        key: 'administration.help',
+                        label: 'menu.config.help',
+                        route: 'app_help_index',
+                        icon: 'mdi:help-circle-outline',
+                    )->inColumn('menu.config.menu_assistance'),
+
+                    MenuItem::link(
+                        key: 'administration.faq',
+                        label: 'menu.config.faq',
+                        route: 'app_faq_index',
+                        icon: 'mdi:chat-question-outline',
+                    )->inColumn('menu.config.menu_assistance'),
+
+                    MenuItem::link(
+                        key: 'administration.tutoriels',
+                        label: 'menu.config.tutoriels',
+                        route: 'app_tutoriel_admin_index',
+                        icon: 'mdi:youtube',
+                    )->inColumn('menu.config.menu_assistance'),
 
                     MenuItem::link(
                         key: 'administration.statistiques_visites',

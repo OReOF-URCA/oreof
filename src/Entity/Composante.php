@@ -215,6 +215,22 @@ class Composante
         return $this->formations;
     }
 
+    /**
+     * @return Collection<int, Formation>
+     */
+    public function getFormationsAccreditees(): Collection
+    {
+        return $this->formations->filter(static fn(Formation $formation) => $formation->isClassique());
+    }
+
+    /**
+     * @return Collection<int, Formation>
+     */
+    public function getFormationsNonAccreditees(): Collection
+    {
+        return $this->formations->filter(static fn(Formation $formation) => !$formation->isClassique());
+    }
+
     public function addFormation(Formation $formation): self
     {
         if (!$this->formations->contains($formation)) {

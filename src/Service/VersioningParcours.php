@@ -321,7 +321,7 @@ class VersioningParcours
                     . implode(
                         "</p><p class=\"list-item\">",
                         array_map(
-                            fn ($regime) => $regime->value,
+                            fn($regime) => $regime instanceof \BackedEnum ? $regime->value : (string)$regime,
                             $lastVersion->getRegimeInscription()
                         )
                     ) . "</p>",
@@ -329,7 +329,7 @@ class VersioningParcours
                     . implode(
                         "</p><p class=\"list-item\">",
                         array_map(
-                            fn ($regime) => $regime->value,
+                            fn($regime) => $regime instanceof \BackedEnum ? $regime->value : (string)$regime,
                             $parcours->getRegimeInscription()
                         )
                     ) . "</p>",

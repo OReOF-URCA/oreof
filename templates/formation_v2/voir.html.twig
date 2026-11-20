@@ -81,6 +81,16 @@
         </div>
     {% endif %}
 
+    {% set userCanEditFormation = is_granted('EDIT', {route: 'app_formation', subject: formation})
+        or is_granted('EDIT', {route: 'app_composante', subject: formation})
+        or is_granted('EDIT', {route: 'app_etablissement', subject: formation})
+        or is_granted('ROLE_ADMIN') %}
+    {% if formation.hasParcours == true %}
+        {% set canEditFormation = userCanEditFormation and isOuvert(formation) %}
+    {% else %}
+        {% set canEditFormation = userCanEditFormation and dpeParcours is not null and isOuvert(dpeParcours) and isEditable(dpeParcours) %}
+    {% endif %}
+
     <div class="flex bg-surface dark:bg-secondary-900" data-controller="scroll-spy">
         <aside class="app-scrollspy-aside w-72 flex flex-col p-3 space-y-8">
             <div class="sticky top-[calc(var(--page-header-offset,4rem)+0.5rem)] space-y-8">
@@ -132,8 +142,19 @@
                              </a>
                          {% else %}
                              {% for parcours in formation.parcours %}
-                                 <p class="app-scrollspy-section-title--accent">
-                                     Parcours {{ parcours.libelle }}{% set typeParcoursBadge = parcours.typeParcours|badgeTypeParcours %}{% if typeParcoursBadge is not null %} {{ component('Badge', { dto: typeParcoursBadge }) }}{% endif %}</p>
+                                 {% set canEditP = isOuvert(parcours) and isEditable(parcours) and (is_granted('ROLE_ADMIN') or is_granted('EDIT', parcours)) %}
+                                 <div class="flex items-center justify-between gap-1 pr-2 mt-6 mb-1">
+                                     <p class="app-scrollspy-section-title app-scrollspy-section-title--accent !mb-0 truncate flex-1">
+                                         Parcours {{ parcours.libelle }}{% set typeParcoursBadge = parcours.typeParcours|badgeTypeParcours %}{% if typeParcoursBadge is not null %} {{ component('Badge', { dto: typeParcoursBadge }) }}{% endif %}</p>
+                                     {% if canEditP %}
+                                         <a href="{{ path('parcours_v2_modifier', {parcours: parcours.id}) }}"
+                                            class="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-lg text-warning-600 hover:bg-warning-100 hover:text-warning-800 transition dark:text-warning-400 dark:hover:bg-warning-950/60"
+                                                 {{ stimulus_controller('tooltip') }}
+                                            title="Modifier ce parcours">
+                                             {{ ux_icon('icon:edit', {class: 'h-3.5 w-3.5'}) }}
+                                         </a>
+                                     {% endif %}
+                                 </div>
 
                                  <a href="#presentation_{{ parcours.id }}" data-scroll-spy-target="link"
                                     class="app-scrollspy-link">
@@ -186,6 +207,67 @@
             ]) }}
         </div>
     </div>
+
+    {# Widget flottant d'actions rapides & retour en haut (Option 2 - positionné à gauche du bouton d'aide) #}
+    <div data-controller="floating-actions"
+         data-floating-actions-target="container"
+         class="fixed bottom-6 right-[5.5rem] sm:bottom-8 sm:right-[6.5rem] z-40 flex items-center gap-2.5 opacity-0 translate-y-4 pointer-events-none transition-all duration-300">
+
+        {# Dropup Popover #}
+        <div data-floating-actions-target="menu"
+             class="hidden absolute bottom-full right-0 mb-3 w-80 max-h-[calc(100vh-10rem)] overflow-y-auto rounded-2xl border border-secondary-200 bg-surface/95 p-3 shadow-2xl backdrop-blur-md ring-1 ring-secondary-200/60 dark:border-secondary-700 dark:bg-secondary-900/95 dark:ring-secondary-700/60">
+            <div class="mb-2 flex items-center justify-between border-b border-secondary-100 pb-2 dark:border-secondary-800">
+                <span class="text-[11px] font-black uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                    Accès rapide aux modifications
+                </span>
+                <button type="button"
+                        data-action="click->floating-actions#close"
+                        class="text-secondary-400 hover:text-secondary-600 dark:hover:text-secondary-200">
+                    {{ ux_icon('icon:close', {class: 'h-3.5 w-3.5'}) }}
+                </button>
+            </div>
+
+            {{ include('formation_v2/_actions_modifier_menu.html.twig', {
+                formation: formation,
+                canEditFormation: canEditFormation
+            }) }}
+
+            <div class="mt-2 pt-2 border-t border-secondary-100 dark:border-secondary-800 flex items-center justify-between text-xs">
+                <a href="{{ path('app_formation_index') }}"
+                   class="inline-flex items-center gap-1.5 text-secondary-500 hover:text-secondary-800 dark:text-secondary-400 dark:hover:text-secondary-200 transition">
+                    {{ ux_icon('icon:arrow-left', {class: 'h-3.5 w-3.5'}) }}
+                    <span>Retour liste</span>
+                </a>
+                <button type="button"
+                        data-action="click->floating-actions#scrollToTop"
+                        class="inline-flex items-center gap-1 text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-200 transition font-medium">
+                    {{ ux_icon('icon:chevron-up', {class: 'h-3.5 w-3.5'}) }}
+                    <span>Haut de page</span>
+                </button>
+            </div>
+        </div>
+
+        {# Bouton principal d'édition flottant #}
+        <button type="button"
+                data-floating-actions-target="button"
+                data-action="click->floating-actions#toggle"
+                class="inline-flex items-center gap-2 rounded-full border border-warning-400 bg-warning-500 px-4 py-3 text-xs sm:text-sm font-bold text-white shadow-xl hover:bg-warning-600 focus:outline-none focus:ring-2 focus:ring-warning-500/40 transition dark:border-warning-600 dark:bg-warning-600 dark:hover:bg-warning-500 cursor-pointer h-12 sm:h-14"
+                aria-haspopup="true"
+                aria-expanded="false">
+            {{ ux_icon('icon:edit', {class: 'h-4 w-4 shrink-0'}) }}
+            <span>Modifier...</span>
+            {{ ux_icon('icon:chevron-up', {class: 'h-3.5 w-3.5 shrink-0 transition-transform duration-200', 'data-floating-actions-target': 'chevron'}) }}
+        </button>
+
+        {# Bouton remonter en haut #}
+        <button type="button"
+                data-action="click->floating-actions#scrollToTop"
+                class="inline-flex h-10 w-10 sm:h-11 sm:w-11 items-center justify-center rounded-full border border-secondary-200 bg-surface/95 text-secondary-600 shadow-xl backdrop-blur hover:bg-secondary-100 hover:text-secondary-900 focus:outline-none focus:ring-2 focus:ring-primary-500/30 transition dark:border-secondary-700 dark:bg-secondary-800/90 dark:text-secondary-300 dark:hover:bg-secondary-700 cursor-pointer"
+                {{ stimulus_controller('tooltip') }}
+                title="Remonter en haut de page">
+            {{ ux_icon('icon:chevron-up', {class: 'h-4 w-4'}) }}
+        </button>
+    </div>
 {% endblock %}
 
 {% set header_title %}
@@ -205,9 +287,9 @@
                         href="{{ canEditFormation ? path('formation_v2_modifier', {slug:formation.slug}) : '' }}"
                         variant="warning"
                         icon="icon:edit"
-                        label="Modifier le DPE"
+                        label="Modifier la formation"
                         :disabled="not canEditFormation"
-                        tooltip="{{ canEditFormation ? 'Modifier le DPE' : 'Formation verrouillée' }}"
+                        tooltip="{{ canEditFormation ? 'Modifier la formation' : 'Formation verrouillée' }}"
                 />
             {% endif %}
         {% else %}
@@ -217,9 +299,9 @@
                         href="{{ canEditFormation ? path('formation_v2_modifier', {slug:formation.slug}) : '' }}"
                         variant="warning"
                         icon="icon:edit"
-                        label="Modifier le DPE"
+                        label="Modifier la formation"
                         :disabled="not canEditFormation"
-                        tooltip="{{ canEditFormation ? 'Modifier le DPE' : 'Formation verrouillée' }}"
+                        tooltip="{{ canEditFormation ? 'Modifier la formation' : 'Formation verrouillée' }}"
                 />
             {% endif %}
         {% endif %}

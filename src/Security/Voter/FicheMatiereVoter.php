@@ -14,6 +14,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 final class FicheMatiereVoter extends Voter
 {
     public const EDIT = 'EDIT_FICHE_MATIERE';
+    public const VIEW = 'VIEW_FICHE_MATIERE';
 
     public function __construct(
         private readonly Security $security,
@@ -22,7 +23,7 @@ final class FicheMatiereVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return self::EDIT === $attribute && $subject instanceof FicheMatiere;
+        return in_array($attribute, [self::EDIT, self::VIEW, 'EDIT', 'SHOW', 'VIEW'], true) && $subject instanceof FicheMatiere;
     }
 
     protected function voteOnAttribute(
@@ -35,7 +36,10 @@ final class FicheMatiereVoter extends Voter
             return false;
         }
 
-        if (!$subject->isModifiable()) {
+        $isView = in_array($attribute, [self::VIEW, 'SHOW', 'VIEW'], true);
+
+        // Seule la modification nécessite que la fiche soit modifiable
+        if (!$isView && !$subject->isModifiable()) {
             return false;
         }
 
@@ -78,6 +82,7 @@ final class FicheMatiereVoter extends Voter
             }
         }
 
-        return $this->security->isGranted('EDIT', ['route' => 'app_fiche_matiere', 'subject' => $subject]);
+        $permissionToCheck = $isView ? 'SHOW' : 'EDIT';
+        return $this->security->isGranted($permissionToCheck, ['route' => 'app_fiche_matiere', 'subject' => $subject]);
     }
 }

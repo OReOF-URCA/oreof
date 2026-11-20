@@ -1,0 +1,46 @@
+{#
+Composant DocumentPreview — bouton loupe + modale d'aperçu d'un document.
+  <twig:DocumentPreview url="{{ asset('docs/guide.pdf') }}" title="Guide de validation" type="pdf" />
+Aperçu : pdf, video, audio, image, word (.docx seulement), excel (.xlsx seulement). Autres types : message + lien de téléchargement.
+Le contenu n'est chargé qu'à l'ouverture (rien n'est téléchargé tant que la loupe n'est pas cliquée).
+#}
+{% set modalId = id != '' ? 'document-preview-' ~ id : 'document-preview-' ~ random() %}
+
+<div class="inline-flex"
+     {{ stimulus_controller('document-preview', {url: url, type: type, previewable: this.previewable}) }}>
+    <twig:Button
+            type="button"
+            :soft="true"
+            :variant="variant"
+            :size="size"
+            icon="icon:search"
+            tooltip="{{ tooltip }}"
+            dataAction="click->document-preview#open"
+            aria-label="{{ tooltip }} : {{ title }}"
+    />
+
+    <div id="{{ modalId }}"
+         class="fixed inset-0 z-70 hidden"
+         role="dialog" aria-modal="true" aria-label="{{ tooltip }} : {{ title }}"
+         data-document-preview-target="modal"
+         data-action="keydown.esc@window->document-preview#close">
+        <div class="absolute inset-0 bg-black/50" data-action="click->document-preview#close"></div>
+
+        <div class="absolute inset-0 flex items-center justify-center p-4">
+            <div class="flex max-h-full w-full max-w-5xl flex-col overflow-hidden rounded-xl border border-secondary-200 bg-surface shadow-xl dark:border-secondary-700">
+                <div class="flex items-center justify-between gap-3 border-b border-secondary-200 px-5 py-3 dark:border-secondary-700">
+                    <h3 class="min-w-0 truncate text-base font-semibold text-secondary-900 dark:text-secondary-100">{{ title }}</h3>
+                    <div class="flex shrink-0 items-center gap-2">
+                        <twig:Button label="Télécharger" variant="secondary" :soft="true" size="sm"
+                                     icon="icon:download" href="{{ url }}" target="_blank" rel="noopener" />
+                        <twig:Button type="button" variant="secondary" :soft="true" size="sm" icon="icon:close"
+                                     tooltip="Fermer" dataAction="click->document-preview#close"
+                                     aria-label="Fermer l'aperçu" />
+                    </div>
+                </div>
+                <div class="min-h-0 grow overflow-auto bg-secondary-50 dark:bg-secondary-900"
+                     data-document-preview-target="body"></div>
+            </div>
+        </div>
+    </div>
+</div>

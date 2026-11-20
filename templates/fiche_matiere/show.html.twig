@@ -102,7 +102,7 @@
         or is_granted('EDIT', {route: 'app_fiche_matiere', subject: 'parcours'})
         or is_granted('ROLE_ADMIN') %}
         <a
-                href="{{ path('fiche_matiere_v2_modifier',{slug: ficheMatiere.slug}) }}"
+                href="{{ path('fiche_matiere_v2_modifier',{id: ficheMatiere.id}) }}"
                 class="btn btn-sm btn-outline-warning"
                 data-bs-toggle="tooltip"
                 data-bs-placement="bottom"

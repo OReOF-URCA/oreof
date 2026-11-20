@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Classes\Json\ExtractTextFromJsonPatch;
 use App\Classes\MyGotenbergPdf;
 use App\Entity\Composante;
+use App\Entity\Formation;
 use App\Navigation\Breadcrumb\Attribute\Breadcrumb;
 use App\Repository\ComposanteRepository;
 use App\Repository\ParcoursRepository;
@@ -31,8 +32,35 @@ class ComposanteController extends BaseController
         Composante $composante): Response
     {
         $breadcrumb->add('Composante : '.$composante->getLibelle());
+
+        $formationsAccreditees = [];
+        $formationsNonAccreditees = [];
+        foreach ($composante->getFormations() as $formation) {
+            if ($formation->isClassique()) {
+                $formationsAccreditees[] = $formation;
+            } else {
+                $formationsNonAccreditees[] = $formation;
+            }
+        }
+
+        $sortFn = static function (Formation $a, Formation $b): int {
+            $tdA = $a->getTypeDiplome()?->getLibelle() ?? '';
+            $tdB = $b->getTypeDiplome()?->getLibelle() ?? '';
+            $cmp = strcasecmp($tdA, $tdB);
+            if ($cmp !== 0) {
+                return $cmp;
+            }
+            $mA = $a->getMention()?->getLibelle() ?? $a->getMentionTexte() ?? '';
+            $mB = $b->getMention()?->getLibelle() ?? $b->getMentionTexte() ?? '';
+            return strcasecmp($mA, $mB);
+        };
+        usort($formationsAccreditees, $sortFn);
+        usort($formationsNonAccreditees, $sortFn);
+
         return $this->render('composante/index.html.twig', [
             'composante' => $composante,
+            'formationsAccreditees' => $formationsAccreditees,
+            'formationsNonAccreditees' => $formationsNonAccreditees,
         ]);
     }
 

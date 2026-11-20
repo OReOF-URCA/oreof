@@ -501,6 +501,9 @@ framework:
                 argumentaire: motif
             form:
               type: 'App\Form\Workflow\ArgumentaireType'
+              options:
+                argumentaire_required: true
+                min_length: 5
         reouvrir_sans_cfvu:
           from: 'publie'
           to: 'en_cours_redaction_ss_cfvu'
@@ -520,7 +523,8 @@ framework:
               submit_label: "Valider la demande"
               type: 'App\Form\Workflow\ArgumentaireType'
               options:
-                argumentaire_required: false
+                argumentaire_required: true
+                min_length: 5
 
 
         reouvrir_tacite_mccc:
@@ -537,6 +541,9 @@ framework:
             context: *dpe_argumentaire_context
             form:
               type: 'App\Form\Workflow\ArgumentaireType'
+              options:
+                argumentaire_required: true
+                min_length: 5
         reouvrir_tacite_sans_cfvu:
           from: 'tacite_reconduction'
           to: 'en_cours_redaction_ss_cfvu'
@@ -556,7 +563,8 @@ framework:
               submit_label: "Valider la demande"
               type: 'App\Form\Workflow\ArgumentaireType'
               options:
-                argumentaire_required: false
+                argumentaire_required: true
+                min_length: 5
 
         reouvrir_avant_publie:
           from: 'valide_a_publier'
@@ -576,7 +584,8 @@ framework:
               submit_label: "Valider la demande"
               type: 'App\Form\Workflow\ArgumentaireType'
               options:
-                argumentaire_required: false
+                argumentaire_required: true
+                min_length: 5
 
         valider_ouverture_sans_cfvu:
           from: 'en_cours_redaction_ss_cfvu'

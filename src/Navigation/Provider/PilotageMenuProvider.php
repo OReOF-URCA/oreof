@@ -58,88 +58,88 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
             icon: 'mdi:chart-bar',
             children: [
                 MenuItem::link(
-                    'pilotage.tour_de_controle',
-                    'menu.admin.tour_de_controle',
-                    'app_admin_pilotage_campagne_index',
-                    icon: 'mdi:monitor-dashboard',
-                ),
-
-                MenuItem::link(
                     'pilotage.consulter_offre',
                     'menu.admin.consulter_offre',
                     'structure_composante_index',
                     icon: 'mdi:book-search-outline',
-                ),
+                )->inColumn('menu.admin.menu_offre'),
 
                 MenuItem::link(
                     'pilotage.gestion_offre',
                     'menu.admin.gestion_offre',
                     'app_offre_index',
                     icon: 'mdi:notebook-edit-outline',
-                ),
+                )->inColumn('menu.admin.menu_offre'),
 
                 MenuItem::link(
                     'pilotage.gestion_offre_etablissement',
                     'menu.admin.gestion_offre_etablissement',
                     'app_offre_etablissement_index',
                     icon: 'mdi:school-outline',
-                ),
+                )->inColumn('menu.admin.menu_offre'),
 
                 MenuItem::link(
-                    'pilotage.statistiques_offre',
-                    'menu.admin.statistiques_offre',
-                    'offre_v2_statistiques',
-                    icon: 'icon:chart-pie',
-                ),
+                    'pilotage.tour_de_controle',
+                    'menu.admin.tour_de_controle',
+                    'app_admin_pilotage_campagne_index',
+                    icon: 'mdi:monitor-dashboard',
+                )->inColumn('menu.admin.menu_suivi'),
 
                 MenuItem::link(
                     'pilotage.dpe_ouverts',
                     'menu.admin.dpe_ouverts',
                     'app_demande_dpe',
                     icon: 'mdi:folder-open-outline',
-                ),
+                )->inColumn('menu.admin.menu_suivi'),
+
+                MenuItem::link(
+                    'pilotage.statistiques_offre',
+                    'menu.admin.statistiques_offre',
+                    'offre_v2_statistiques',
+                    icon: 'icon:chart-pie',
+                )->inColumn('menu.admin.menu_suivi'),
 
                 MenuItem::link(
                     'pilotage.validation_dpe',
                     'menu.admin.validation_dpe',
                     'app_validation_dpe_index',
                     icon: 'mdi:folder-check-outline',
-                ),
+                )->inColumn('menu.admin.menu_validation'),
 
                 MenuItem::link(
                     'pilotage.validation_fiches_ec',
                     'menu.admin.validation_fiches_ec',
                     'app_validation_fiche_index',
                     icon: 'mdi:file-check-outline',
-                ),
+                )->inColumn('menu.admin.menu_validation'),
 
                 MenuItem::link(
                     'pilotage.validation_rf',
                     'menu.admin.validation_rf',
                     'app_validation_change_rf_index',
                     icon: 'mdi:account-check-outline',
-                ),
+                )->inColumn('menu.admin.menu_validation'),
 
                 MenuItem::link(
                     'pilotage.controle_lheo',
                     'menu.admin.controle_lheo',
                     'app_parcours_lheo_invalid_list',
                     icon: 'mdi:shield-check-outline',
-                ),
+                )->inColumn('menu.admin.menu_publication'),
 
                 MenuItem::link(
                     'pilotage.descriptifs_parcours',
                     'menu.admin.descriptifs_parcours',
                     'app_admin_pilotage_descriptifs_index',
                     icon: 'mdi:card-text-outline',
-                ),
+                )->inColumn('menu.admin.menu_publication'),
 
                 MenuItem::link(
                     'pilotage.liens_courts_parcours',
                     'menu.admin.liens_courts_parcours',
                     'app_admin_pilotage_liens_courts_index',
                     icon: 'ph:link-bold',
-                ),
+                )->inColumn('menu.admin.menu_publication'),
 
                 MenuItem::link(
                     'pilotage.exports',
@@ -149,9 +149,9 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 )->requires('SHOW', [
                     'route' => 'app_etablissement',
                     'subject' => 'etablissement',
-                ]),
+                ])->inColumn('menu.admin.menu_publication'),
             ],
-        )->withPosition(20);
+        )->asMegaMenu()->withPosition(20);
     }
 
     private function composantePilotageMenu(): MenuItem

@@ -56,7 +56,8 @@ Quand lire : toute création/modification de template Twig, CSS ou composant UI,
 |---|---|
 | `<twig:Button>` | `label`, `variant`, `size` sm/md/lg, `soft` (défaut true), `outline`, `icon`, `iconEnd`, `href`, `type` button/submit, `fullWidth`, `centered`, `tooltip`, `disabled`, `extraClass`, `dataAction` |
 | `<twig:Badge>` | `label`, `variant`, `size` sm/md, `soft` (true), `pill` (true), `icon`, `iconEnd`, `extraClass` |
-| `<twig:DownloadCard>` | `title`*, `href`*, `type` word/excel/pdf/powerpoint/archive/video/audio/image/link/file, `description`, `meta`, `variant`, `cta`, `icon`, `target` (_blank) |
+| `<twig:DownloadCard>` | `title`*, `href`*, `type` word/excel/pdf/powerpoint/archive/video/audio/image/link/file, `description`, `meta`, `variant`, `cta`, `icon`, `target` (_blank), `previewUrl` (ajoute la loupe d'aperçu), contenu = actions supplémentaires |
+| `<twig:DocumentPreview>` | `url`*, `title`*, `type` (aperçu : pdf/video/audio/image + word .docx (lib `docx-preview`) + excel .xlsx (lib `read-excel-file`) ; sinon téléchargement), `tooltip`, `size`, `variant`, `id` ; contrôleur Stimulus `document-preview` |
 | `<twig:Kpi>` | `title`*, `value`*, `total`, `unit`, `percent` (affiche une jauge), `variant` (+`default`), `icon`, `description`, `href`, `extraClass` |
 | `{{ component('alerte', {type, message}) }}` | messages info/succès/alerte |
 | `<twig:PageHeader>` | `titleKey`/`title`, `descriptionKey`/`description`, `translationParams`, `translationDomain` (`header`), `breadcrumb` (true), `sticky` (true), bloc/prop `actions` — voir « En-tête de page » |

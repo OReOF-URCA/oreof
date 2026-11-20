@@ -29,7 +29,7 @@
                 <dt class="{{ dtClass }}">Modalités de l'alternance</dt>
                 <dd class="{{ ddClass }} texte-riche">
                     {% if formation.hasParcours %}
-                        {{ parcours.modalitesAlternance|raw }}
+                        {{ (parcours.displayModalitesAlternance|default(parcours.modalitesAlternance))|raw }}
                     {% else %}
                         {{ formation.modalitesAlternance|raw }}
                     {% endif %}

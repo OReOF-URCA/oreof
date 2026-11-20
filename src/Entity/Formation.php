@@ -102,14 +102,17 @@ class Formation
 
     #[Groups(['parcours_json_versioning', 'formation_json_versioning'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    /** @deprecated Les régimes d'inscription sont désormais configurés sur chaque Annee. */
     private ?string $regimeInscriptionTexte = null;
 
     #[Groups(['parcours_json_versioning', 'formation_json_versioning'])]
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    /** @deprecated Les modalités d'alternance sont désormais gérées au niveau de chaque Parcours. */
     private ?string $modalitesAlternance = null;
 
     #[Groups('formation_json_versioning')]
     #[ORM\Column(nullable: true)]
+    /** @deprecated Conservé pour la transition (campagnes précédentes). La donnée officielle est désormais portée par Annee. */
     private ?array $regimeInscription = [];
 
     #[Groups(['parcours_json_versioning', 'formation_json_versioning'])]
@@ -592,11 +595,17 @@ class Formation
     }
 
 
+    /**
+     * @deprecated Les régimes d'inscription sont désormais configurés sur chaque Annee.
+     */
     public function getRegimeInscriptionTexte(): ?string
     {
         return $this->regimeInscriptionTexte;
     }
 
+    /**
+     * @deprecated Les régimes d'inscription sont désormais configurés sur chaque Annee.
+     */
     public function setRegimeInscriptionTexte(?string $regimeInscriptionTexte): self
     {
         $this->regimeInscriptionTexte = $regimeInscriptionTexte;
@@ -604,11 +613,17 @@ class Formation
         return $this;
     }
 
+    /**
+     * @deprecated Les modalités d'alternance sont désormais gérées au niveau de chaque Parcours.
+     */
     public function getModalitesAlternance(): ?string
     {
         return $this->modalitesAlternance;
     }
 
+    /**
+     * @deprecated Les modalités d'alternance sont désormais gérées au niveau de chaque Parcours.
+     */
     public function setModalitesAlternance(?string $modalitesAlternance): self
     {
         $this->modalitesAlternance = $modalitesAlternance;
@@ -632,37 +647,65 @@ class Formation
     }
 
     /**
+     * Retourne uniquement les régimes directement enregistrés en BDD sur cette formation (valeur de transition).
+     *
+     * @return list<string>
+     * @deprecated Méthode de transition interne. Utiliser getRegimeInscriptionValues() qui reconstruit dynamiquement depuis les parcours/années.
+     */
+    public function getDirectRegimeInscriptionValues(): array
+    {
+        return \App\Referentiel\RegimeInscription::normalize($this->regimeInscription ?? []);
+    }
+
+    /**
      * @deprecated Returns only legacy enum cases and drops custom referential values.
      *             Use getRegimeInscriptionValues() for all new consumers.
      * @return list<\App\Enums\RegimeInscriptionEnum>
      */
     public function getRegimeInscription(): array
     {
-        if ($this->regimeInscription === null) {
-            return [];
-        }
-
-        $t = [];
-        foreach ($this->regimeInscription as $value) {
-            if ($value instanceof RegimeInscriptionEnum) {
-                $t[] = $value;
-            } elseif (is_string($value)) {
-                $case = RegimeInscriptionEnum::tryFrom($value);
-                if ($case !== null) {
-                    $t[] = $case;
-                }
-            }
-        }
-
-        return $t;
+        return \App\Referentiel\RegimeInscription::legacyCases($this->getRegimeInscriptionValues());
     }
 
     /** @return list<string> */
     public function getRegimeInscriptionValues(): array
     {
-        return \App\Referentiel\RegimeInscription::normalize($this->regimeInscription ?? []);
+        // 1. Reconstruire depuis les parcours (qui reconstruisent depuis leurs années ou leur BDD)
+        $regimesFromParcours = [];
+        foreach ($this->getParcours() as $parcours) {
+            foreach ($parcours->getRegimeInscriptionValues() as $val) {
+                $regimesFromParcours[] = $val;
+            }
+        }
+
+        if ($regimesFromParcours !== []) {
+            return \App\Referentiel\RegimeInscription::normalize($regimesFromParcours);
+        }
+
+        // 2. Fallback transition : valeurs en BDD de la formation si existantes (campagnes précédentes)
+        return $this->getDirectRegimeInscriptionValues();
     }
 
+    public function hasRegimeInscription(string|RegimeInscriptionEnum $regime): bool
+    {
+        $val = $regime instanceof RegimeInscriptionEnum ? $regime->value : $regime;
+        return in_array($val, $this->getRegimeInscriptionValues(), true);
+    }
+
+    public function isAlternance(): bool
+    {
+        foreach ($this->getRegimeInscriptionValues() as $val) {
+            if (\App\Referentiel\RegimeInscription::isAlternance($val)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * @deprecated Le régime d'inscription doit désormais être configuré sur chaque Annee (source officielle).
+     */
     public function setRegimeInscription(?array $regimeInscription): self
     {
         $this->regimeInscription = $regimeInscription === null ? [] : \App\Referentiel\RegimeInscription::normalize($regimeInscription);

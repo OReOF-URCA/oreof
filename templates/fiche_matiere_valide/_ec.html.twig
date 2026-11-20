@@ -107,7 +107,7 @@
         {% if ec.elementConstitutif != null and ec.elementConstitutif.ficheMatiere != null %}
             {% if ec.elementConstitutif.ficheMatiere.parcours != null and ec.elementConstitutif.ficheMatiere.parcours.id == parcours.id and ec.raccroche == false and raccrocheUe == false and raccrocheSemestre == false %}
                 <twig:Button
-                    href="{{ path('fiche_matiere_v2_modifier', {slug: ec.elementConstitutif.ficheMatiere.slug}) }}"
+                        href="{{ path('fiche_matiere_v2_modifier', {id: ec.elementConstitutif.ficheMatiere.id}) }}"
                     variant="warning"
                     :outline="true"
                     size="sm"

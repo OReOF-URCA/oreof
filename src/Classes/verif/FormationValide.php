@@ -128,12 +128,6 @@ class FormationValide extends AbstractValide
         $this->etat['composantesInscriptions'] = $this->formation->getComposantesInscription()->count() > 0 ? self::COMPLET : self::VIDE;
         $this->etat['regimeInscription'] = count($this->formation->getRegimeInscriptionValues()) > 0 ? self::COMPLET : self::VIDE;
         $this->etat['modaliteAlternance'] = self::NON_CONCERNE;
-        foreach ($this->formation->getRegimeInscriptionValues() as $regimeInscription) {
-            if ($regimeInscription !== RegimeInscriptionEnum::FI->value && $regimeInscription !== RegimeInscriptionEnum::FC->value) {
-                $this->etat['modaliteAlternance'] = $this->nonVide($this->formation->getModalitesAlternance());
-                $this->etat['regimeInscription'] = $this->etat['modaliteAlternance'] === self::COMPLET ? self::COMPLET : self::INCOMPLET;
-            }
-        }
         $this->etat['objectifsFormation'] = $this->nonVide($this->formation->getObjectifsFormation());
         $this->etat['hasParcours'] = $this->formation->isHasParcours() === null ? self::VIDE : self::COMPLET;
         $this->etat['erreurHasParcours'] = $this->formation->isHasParcours() === null ? self::VIDE : self::COMPLET;

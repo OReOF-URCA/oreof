@@ -147,16 +147,14 @@ class ParcoursTabCompletionChecker extends AbstractChecker
             $issues[] = new TabIssue('parcours_step5[composanteInscription]', 'Composante d’inscription', 'Choisissez une composante.');
         }
 
-        if ($this->filled($p->getModalitesAlternance()) === false && (in_array(RegimeInscriptionEnum::FC_CONTRAT_PRO, $p->getRegimeInscription(), true) || in_array(RegimeInscriptionEnum::FI_APPRENTISSAGE, $p->getRegimeInscription(), true))) {
-            $issues[] = new TabIssue('parcours_step5[modalitesAlternance]', 'Modalités d\'alternance', 'Vous avez indiqué FC en contrat pro ou FI en apprentissage, vous devez préciser les modalités.');
+        if ($this->filled($p->getDisplayModalitesAlternance()) === false && $p->isAlternance()) {
+            $issues[] = new TabIssue('parcours_step5[modalitesAlternance]', 'Modalités d\'alternance', 'Ce parcours propose de l\'alternance, vous devez préciser les modalités.');
         }
 
         if ($p->getContacts()->count() === 0) {
             $issues[] = new TabIssue('parcours_step5[coordSecretariat]', 'Coordonnées secrétariat', 'Renseignez les coordonnées.');
         }
-        if (!$this->filled($p->getModalitesAdmission())) {
-            $issues[] = new TabIssue('parcours_step5[modalitesAdmission]', 'Modalités d’admission', 'Renseignez les modalités.');
-        }
+
 
         return $issues;
     }

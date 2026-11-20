@@ -31,6 +31,7 @@ use App\Service\LheoXML;
 use App\Service\Parcours\ParcoursAccessExplainer;
 use App\Service\Parcours\ParcoursDeleteService;
 use App\Service\Parcours\ParcoursDuplicationService;
+use App\Service\SecureUploadService;
 use App\Service\Validation\SemesterValidationRefresher;
 use App\Service\VersioningFormation;
 use App\Service\VersioningParcours;
@@ -39,9 +40,14 @@ use App\Utils\Access;
 use App\Utils\TurboStreamResponseFactory;
 use Doctrine\ORM\EntityManagerInterface;
 use Jfcherng\Diff\DiffHelper;
+use Symfony\Component\ExpressionLanguage\Expression;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/parcours/v2', name: 'parcours_v2_')]
 class ParcoursController extends BaseController
@@ -123,6 +129,10 @@ class ParcoursController extends BaseController
         BreadcrumbService      $breadcrumb,
     ): Response
     {
+        if (!$this->isGranted('SHOW', $parcours)) {
+            throw $this->createAccessDeniedException('Vous n\'avez pas accès à ce parcours.');
+        }
+
         $formation = $parcours->getFormation();
         if ($formation === null) {
             throw $this->createNotFoundException();
@@ -377,7 +387,7 @@ class ParcoursController extends BaseController
         );
         $breadcrumb->add('Modifier le parcours');
 
-        $validTabs = ['presentation_formation', 'presentation', 'maquette', 'descriptif', 'admission', 'et_apres', 'configuration'];
+        $validTabs = ['presentation_formation', 'presentation', 'maquette', 'maquette_pdf', 'descriptif', 'admission', 'et_apres', 'configuration'];
         if (!in_array($tab, $validTabs, true)) {
             throw $this->createNotFoundException('Onglet inconnu : ' . $tab);
         }
@@ -797,5 +807,77 @@ class ParcoursController extends BaseController
         }
 
         return $this->redirect($redirectUrl);
+    }
+
+    #[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION')"))]
+    #[Route('/{parcours}/maquette_pdf', name: 'maquette_pdf')]
+    public function uploadMaquettePdf(
+        Parcours $parcours, 
+        Request $r,
+        SecureUploadService $uploadService,
+        EntityManagerInterface $em,
+        TurboStreamResponseFactory $turboStream,
+        Filesystem $fs,
+    ) {
+        if($r->headers->has('Turbo-Frame')) {
+            if($parcours->getMaquettePdf() !== null) {
+                $filePath = __DIR__ . "/../../../public/uploads/maquettes/" . $parcours->getMaquettePdf(); 
+                if($fs->exists($filePath)) {
+                    $fs->remove($filePath);
+                }
+            }
+            $file = $uploadService->uploadFromRequest($r, 'maquettePdf', 'maquettes');
+            $parcours->setMaquettePdf($file->getStoredFilename());
+            $parcours->setMaquettePdfNomOriginal($file->getOriginalFilename());
+            $em->flush();
+            
+            return $turboStream->stream('parcours_v2/tabs/_maquette_pdf_success.stream.html.twig', [
+                'pdfNomOriginal' => $parcours->getMaquettePdfNomOriginal(),
+                'parcours_id' => $parcours->getId(),
+            ]);
+        }
+    }
+
+    #[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION')"))]
+    #[Route('/{parcours}/maquette_pdf/delete', name: 'delete_maquette_pdf')]
+    public function deleteMaquettePdf(
+        Parcours $parcours, 
+        Request $r,
+        Filesystem $fs,
+        TurboStreamResponseFactory $turbo,
+        EntityManagerInterface $em,
+    ) {
+        if($r->headers->has('Turbo-Frame')) {
+            if($parcours->getMaquettePdf() !== null) {
+                $file = __DIR__ . "/../../../public/uploads/maquettes/" . $parcours->getMaquettePdf();
+                if($fs->exists($file)) {
+                    $parcours->setMaquettePdfNomOriginal(null);
+                    $parcours->setMaquettePdf(null);
+                    $fs->remove($file);
+                    $em->flush();
+                }
+            }
+
+            return $turbo->stream('parcours_v2/tabs/_maquette_pdf.delete.stream.html.twig'); 
+        }
+    }
+
+    #[IsGranted(new Expression("is_granted('ROLE_ADMIN') or is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION')"))]
+    #[Route('/{parcours}/maquette_pdf/show', name: 'show_maquette_pdf')]
+    public function showMaquettePdf(Parcours $parcours, Filesystem $fs) {
+        $filePath = __DIR__ . "/../../../public/uploads/maquettes/" . $parcours->getMaquettePdf();
+        if($fs->exists($filePath)) {
+            return new BinaryFileResponse(
+                $filePath, 
+                status: 200,
+                headers: [
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'inline; filename=' . $parcours->getMaquettePdfNomOriginal()
+                ]
+            );
+        }
+        else {
+            return new JsonResponse(['error' => 'File not found']);
+        }
     }
 }

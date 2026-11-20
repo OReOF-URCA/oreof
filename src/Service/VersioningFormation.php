@@ -26,7 +26,7 @@ class VersioningFormation
     private Serializer $serializer;
     private EntityManagerInterface $entityManager;
     private Filesystem $filesystem;
-    private array $formationTextDifferences;
+    private array $formationTextDifferences = [];
 
     public function __construct(
         EntityManagerInterface $entityManager,
@@ -101,6 +101,8 @@ class VersioningFormation
 
     public function getDifferencesBetweenFormationAndLastVersion(Formation $formation, bool $fromLastYear = false): array
     {
+        $this->formationTextDifferences = [];
+
         $lastVersion = null;
         if ($fromLastYear) {
             $lastVersion = $formation->getFormationOrigineCopie();
@@ -171,7 +173,7 @@ class VersioningFormation
                     . implode(
                         "</p><p class=\"list-item\">",
                         array_map(
-                            fn ($regime) => $regime->value,
+                            fn($regime) => $regime instanceof \BackedEnum ? $regime->value : (string)$regime,
                             $lastVersion->getRegimeInscription()
                         )
                     ) . "</p>",
@@ -179,7 +181,7 @@ class VersioningFormation
                     . implode(
                         "</p><p class=\"list-item\">",
                         array_map(
-                            fn ($regime) => $regime->value,
+                            fn($regime) => $regime instanceof \BackedEnum ? $regime->value : (string)$regime,
                             $formation->getRegimeInscription()
                         )
                     ) . "</p>",

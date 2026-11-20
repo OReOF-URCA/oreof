@@ -19,34 +19,6 @@
         {{ form_row(form.sigle) }}
         {{ form_row(form.localisationMention) }}
         {{ form_row(form.composantesInscription) }}
-
-        {% set hasAlternance = false %}
-        {% for regime in formation.regimeInscriptionValues %}
-            {% if regime in [
-                enum("App\\Enums\\RegimeInscriptionEnum").FI_APPRENTISSAGE.value,
-                enum("App\\Enums\\RegimeInscriptionEnum").FC_CONTRAT_PRO.value,
-                'FI_APPRENTISSAGE',
-                'FC_CONTRAT_PRO'
-            ] %}
-                {% set hasAlternance = true %}
-            {% endif %}
-        {% endfor %}
-
-        <div data-controller="conditional-field"
-             data-conditional-field-expected-values-value='{{ [
-                 enum("App\\Enums\\RegimeInscriptionEnum").FI_APPRENTISSAGE.value,
-                 enum("App\\Enums\\RegimeInscriptionEnum").FC_CONTRAT_PRO.value,
-                 "FI_APPRENTISSAGE",
-                 "FC_CONTRAT_PRO"
-             ] | json_encode | e("html_attr") }}'>
-            {{ form_row(form.regimeInscription) }} {# Contient les targets "trigger" #}
-
-            <div data-conditional-field-target="container" class="{{ hasAlternance ? '' : 'hidden' }}"
-                 {% if not hasAlternance %}hidden{% endif %}>
-                {{ form_row(form.modalitesAlternance) }}
-            </div>
-        </div>
-
         {{ form_end(form) }}
     </div>
 </turbo-frame>
