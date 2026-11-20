@@ -21,6 +21,34 @@ final class DpeWorkflowOperationVoter extends Voter
 {
     public const APPLY = 'DPE_WORKFLOW_TRANSITION';
 
+    /** Transitions réservées au SES (validation centrale, CFVU, publication). */
+    private const TRANSITIONS_SES = [
+        'valider_central',
+        'reserver_central',
+        'valider_publication_directe',
+        'refuser_revoir_cfvu',
+        'valider_reserve_cfvu',
+        'valider_reserve_conseil_cfvu',
+        'valider_reserve_central_cfvu',
+        'valider_cfvu',
+        'valider_publication',
+        'publier',
+        'valider_transmettre_ouverture_sans_cfvu',
+        'reserver_transmettre_ouverture_sans_cfvu',
+        'valider_transmettre_reserve_cfvu',
+        'reserver_transmettre_reserve_cfvu',
+        'valider_non_ouverture_ses',
+    ];
+
+    /** Transitions réservées à la composante (DPE) : validation composante et conseil. */
+    private const TRANSITIONS_COMPOSANTE = [
+        'valider_dpe_composante',
+        'reserver_dpe_composante',
+        'valider_conseil',
+        'reserver_conseil',
+        'transmetre_reserve_cfvu',
+    ];
+
     public function __construct(private readonly Security $security)
     {
     }
@@ -47,6 +75,23 @@ final class DpeWorkflowOperationVoter extends Voter
         }
 
         $dpeParcours = $subject->subject;
+        $transition = $subject->operation->transitionName;
+
+        // Étapes SES / CFVU / publication : gestionnaires de l'établissement uniquement.
+        if (in_array($transition, self::TRANSITIONS_SES, true)) {
+            return $this->security->isGranted('MANAGE', [
+                'route' => 'app_etablissement',
+                'subject' => 'etablissement',
+            ]);
+        }
+
+        // Étapes composante (DPE) et conseil : droit MANAGE sur la composante uniquement.
+        if (in_array($transition, self::TRANSITIONS_COMPOSANTE, true)) {
+            return $this->security->isGranted('MANAGE', [
+                'route' => 'app_composante',
+                'subject' => $dpeParcours,
+            ]);
+        }
 
         return $this->security->isGranted('MANAGE', [
             'route' => 'app_composante',
