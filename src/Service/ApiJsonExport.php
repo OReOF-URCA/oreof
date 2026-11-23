@@ -131,9 +131,24 @@ class ApiJsonExport
                             )
                         ];
                         if ($isV2) {
+                            $parcoursVersionObj = ($lastVersionData !== null && isset($lastVersionData['parcours']) && $lastVersionData['parcours'] instanceof Parcours)
+                                ? $lastVersionData['parcours']
+                                : $parcours;
+                            $codesRome = $parcoursVersionObj->getCodesRomeNormalized();
+                            if (empty($codesRome)) {
+                                $codesRome = $parcours->getCodesRomeNormalized();
+                            }
+
+                            $lienCourt = ($parcours->getLienCourt() !== null && $parcours->getLienCourt() !== '') ? $parcours->getLienCourt() : '';
+
                             $parcoursData['annee'] = $campagneCourante->getAnnee();
                             $parcoursData['uuid_parcours'] = $this->getUuidForParcours($parcours);
-                            $parcoursData['lien_court'] = $parcours->getLienCourt();
+                            $parcoursData['lien-court'] = $lienCourt;
+                            $parcoursData['codes-rome'] = $codesRome;
+                            $parcoursData['metadata'] = [
+                                'lien-court' => $lienCourt,
+                                'codes-rome' => $codesRome,
+                            ];
                         }
                         $tParcours[] = $parcoursData;
 
@@ -237,10 +252,16 @@ class ApiJsonExport
                                     )
                                 ];
                                 if ($isV2) {
+                                    $codesRomeNext = $parcoursAnneeSuivante->getCodesRomeNormalized();
+                                    $lienCourtNext = ($parcoursAnneeSuivante->getLienCourt() !== null && $parcoursAnneeSuivante->getLienCourt() !== '') ? $parcoursAnneeSuivante->getLienCourt() : '';
                                     $parcoursDataNext['annee'] = $campagneSuivante->getAnnee();
                                     $parcoursDataNext['uuid_parcours'] = $this->getUuidForParcours($parcoursAnneeSuivante);
-                                    $parcoursDataNext['lien_court'] = $parcoursAnneeSuivante->getLienCourt();
-                                    $parcoursDataNext['lienCourt'] = $parcoursAnneeSuivante->getLienCourt();
+                                    $parcoursDataNext['lien-court'] = $lienCourtNext;
+                                    $parcoursDataNext['codes-rome'] = $codesRomeNext;
+                                    $parcoursDataNext['metadata'] = [
+                                        'lien-court' => $lienCourtNext,
+                                        'codes-rome' => $codesRomeNext,
+                                    ];
                                 }
                                 $addedParcours[] = $parcoursDataNext;
                             }

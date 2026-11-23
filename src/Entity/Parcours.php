@@ -693,6 +693,25 @@ class Parcours
         return $this;
     }
 
+    /**
+     * @return string[]
+     */
+    public function getCodesRomeNormalized(): array
+    {
+        $codes = [];
+        foreach ($this->getCodesRome() as $item) {
+            $value = is_array($item) ? ($item['code'] ?? '') : (string)$item;
+            if (is_string($value) && preg_match_all('/\\t/m', $value)) {
+                $value = (string)preg_replace('/\\t/m', '', $value);
+            }
+            if (is_string($value) && preg_match('/([A-Za-z][0-9]{4})/', $value, $matches) === 1) {
+                $codes[] = strtoupper($matches[1]);
+            }
+        }
+
+        return array_values(array_unique($codes));
+    }
+
     public function remplissageBrut(): Remplissage
     {
         if (null !== $this->getFormation()) {

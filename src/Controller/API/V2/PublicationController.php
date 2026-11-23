@@ -172,6 +172,13 @@ final class PublicationController extends AbstractController
         $logoTypeDiplomeArray = $this->getLogoTypeDiplomeParcoursApi($parcoursVersion->getParcours());
         $logosParcours = $this->getLogoArrayParcoursApi($parcoursVersion->getParcours());
 
+        $codesRome = $parcoursVersionData->getCodesRomeNormalized();
+        if (empty($codesRome)) {
+            $codesRome = $parcours->getCodesRomeNormalized();
+        }
+
+        $lienCourt = ($parcours->getLienCourt() !== null && $parcours->getLienCourt() !== '') ? $parcours->getLienCourt() : '';
+
         $data = [
             'description' => '',
             'ects' => $ects ?? 0,
@@ -187,13 +194,20 @@ final class PublicationController extends AbstractController
                 'niveau-entree-libelle' => NiveauFormation::legacyCase($parcours->getFormation()->getNiveauEntreeValue())?->libelle() ?? "0",
                 'niveau-sortie-code' => $parcours->getFormation()->getNiveauSortieValue(),
                 'niveau-sortie-libelle' => NiveauFormation::legacyCase($parcours->getFormation()->getNiveauSortieValue())?->libelle() ?? "0",
+                'lien_court' => $lienCourt,
+                'lien-court' => $lienCourt,
+                'codes-rome' => $codesRome,
+                'codes_rome' => $codesRome,
             ],
             'xml-lheo' => $this->generateUrl('app_parcours_export_xml_lheo_v2', ['parcours' => $parcoursVersion->getParcours()->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'fiche-pdf' => $this->generateUrl('app_parcours_export_pdf_versioning', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'maquette-pdf' => $this->generateUrl('app_parcours_mccc_export_cfvu_valid', ['parcours' => $parcoursVersion->getParcours()->getId(), 'format' => 'simplifie'], UrlGeneratorInterface::ABSOLUTE_URL),
             'maquette-json' => $this->generateUrl('api_site_web_v2_parcours_maquette_validee_cfvu', ['parcours' => $parcoursVersion->getParcours()->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'logos-parcours' => $logosParcours,
-            'lien-court' => $parcours->getLienCourt(),
+            'lien-court' => $lienCourt,
+            'lien_court' => $lienCourt,
+            'codes-rome' => $codesRome,
+            'codes_rome' => $codesRome,
         ];
 
         return new JsonResponse($data);
@@ -307,6 +321,9 @@ final class PublicationController extends AbstractController
         $logoTypeDiplomeArray = $this->getLogoTypeDiplomeParcoursApi($parcours);
         $logosParcours = $this->getLogoArrayParcoursApi($parcours);
 
+        $codesRome = $parcours->getCodesRomeNormalized();
+        $lienCourt = ($parcours->getLienCourt() !== null && $parcours->getLienCourt() !== '') ? $parcours->getLienCourt() : '';
+
         $data = [
             'description' => '',
             'ects' => $ects,
@@ -322,14 +339,14 @@ final class PublicationController extends AbstractController
                 'niveau-entree-libelle' => NiveauFormation::legacyCase($parcours->getFormation()->getNiveauEntreeValue())?->libelle() ?? "0",
                 'niveau-sortie-code' => $parcours->getFormation()->getNiveauSortieValue(),
                 'niveau-sortie-libelle' => NiveauFormation::legacyCase($parcours->getFormation()->getNiveauSortieValue())?->libelle() ?? "0",
+                'lien-court' => $lienCourt,
+                'codes-rome' => $codesRome,
             ],
             'xml-lheo' => $this->generateUrl('app_parcours_export_xml_lheo_v2', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'fiche-pdf' => $this->generateUrl('app_parcours_export', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'maquette-pdf' => $urlMaquettePdf,
             'maquette-json' => $urlMaquetteJson,
-            'logos-parcours' => $logosParcours,
-            'lien-court' => $parcours->getLienCourt(),
-            'lien_court' => $parcours->getLienCourt(),
+            'logos-parcours' => $logosParcours
         ];
 
         return new JsonResponse($data);
