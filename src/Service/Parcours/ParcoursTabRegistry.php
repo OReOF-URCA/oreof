@@ -17,7 +17,7 @@ use App\Form\ParcoursStep6Type;
 
 final class ParcoursTabRegistry
 {
-    public const TABS = ['presentation', 'descriptif', 'maquette', 'et_apres', 'admission'];
+    public const TABS = ['presentation', 'descriptif', 'competences', 'maquette', 'et_apres', 'admission'];
 
     public static function assertTab(string $tabKey): void
     {

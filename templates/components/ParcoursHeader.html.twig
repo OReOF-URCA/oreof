@@ -220,10 +220,12 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
-                <button class="{{ quickBtnSecondary }}">
-                    {{ ux_icon('icon:download', {class: 'h-4 w-4'}) }}
-                    <span>Voir PV</span>
-                </button>
+                {% if formation.isClassique() %}
+                    <button class="{{ quickBtnSecondary }}">
+                        {{ ux_icon('icon:download', {class: 'h-4 w-4'}) }}
+                        <span>Voir PV</span>
+                    </button>
+                {% endif %}
 
                 {% if validationOptions|length > 0 %}
                     <div class="relative" data-controller="navbar-dropdown"

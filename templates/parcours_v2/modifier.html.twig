@@ -159,7 +159,10 @@
                             <twig:UX:Icon name="ph:lock-key" class="w-4 h-4 text-warning-500 shrink-0" title="Consultation seule (sans CFVU)" />
                         {% endif %}
                     </span>
-                    <span class="w-2 h-2 bg-{{ parcours.colorStep(3) }}-500 rounded-full"></span>
+                    <span id="tab_badge_competences">
+                      {% set compStatus = (isCompetencesImposees ?? (typeD is defined ? typeD.hasReferentielCompetencesImpose(parcours) : false)) ? 'green' : (tabStates['competences'].status ?? 'red') %}
+                        {{ include('communs/_badge.html.twig', { tabKey: 'competences', status: compStatus }) }}
+                    </span>
                 </a>
 
                 <a

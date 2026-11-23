@@ -40,6 +40,11 @@ abstract class AbstractTypeDiplomeHandler implements TypeDiplomeHandlerInterface
         return TypeDiplomeHandlerInterface::TEMPLATE_COMPETENCES;
     }
 
+    public function hasReferentielCompetencesImpose(?Parcours $parcours = null): bool
+    {
+        return false;
+    }
+
     public function getFormationFormOptions(array $context): array
     {
         $formation = new Formation($context['campagne']);

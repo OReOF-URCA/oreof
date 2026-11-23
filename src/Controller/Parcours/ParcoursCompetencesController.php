@@ -59,11 +59,14 @@ class ParcoursCompetencesController extends BaseController
         $dpeParcours = GetDpeParcours::getFromParcours($parcours);
         $canEditTab = Access::isTabEditable($dpeParcours, 'competences');
 
+        $isCompetencesImposees = $typeD->hasReferentielCompetencesImpose($parcours);
+
         return $this->render('typeDiplome/' . $typeD->getTemplateFolder() . '/competences/_competence_edit.html.twig', [
             'parcours' => $parcours,
             'dpeParcours' => $dpeParcours,
             'canEditTab' => $canEditTab,
             'typeD' => $typeD,
+            'isCompetencesImposees' => $isCompetencesImposees,
             'listeParcours' => $listeParcours,
             'competences' => $competences,
             'tabStates' => $tabStates,

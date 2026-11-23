@@ -13,6 +13,7 @@ use App\DTO\Remplissage;
 use App\Entity\Parcours;
 use App\Entity\TypeDiplome;
 use App\Enums\RegimeInscriptionEnum;
+use App\TypeDiplome\TypeDiplomeHandlerInterface;
 
 class ParcoursValide extends AbstractValide
 {
@@ -21,7 +22,8 @@ class ParcoursValide extends AbstractValide
 
     public function __construct(
         protected Parcours $parcours,
-        protected TypeDiplome $typeDiplome
+        protected TypeDiplome                  $typeDiplome,
+        protected ?TypeDiplomeHandlerInterface $typeDiplomeHandler = null
     ) {
     }
 
@@ -132,12 +134,15 @@ class ParcoursValide extends AbstractValide
         }
 
         //onglet 3
+        $isCompetencesImposees = $this->typeDiplomeHandler?->hasReferentielCompetencesImpose($this->parcours)
+            ?? ($this->typeDiplome->getLibelleCourt() === 'BUT');
+
         if ($this->typeDiplome->isClassique() === false) {
             $this->etat['competences'] = self::NON_CONCERNE;
             $this->etat['structure'] = self::NON_CONCERNE;
             // Formation non classique : la structure est portée par le PDF de maquette.
             $this->etat['maquette'] = $this->parcours->getMaquettePdf() !== null ? self::COMPLET : self::VIDE;
-        } elseif ($this->typeDiplome->getLibelleCourt() !== 'BUT') {
+        } elseif (!$isCompetencesImposees) {
             $this->etat['competences'] = $this->parcours->getBlocCompetences()->count() > 0 ? self::COMPLET : self::VIDE;
 
             foreach ($this->parcours->getBlocCompetences() as $blocCompetence) {
@@ -152,8 +157,12 @@ class ParcoursValide extends AbstractValide
             ValideStructure::valideStructure($this->parcours);
             $this->etat['structure'] = ValideStructure::getStructure();
         } else {
-            $this->etat['competences'] = $this->parcours->getFormation()?->getButCompetences()->count() > 0 ? self::COMPLET : self::VIDE;
-            ValideStructure::valideStructureBut($this->parcours);
+            $this->etat['competences'] = self::COMPLET;
+            if ($this->typeDiplome->getLibelleCourt() === 'BUT') {
+                ValideStructure::valideStructureBut($this->parcours);
+            } else {
+                ValideStructure::valideStructure($this->parcours);
+            }
             $this->etat['structure'] = ValideStructure::getStructure();
         }
         $this->etat['structure'] = ValideStructure::getStructure();

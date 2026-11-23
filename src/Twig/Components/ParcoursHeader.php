@@ -83,9 +83,12 @@ final class ParcoursHeader
             $this->formation = $this->em->getRepository(Formation::class)->find($this->formationId);
         }
 
+        $isClassique = $this->formation?->isClassique() ?? true;
+        $this->process = $this->validationProcess->getProcess($isClassique);
+
         $this->init();
         $this->getHistorique();
-        $this->processSteps = $this->validationProcess->getProcess();
+        $this->processSteps = $this->process;
         $this->validationOptions = $this->getVisibleValidationOptions();
     }
 

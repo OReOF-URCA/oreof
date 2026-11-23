@@ -338,7 +338,8 @@ final class PublicationController extends AbstractController
     private function getLogoArrayParcoursApi(Parcours $parcours): array
     {
         $result = [];
-        foreach ($parcours->getLogo() ?? [] as $filename) {
+        foreach ($parcours->getLogosNormalized() as $logo) {
+            $filename = $logo['filename'];
             $filePath = $this->secureUploadService->resolveStoredFilePath('logos', $filename);
             $result[] = [
                 'image_data' => $this->generateUrl(
@@ -348,6 +349,7 @@ final class PublicationController extends AbstractController
                 ),
                 'image_type' => file_exists($filePath) ? mime_content_type($filePath) : null,
                 'id' => pathinfo($filename, PATHINFO_FILENAME),
+                'url' => $logo['url'],
             ];
         }
 

@@ -30,6 +30,8 @@ interface TypeDiplomeHandlerInterface extends TypeDiplomeMcccInterface, Structur
 
     public function getFormationFormOptions(array $context): array;
 
+    public function hasReferentielCompetencesImpose(?Parcours $parcours = null): bool;
+
     public function handleFormationSubmission(
         FormInterface $form,
         Request $request,

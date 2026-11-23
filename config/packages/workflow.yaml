@@ -152,7 +152,7 @@ framework:
         valider_parcours: # Soumettre du resp de parcours vers formation
           from: 'en_cours_redaction'
           to: 'soumis_parcours'
-          #guard: "service('App\\\\Workflow\\\\Service\\\\ValidationService').canTransition(subject, 'soumis_parcours')"
+          guard: "subject.getFormation() != null and subject.getFormation().isClassique()"
           metadata:
             validation:
               step: soumis_parcours
@@ -277,7 +277,7 @@ framework:
         valider_central:
           from: 'soumis_central'
           to: 'soumis_cfvu'
-          #          guard: "service('App\\\\Workflow\\\\Service\\\\ValidationService').canTransition(subject, 'soumis_cfvu')"
+          guard: "subject.getFormation() != null and subject.getFormation().isClassique()"
           metadata:
             validation:
               step: soumis_cfvu
@@ -296,6 +296,7 @@ framework:
         reserver_central:
           from: 'soumis_central'
           to: 'en_cours_redaction'
+          guard: "subject.getFormation() != null and subject.getFormation().isClassique()"
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
             titre_with_parcours: 'La fiche du parcours %%s de la formation %%s a reçu des réserves par le SES'
@@ -313,6 +314,7 @@ framework:
         valider_publication_directe:
           from: 'soumis_central'
           to: 'valide_a_publier'
+          guard: "subject.getFormation() != null and subject.getFormation().isClassique()"
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
             type: valider
@@ -477,6 +479,7 @@ framework:
         valider_tacite_composante:
           from: 'tacite_reconduction'
           to: 'soumis_central'
+          guard: "subject.getFormation() != null and subject.getFormation().isClassique()"
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
             label: 'Valider la tacite reconduction'
@@ -488,6 +491,7 @@ framework:
         reouvrir_mccc:
           from: 'publie'
           to: 'en_cours_redaction'
+          guard: "subject.getFormation() != null and subject.getFormation().isClassique()"
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
             timeline_modules: [ 'maquettes', 'mccc' ]
@@ -507,6 +511,7 @@ framework:
         reouvrir_sans_cfvu:
           from: 'publie'
           to: 'en_cours_redaction_ss_cfvu'
+          guard: "subject.getFormation() != null and subject.getFormation().isClassique()"
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
             timeline_modules: [ 'descriptifs' ]
@@ -530,6 +535,7 @@ framework:
         reouvrir_tacite_mccc:
           from: 'tacite_reconduction'
           to: 'en_cours_redaction'
+          guard: "subject.getFormation() != null and subject.getFormation().isClassique()"
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
             timeline_modules: [ 'maquettes', 'mccc' ]
@@ -547,6 +553,7 @@ framework:
         reouvrir_tacite_sans_cfvu:
           from: 'tacite_reconduction'
           to: 'en_cours_redaction_ss_cfvu'
+          guard: "subject.getFormation() != null and subject.getFormation().isClassique()"
           metadata:
             recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
             timeline_modules: [ 'descriptifs' ]
@@ -672,6 +679,97 @@ framework:
             button_class: 'success'
             button_icon: 'ph:check'
             description: '--'
+        # Transitions spécifiques aux parcours d'établissement (non classiques / au fil de l'eau)
+        transmettre_ses_etablissement:
+          from: 'en_cours_redaction'
+          to: 'soumis_central'
+          guard: "subject.getFormation() != null and not subject.getFormation().isClassique()"
+          metadata:
+            recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
+            titre_with_parcours: "Le parcours %%s de votre formation %%s a été soumis à validation au SES"
+            titre: 'Un parcours de votre formation %%s a été soumis à validation au SES'
+            type: valider
+            label: 'btn.offre_v2.composante.transmettre_ses_etablissement'
+            button_class: 'success'
+            button_icon: 'ph:paper-plane-tilt'
+            form:
+              fields: [ ]
+        valider_ses_etablissement:
+          from: 'soumis_central'
+          to: 'valide_cfvu'
+          guard: "subject.getFormation() != null and not subject.getFormation().isClassique()"
+          metadata:
+            recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
+            titre_with_parcours: 'La fiche du parcours %%s de la formation %%s a été validée par le SES'
+            titre: 'La fiche de la formation %%s a été validée par le SES'
+            type: valider
+            label: 'btn.offre_v2.composante.valider_ses_etablissement'
+            button_class: 'success'
+            button_icon: 'ph:check'
+            form:
+              fields: [ ]
+        reserver_ses_etablissement:
+          from: 'soumis_central'
+          to: 'en_cours_redaction'
+          guard: "subject.getFormation() != null and not subject.getFormation().isClassique()"
+          metadata:
+            recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
+            titre_with_parcours: 'La fiche du parcours %%s de la formation %%s a reçu des réserves par le SES'
+            titre: 'La fiche de la formation %%s a reçue des réserves par le SES'
+            type: reserver
+            label: 'btn.offre_v2.composante.reserver_ses_etablissement'
+            button_class: 'warning'
+            button_icon: 'material-symbols:fact-check-outline-sharp'
+            context:
+              aliases:
+                argumentaire: motif
+            form:
+              type: 'App\Form\Workflow\ArgumentaireType'
+              options:
+                argumentaire_required: true
+                min_length: 5
+        reouvrir_relecture_etablissement:
+          from: 'valide_cfvu'
+          to: 'en_cours_redaction'
+          guard: "subject.getFormation() != null and not subject.getFormation().isClassique()"
+          metadata:
+            recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
+            label: 'btn.offre_v2.composante.reouvrir_etablissement'
+            description: 'Réouvrir pour modification au fil de l’eau'
+            button_class: 'warning'
+            button_icon: 'flowbite:undo-outline'
+            type: 'reouvrir'
+            context:
+              aliases:
+                argumentaire: motif
+            form:
+              title: "Réouvrir le parcours"
+              submit_label: "Valider la demande"
+              type: 'App\Form\Workflow\ArgumentaireType'
+              options:
+                argumentaire_required: true
+                min_length: 5
+        reouvrir_etablissement:
+          from: 'publie'
+          to: 'en_cours_redaction'
+          guard: "subject.getFormation() != null and not subject.getFormation().isClassique()"
+          metadata:
+            recipients: [ 'DPE', 'RF', 'CoRF', 'RP', 'CoRP' ]
+            label: 'btn.offre_v2.composante.reouvrir_etablissement'
+            description: 'Réouvrir pour modification au fil de l’eau'
+            button_class: 'warning'
+            button_icon: 'flowbite:undo-outline'
+            type: 'reouvrir'
+            context:
+              aliases:
+                argumentaire: motif
+            form:
+              title: "Réouvrir le parcours"
+              submit_label: "Valider la demande"
+              type: 'App\Form\Workflow\ArgumentaireType'
+              options:
+                argumentaire_required: true
+                min_length: 5
     fiche:
       type: 'workflow'
       marking_store:
