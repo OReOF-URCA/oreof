@@ -29,6 +29,7 @@ use App\Repository\AccreditationRepository;
 use App\Repository\ComposanteRepository;
 use App\Repository\DomaineRepository;
 use App\Repository\DpeParcoursRepository;
+use App\Repository\FicheMatiereRepository;
 use App\Repository\FormationRepository;
 use App\Repository\MentionRepository;
 use App\Repository\ProfilRepository;
@@ -306,12 +307,13 @@ class FormationController extends BaseController
 
     #[Route('/fiches/liste', name: 'app_fiches_formation_liste', methods: ['GET'])]
     public function fichesFormation(
-        UserRepository        $userRepository,
-        GetFormations         $getFormations,
-        MentionRepository     $mentionRepository,
-        ComposanteRepository  $composanteRepository,
-        TypeDiplomeRepository $typeDiplomeRepository,
-        Request               $request,
+        UserRepository         $userRepository,
+        GetFormations          $getFormations,
+        MentionRepository      $mentionRepository,
+        ComposanteRepository   $composanteRepository,
+        TypeDiplomeRepository  $typeDiplomeRepository,
+        FicheMatiereRepository $ficheMatiereRepository,
+        Request                $request,
     ): Response {
         $isEtablissement = $getFormations->isEtablissement();
         $classiqueParam = $request->query->get('classique');
@@ -361,20 +363,7 @@ class FormationController extends BaseController
             $params
         );
 
-        $stats = [];
-        foreach ($tFormations as $formation) {
-
-            $parcourss = $formation->getParcours();
-            $stats[$formation->getId()]['stats'] = new StatsFichesMatieres();
-            $typeD = $this->typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
-            foreach ($parcourss as $parcours) {
-
-                $stats[$formation->getId()][$parcours->getId()] = $typeD->calcul($parcours);
-                $stats[$formation->getId()]['stats']->addStatsParcours(
-                    $stats[$formation->getId()][$parcours->getId()]->statsFichesMatieresParcours
-                );
-            }
-        }
+        $stats = $ficheMatiereRepository->getStatsForFormations($tFormations, $this->getCampagneCollecte());
 
         return $this->render('formation/_fichesListe.html.twig', [
             'formations' => $tFormations,

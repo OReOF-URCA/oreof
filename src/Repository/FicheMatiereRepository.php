@@ -9,6 +9,7 @@
 
 namespace App\Repository;
 
+use App\DTO\StatsFichesMatieres;
 use App\Entity\CampagneCollecte;
 use App\Entity\Composante;
 use App\Entity\DpeParcours;
@@ -557,4 +558,88 @@ class FicheMatiereRepository extends ServiceEntityRepository
             ->orderBy('fm.libelle', 'ASC');
     }
 
+    /**
+     * Calcule les statistiques des fiches matières pour une liste de formations sans hydrater
+     * les parcours ni les maquettes en mémoire.
+     *
+     * @param iterable<Formation|int> $formations
+     * @return array<int, array{stats: StatsFichesMatieres}>
+     */
+    public function getStatsForFormations(iterable $formations, ?CampagneCollecte $campagneCollecte): array
+    {
+        $formationIds = [];
+        $stats = [];
+
+        foreach ($formations as $formation) {
+            $id = $formation instanceof Formation ? $formation->getId() : (int)$formation;
+            if ($id !== null && $id > 0) {
+                $formationIds[] = $id;
+                $stats[$id] = [
+                    'stats' => new StatsFichesMatieres(),
+                ];
+            }
+        }
+
+        if ($formationIds === [] || $campagneCollecte === null) {
+            return $stats;
+        }
+
+        $qb = $this->createQueryBuilder('fm')
+            ->select('IDENTITY(p.formation) AS formation_id, fm.id, fm.remplissage, fm.etatFiche')
+            ->join('fm.parcours', 'p')
+            ->where('IDENTITY(p.formation) IN (:formationIds)')
+            ->andWhere('fm.campagneCollecte = :campagneCollecte')
+            ->andWhere('fm.horsDiplome = 0 OR fm.horsDiplome IS NULL')
+            ->setParameter('formationIds', $formationIds)
+            ->setParameter('campagneCollecte', $campagneCollecte);
+
+        /** @var list<array{formation_id: int|string, id: int, remplissage: array|null, etatFiche: array|null}> $rows */
+        $rows = $qb->getQuery()->getArrayResult();
+
+        foreach ($rows as $row) {
+            $formationId = (int)$row['formation_id'];
+            if (!isset($stats[$formationId])) {
+                $stats[$formationId] = [
+                    'stats' => new StatsFichesMatieres(),
+                ];
+            }
+
+            /** @var StatsFichesMatieres $statFiches */
+            $statFiches = $stats[$formationId]['stats'];
+            $statFiches->nbFiches++;
+
+            $remplissage = $row['remplissage'] ?? [];
+            if (is_array($remplissage) && isset($remplissage['score'], $remplissage['total']) && (int)$remplissage['total'] > 0 && (int)$remplissage['score'] === (int)$remplissage['total']) {
+                $statFiches->nbFichesCompletes++;
+            }
+
+            $etatFiche = $row['etatFiche'] ?? [];
+            if (!is_array($etatFiche)) {
+                $etatFiche = [];
+            }
+
+            if (empty($etatFiche) || array_key_exists('fiche_matiere', $etatFiche)) {
+                $statFiches->nbFichesNonValidees++;
+            }
+
+            if (array_key_exists('soumis_central', $etatFiche)) {
+                $statFiches->nbFichesNonValideesSes++;
+            }
+
+            if (array_key_exists('en_cours_redaction', $etatFiche)) {
+                $statFiches->nbEnCoursRedaction++;
+            }
+
+            if (array_key_exists('valide_pour_publication', $etatFiche)) {
+                $statFiches->nbFichesValidees++;
+            }
+
+            if (array_key_exists('publie', $etatFiche)) {
+                $statFiches->nbFichesPubliees++;
+            }
+        }
+
+        return $stats;
+    }
 }
+
