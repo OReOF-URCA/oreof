@@ -194,10 +194,8 @@ final class PublicationController extends AbstractController
                 'niveau-entree-libelle' => NiveauFormation::legacyCase($parcours->getFormation()->getNiveauEntreeValue())?->libelle() ?? "0",
                 'niveau-sortie-code' => $parcours->getFormation()->getNiveauSortieValue(),
                 'niveau-sortie-libelle' => NiveauFormation::legacyCase($parcours->getFormation()->getNiveauSortieValue())?->libelle() ?? "0",
-                'lien_court' => $lienCourt,
                 'lien-court' => $lienCourt,
-                'codes-rome' => $codesRome,
-                'codes_rome' => $codesRome,
+                'code-rome' => $codesRome,
             ],
             'xml-lheo' => $this->generateUrl('app_parcours_export_xml_lheo_v2', ['parcours' => $parcoursVersion->getParcours()->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'fiche-pdf' => $this->generateUrl('app_parcours_export_pdf_versioning', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
@@ -205,9 +203,7 @@ final class PublicationController extends AbstractController
             'maquette-json' => $this->generateUrl('api_site_web_v2_parcours_maquette_validee_cfvu', ['parcours' => $parcoursVersion->getParcours()->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'logos-parcours' => $logosParcours,
             'lien-court' => $lienCourt,
-            'lien_court' => $lienCourt,
-            'codes-rome' => $codesRome,
-            'codes_rome' => $codesRome,
+            'code-rome' => $codesRome,
         ];
 
         return new JsonResponse($data);
@@ -340,13 +336,15 @@ final class PublicationController extends AbstractController
                 'niveau-sortie-code' => $parcours->getFormation()->getNiveauSortieValue(),
                 'niveau-sortie-libelle' => NiveauFormation::legacyCase($parcours->getFormation()->getNiveauSortieValue())?->libelle() ?? "0",
                 'lien-court' => $lienCourt,
-                'codes-rome' => $codesRome,
+                'code-rome' => $codesRome,
             ],
             'xml-lheo' => $this->generateUrl('app_parcours_export_xml_lheo_v2', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'fiche-pdf' => $this->generateUrl('app_parcours_export', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'maquette-pdf' => $urlMaquettePdf,
             'maquette-json' => $urlMaquetteJson,
-            'logos-parcours' => $logosParcours
+            'logos-parcours' => $logosParcours,
+            'lien-court' => $lienCourt,
+            'code-rome' => $codesRome,
         ];
 
         return new JsonResponse($data);
