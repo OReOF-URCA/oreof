@@ -94,15 +94,8 @@ class ParcoursStep1Type extends AbstractType
                 'data' => $options['data']->getLocalisation(),
                 'autocomplete' => true,
             ]);
-            //->add('logo', FileType::class, [
-            //    'help' => 'Logo du parcours',
-            //    'multiple' => true,
-            //    'required' => false,
-            //    'mapped' => false,
-            //    'attr' => ['accept' => 'image/png, image/jpeg'],
-            //])
-            ;
-        ;
+        // Note : En V2, la gestion des logos et de leurs liens web associés est prise
+        // en charge par la carte dédiée et asynchrone sur l'onglet Présentation (_presentation.html.twig).
     }
 
     public function configureOptions(OptionsResolver $resolver): void

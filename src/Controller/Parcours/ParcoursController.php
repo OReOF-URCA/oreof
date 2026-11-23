@@ -114,6 +114,8 @@ class ParcoursController extends BaseController
         $dto = $typeD->calcul($parcours);
 
         return $this->render('parcours_v2/modifier.html.twig', array_merge($parameters, [
+            'typeD' => $typeD,
+            'isCompetencesImposees' => $typeD->hasReferentielCompetencesImpose($parcours),
             'dto' => $dto,
         ]));
     }
@@ -455,6 +457,7 @@ class ParcoursController extends BaseController
 
         $tabStates = $statesRepo->indexByTabKey($parcours);
         $typeD = $typeDiplomeResolver->fromParcours($parcours);
+        $isCompetencesImposees = $typeD->hasReferentielCompetencesImpose($parcours);
 
         $parameters = [
             'parcours' => $parcours,
@@ -463,6 +466,7 @@ class ParcoursController extends BaseController
             'form' => $form?->createView(),
             'titre' => $titre,
             'typeD' => $typeD,
+            'isCompetencesImposees' => $isCompetencesImposees,
             'texte_help' => $texte_help,
             'tabStates' => $tabStates,
             'typeDiplome' => $parcours->getFormation()?->getTypeDiplome(),

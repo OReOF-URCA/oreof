@@ -116,3 +116,55 @@
         </dl>
     </div>
 </div>
+
+{% set tdEntity = (formation.typeDiplome ?? typeDiplome ?? null) %}
+{% set tdLogos = tdEntity ? (tdEntity.logo ?? []) : [] %}
+{% set currentParcours = parcours ?? (formation.hasParcours == false ? formation.parcours.first : null) %}
+{% set pLogos = currentParcours ? currentParcours.logosNormalized : [] %}
+
+{% if tdLogos|length > 0 or pLogos|length > 0 %}
+    <div class="mt-4 grid grid-cols-1 gap-4 {{ (tdLogos|length > 0 and pLogos|length > 0) ? 'lg:grid-cols-2' : '' }}">
+        {% if tdLogos|length > 0 %}
+            <div class="{{ columnClass }}">
+                <div class="{{ dtClass }} mb-3">Logo{{ tdLogos|length > 1 ? 's' : '' }} du type de diplôme</div>
+                <div class="flex flex-wrap items-center gap-3">
+                    {% for tdLogo in tdLogos %}
+                        <div class="flex items-center justify-center p-3 rounded-xl border border-secondary-200 dark:border-secondary-700 bg-white dark:bg-secondary-800 shadow-xs"
+                             title="Logo {{ typeDiplome|typeDiplome }}">
+                            <img src="{{ asset('uploads/logos/' ~ tdLogo) }}" alt="Logo {{ typeDiplome|typeDiplome }}"
+                                 class="max-h-16 max-w-36 object-contain">
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+
+        {% if pLogos|length > 0 %}
+            <div class="{{ columnClass }}">
+                <div class="{{ dtClass }} mb-3">Logo{{ pLogos|length > 1 ? 's' : '' }} du
+                    parcours{{ currentParcours.libelle ? ' (' ~ currentParcours.libelle ~ ')' : '' }}</div>
+                <div class="flex flex-wrap items-center gap-4">
+                    {% for logo in pLogos %}
+                        <div class="flex flex-col items-center p-2.5 rounded-xl border border-secondary-200 dark:border-secondary-700 bg-white dark:bg-secondary-800 shadow-xs hover:shadow transition">
+                            {% if logo.url %}
+                                <a href="{{ logo.url }}" target="_blank" rel="noopener noreferrer"
+                                   class="flex flex-col items-center group text-center"
+                                   title="Ouvrir le lien web : {{ logo.url }}">
+                                    <img src="{{ asset('uploads/logos/' ~ logo.filename) }}" alt="Logo du parcours"
+                                         class="max-h-16 max-w-32 object-contain">
+                                    <span class="text-[11px] text-primary-600 dark:text-primary-400 group-hover:underline flex items-center gap-1 mt-1.5 truncate max-w-32 font-medium">
+                                        <twig:UX:Icon name="icon:link" class="w-3 h-3 inline shrink-0"/>
+                                        <span class="truncate">{{ logo.url|replace({'https://': '', 'http://': ''}) }}</span>
+                                    </span>
+                                </a>
+                            {% else %}
+                                <img src="{{ asset('uploads/logos/' ~ logo.filename) }}" alt="Logo du parcours"
+                                     class="max-h-16 max-w-32 object-contain">
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+{% endif %}

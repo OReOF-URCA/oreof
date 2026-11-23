@@ -157,8 +157,8 @@ services:
             max_size: 10485760
           logos:
             target_dir: '%kernel.project_dir%/public/uploads/logos'
-            allowed_extensions: [ 'png', 'jpg', 'jpeg', 'webp', 'svg' ]
-            allowed_mime_types: [ 'image/png', 'image/jpeg', 'image/webp', 'image/svg+xml' ]
+            allowed_extensions: [ 'png', 'jpg', 'jpeg' ]
+            allowed_mime_types: [ 'image/png', 'image/jpeg' ]
             max_size: 10485760
           plaquettes:
             target_dir: '%kernel.project_dir%/public/uploads/plaquettes'

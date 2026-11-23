@@ -2196,9 +2196,102 @@ class Parcours
         return $this;
     }
 
-    public function addLogo(string $filename): static
+    /**
+     * @return array<int, array{filename: string, url: ?string}>
+     */
+    public function getLogosNormalized(): array
     {
-        $this->logo[] = $filename;
+        if (empty($this->logo)) {
+            return [];
+        }
+
+        $normalized = [];
+        foreach ($this->logo as $item) {
+            if (is_string($item)) {
+                $trimmed = trim($item);
+                if ($trimmed !== '') {
+                    $normalized[] = [
+                        'filename' => $trimmed,
+                        'url' => null,
+                    ];
+                }
+            } elseif (is_array($item) && !empty($item['filename'])) {
+                $normalized[] = [
+                    'filename' => trim((string)$item['filename']),
+                    'url' => !empty($item['url']) ? trim((string)$item['url']) : null,
+                ];
+            }
+        }
+
+        return $normalized;
+    }
+
+    public function addLogo(string $filename, ?string $url = null): static
+    {
+        if (!is_array($this->logo)) {
+            $this->logo = [];
+        }
+
+        $url = $url !== null ? trim($url) : null;
+        if ($url === '') {
+            $url = null;
+        }
+
+        $this->logo[] = [
+            'filename' => $filename,
+            'url' => $url,
+        ];
+
+        return $this;
+    }
+
+    public function updateLogoUrl(string $filename, ?string $url): static
+    {
+        if (!is_array($this->logo)) {
+            return $this;
+        }
+
+        $url = $url !== null ? trim($url) : null;
+        if ($url === '') {
+            $url = null;
+        }
+
+        $newLogos = [];
+        foreach ($this->logo as $item) {
+            $currentFilename = is_array($item) ? ($item['filename'] ?? '') : (string)$item;
+            $currentUrl = is_array($item) ? ($item['url'] ?? null) : null;
+            if ($currentFilename === $filename) {
+                $newLogos[] = [
+                    'filename' => $filename,
+                    'url' => $url,
+                ];
+            } else {
+                $newLogos[] = is_array($item) ? $item : [
+                    'filename' => $currentFilename,
+                    'url' => $currentUrl,
+                ];
+            }
+        }
+        $this->logo = $newLogos;
+
+        return $this;
+    }
+
+    public function removeLogo(string $filename): static
+    {
+        if (!is_array($this->logo)) {
+            return $this;
+        }
+
+        $newLogos = [];
+        foreach ($this->logo as $item) {
+            $currentFilename = is_array($item) ? ($item['filename'] ?? '') : (string)$item;
+            if ($currentFilename !== $filename) {
+                $newLogos[] = $item;
+            }
+        }
+        $this->logo = array_values($newLogos);
+
         return $this;
     }
 

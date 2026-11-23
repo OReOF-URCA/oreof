@@ -1,0 +1,89 @@
+<turbo-frame id="parcours-logos-frame">
+    {% set logos = parcours.logosNormalized %}
+    {% if logos|length > 0 %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+            {% for logo in logos %}
+                <div data-logo-card
+                     class="flex flex-col justify-between p-3 rounded-xl border border-secondary-200 dark:border-secondary-700 bg-white dark:bg-secondary-800 shadow-sm transition hover:shadow">
+                    <div class="flex items-center justify-between gap-3 mb-2">
+                        <div class="h-16 w-28 flex items-center justify-center p-1.5 rounded-lg bg-secondary-50 dark:bg-secondary-900 border border-secondary-100 dark:border-secondary-800">
+                            <img src="{{ asset('uploads/logos/' ~ logo.filename) }}"
+                                 alt="Logo du parcours"
+                                 class="max-h-14 max-w-24 object-contain">
+                        </div>
+                        <div class="flex items-center gap-1">
+                            {% if is_granted('ROLE_ADMIN') %}
+                                <a href="{{ path('parcours_v2_logo_file', {parcours: parcours.id, filename: logo.filename}) }}"
+                                   target="_blank"
+                                   class="text-secondary-400 hover:text-secondary-700 dark:hover:text-secondary-200 p-1.5 rounded-lg transition"
+                                   title="Voir l'image originale">
+                                    <twig:UX:Icon name="icon:download" class="w-4 h-4"/>
+                                </a>
+                            {% endif %}
+                            {% if editable is defined and editable %}
+                                <button type="button"
+                                        class="text-danger-500 hover:text-danger-700 hover:bg-danger-50 dark:hover:bg-danger-950/50 p-1.5 rounded-lg transition"
+                                        title="Supprimer ce logo"
+                                        data-action="click->parcours-logos#deleteLogo"
+                                        data-filename="{{ logo.filename }}">
+                                    <twig:UX:Icon name="icon:delete" class="w-4 h-4"/>
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if editable is defined and editable %}
+                        <div class="space-y-1 mt-1">
+                            <div class="flex items-center justify-between">
+                                <label class="block text-[11px] font-semibold text-secondary-500 dark:text-secondary-400 uppercase tracking-wider">
+                                    Lien web associé
+                                </label>
+                                <span data-status-for="{{ logo.filename }}"
+                                      class="text-[10px] hidden font-semibold"></span>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <input type="url"
+                                       class="form-control text-xs py-1.5 px-2.5 rounded-lg border border-secondary-300 dark:border-secondary-600 dark:bg-secondary-900 text-secondary-700 dark:text-secondary-200 flex-1 focus:ring-1 focus:ring-primary-500"
+                                       placeholder="https://..."
+                                       value="{{ logo.url }}"
+                                       data-filename="{{ logo.filename }}"
+                                       data-action="change->parcours-logos#updateUrl">
+                                <button type="button"
+                                        class="p-1.5 rounded-lg text-primary-600 hover:bg-primary-50 dark:hover:bg-secondary-700 transition"
+                                        title="Enregistrer le lien web"
+                                        data-action="click->parcours-logos#saveUrlClick"
+                                        data-filename="{{ logo.filename }}">
+                                    <twig:UX:Icon name="icon:check" class="w-4 h-4"/>
+                                </button>
+                                <a href="{{ logo.url|default('#') }}"
+                                   target="_blank"
+                                   rel="noopener noreferrer"
+                                   data-link-test-for="{{ logo.filename }}"
+                                   class="p-1.5 rounded-lg text-secondary-500 hover:text-primary-600 hover:bg-secondary-100 dark:hover:bg-secondary-700 transition {{ not logo.url ? 'hidden' : '' }}"
+                                   title="Tester / ouvrir le lien web">
+                                    <twig:UX:Icon name="icon:link" class="w-4 h-4"/>
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        {% if logo.url %}
+                            <a href="{{ logo.url }}"
+                               target="_blank"
+                               rel="noopener noreferrer"
+                               class="text-xs text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1 truncate mt-1">
+                                <twig:UX:Icon name="icon:link" class="w-3.5 h-3.5 inline shrink-0"/>
+                                <span class="truncate">{{ logo.url }}</span>
+                            </a>
+                        {% else %}
+                            <span class="text-[11px] text-secondary-400 italic">Aucun lien web associé</span>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-xs text-secondary-400 dark:text-secondary-500 italic py-2">
+            Aucun logo enregistré pour ce parcours.
+        </div>
+    {% endif %}
+</turbo-frame>
