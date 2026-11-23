@@ -7,7 +7,7 @@
     <dl class="space-y-4">
         <div class="{{ blockClass }}">
             <dt class="{{ dtClass }}">Contenu de la formation</dt>
-            <dd class="{{ proseBoxClass }}">{{ formation.contenuFormation|raw }}</dd>
+            <dd class="{{ proseBoxClass }} texte-riche">{{ formation.contenuFormation|raw }}</dd>
         </div>
         {% if stringDifferencesFormation.presentationFormationContenuFormation is defined %}
             {{ include('communs/_comparaison_versioning_no_button.html.twig', {
@@ -18,7 +18,7 @@
 
         <div class="{{ blockClass }}">
             <dt class="{{ dtClass }}">Résultats attendus de la formation</dt>
-            <dd class="{{ ddClass }}">{{ formation.resultatsAttendus|raw }}</dd>
+            <dd class="{{ ddClass }} texte-riche">{{ formation.resultatsAttendus|raw }}</dd>
         </div>
         {% if stringDifferencesFormation.presentationFormationResultatsAttendus is defined %}
             {{ include('communs/_comparaison_versioning_no_button.html.twig', {
@@ -34,7 +34,7 @@
 
         <div class="{{ blockClass }}">
             <dt class="{{ dtClass }}">Précisions sur le rythme de formation</dt>
-            <dd class="{{ ddClass }}">{{ formation.rythmeFormationTexte|raw }}</dd>
+            <dd class="{{ ddClass }} texte-riche">{{ formation.rythmeFormationTexte|raw }}</dd>
         </div>
 
         {% set defaultParcours = formation.parcours.first %}
@@ -78,7 +78,7 @@
     <dl class="space-y-4">
         <div class="{{ blockClass }}">
             <dt class="{{ dtClass }}">Organisation et objectifs de la formation</dt>
-            <dd class="{{ proseBoxClass }}">{{ formation.objectifsFormation|raw }}</dd>
+            <dd class="{{ proseBoxClass }} texte-riche">{{ formation.objectifsFormation|raw }}</dd>
         </div>
         {% if stringDifferencesFormation.presentationFormationObjectifsFormation is defined %}
             {{ include('communs/_comparaison_versioning_no_button.html.twig', {

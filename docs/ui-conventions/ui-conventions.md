@@ -120,6 +120,12 @@ n'est pas réduit, pour éviter une oscillation.
 | delete | `danger` | `icon:delete` |
 | new/create | `success` | `icon:add` |
 
+## Texte riche (Trix)
+
+Le preflight Tailwind retire puces, numérotation et soulignement des liens. Pour afficher du HTML saisi dans Trix
+(`|raw`), ajouter la classe `texte-riche` à son conteneur (ex. `<dd class="{{ ddClass }} texte-riche">`). L'éditeur
+`trix-editor` reçoit les mêmes styles (`assets/styles/app.css`, section « Texte riche »).
+
 ## Tokens Tailwind
 
 - Section/panneau : `rounded-xl border border-secondary-200 bg-surface p-4 shadow-sm dark:border-secondary-700`.

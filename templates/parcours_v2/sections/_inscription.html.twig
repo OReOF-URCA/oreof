@@ -12,7 +12,7 @@
 
             <div class="{{ blockClass }}">
                 <dt class="{{ dtClass }}">Régime(s) d'inscription</dt>
-                <dd class="{{ ddClass }}">
+                <dd class="{{ ddClass }} texte-riche">
                     {% if formation.hasParcours %}
                         <div class="flex flex-wrap gap-2">
                             {% for regime in parcours.regimeInscription %}
@@ -27,7 +27,7 @@
 
             <div class="{{ blockClass }}">
                 <dt class="{{ dtClass }}">Modalités de l'alternance</dt>
-                <dd class="{{ ddClass }}">
+                <dd class="{{ ddClass }} texte-riche">
                     {% if formation.hasParcours %}
                         {{ (parcours.displayModalitesAlternance|default(parcours.modalitesAlternance))|raw }}
                     {% else %}

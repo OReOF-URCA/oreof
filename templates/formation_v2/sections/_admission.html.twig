@@ -11,7 +11,7 @@
 
         <div class="{{ blockClass }}">
             <dt class="{{ dtClass }}">Prérequis recommandés</dt>
-            <dd class="{{ ddClass }}">{{ parcours.prerequis|raw }}</dd>
+            <dd class="{{ ddClass }} texte-riche">{{ parcours.prerequis|raw }}</dd>
         </div>
 
         {% if stringDifferencesParcours.prerequisRecommandesParcours is defined %}
