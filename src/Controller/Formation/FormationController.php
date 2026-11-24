@@ -125,7 +125,13 @@ class FormationController extends BaseController
         BreadcrumbService   $breadcrumb,
     ): Response
     {
-        if (!$this->isGranted('SHOW', $formation)) {
+        $canAccess = false;
+        if($this->isGranted('SHOW', $formation) 
+            || (!$formation->isClassique() && $this->isGranted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION'))
+        ) {
+            $canAccess = true;
+        }
+        if (!$canAccess) {
             throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette formation.');
         }
 
