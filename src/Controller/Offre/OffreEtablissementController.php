@@ -58,7 +58,10 @@ final class OffreEtablissementController extends BaseController
                 ]);
             }
         } else {
-            $this->denyAccessUnlessGranted('ROLE_ADMIN');
+            $canAccess = $this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION');
+            if(!$canAccess) {
+                throw $this->createAccessDeniedException();
+            }
         }
 
         $tabStatistiques = [
