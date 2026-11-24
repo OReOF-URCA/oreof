@@ -104,7 +104,18 @@ class ProcessReouvertureController extends BaseController
             $dpeDemandeEvent = new DpeDemandeEvent($demande, $currentUser);
             $this->eventDispatcher->dispatch($dpeDemandeEvent, DpeDemandeEvent::DPE_DEMANDE_OPENED);
 
-            return JsonReponse::success('DPE ouvert');
+            $redirectUrl = $this->generateUrl('parcours_v2_modifier', ['parcours' => $parcours->getId()]);
+
+            if ($this->isTurbo($request) && str_contains((string)$request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')) {
+                return $this->turboStream->stream('process_validation/turbo/reouverture_success.stream.html.twig', [
+                    'parcours' => $parcours,
+                    'dpeParcours' => $dpe,
+                    'message' => 'DPE ouvert',
+                    'redirectUrl' => $redirectUrl,
+                ]);
+            }
+
+            return JsonReponse::success('DPE ouvert', ['redirect' => $redirectUrl]);
         }
 
         if ($this->isTurbo($request)) {
@@ -163,7 +174,9 @@ class ProcessReouvertureController extends BaseController
             $dpeDemandeEvent = new DpeDemandeEvent($demande, $currentUser);
             $this->eventDispatcher->dispatch($dpeDemandeEvent, DpeDemandeEvent::DPE_DEMANDE_OPENED);
 
-            return JsonReponse::success('DPE ouvert avec modification de la structure');
+            $redirectUrl = $this->generateUrl('parcours_v2_modifier', ['parcours' => $parcours->getId()]);
+
+            return JsonReponse::success('DPE ouvert avec modification de la structure', ['redirect' => $redirectUrl]);
         }
 
         return $this->render('process_validation/_demande_switch.html.twig', [
@@ -230,9 +243,18 @@ class ProcessReouvertureController extends BaseController
 
             // Mail au SES
             $dpeDemandeEvent = new DpeDemandeEvent($demande, $currentUser);
-            $this->eventDispatcher->dispatch($dpeDemandeEvent, DpeDemandeEvent::DPE_DEMANDE_OPENED);
+            $redirectUrl = $this->generateUrl('formation_v2_modifier', ['slug' => $formation->getSlug()]);
 
-            return JsonReponse::success($texte);
+            if ($this->isTurbo($request) && str_contains((string)$request->headers->get('Accept', ''), 'text/vnd.turbo-stream.html')) {
+                return $this->turboStream->stream('process_validation/turbo/reouverture_formation_success.stream.html.twig', [
+                    'formation' => $formation,
+                    'dpeParcours' => $dpe,
+                    'message' => $texte,
+                    'redirectUrl' => $redirectUrl,
+                ]);
+            }
+
+            return JsonReponse::success($texte, ['redirect' => $redirectUrl]);
         }
 
         if ($this->isTurbo($request)) {

@@ -50,10 +50,10 @@ class FicheMatiereRepositoryStatsTest extends TestCase
     {
         $em = $this->createMock(EntityManagerInterface::class);
         $meta = new ClassMetadata(FicheMatiere::class);
-        $em->method('getClassMetadata')->with(FicheMatiere::class)->willReturn($meta);
+        $em->method('getClassMetadata')->willReturn($meta);
 
         $registry = $this->createMock(ManagerRegistry::class);
-        $registry->method('getManagerForClass')->with(FicheMatiere::class)->willReturn($em);
+        $registry->method('getManagerForClass')->willReturn($em);
 
         $qb = $this->createMock(QueryBuilder::class);
         $query = $this->createMock(Query::class);
@@ -147,5 +147,78 @@ class FicheMatiereRepositoryStatsTest extends TestCase
         $st30 = $stats[30]['stats'];
         $this->assertSame(0, $st30->nbFiches);
         $this->assertSame(0, $st30->nbFichesCompletes);
+    }
+
+    public function testGetStatsForFormationsFiltersByResponsableCorrectly(): void
+    {
+        $em = $this->createMock(EntityManagerInterface::class);
+        $meta = new ClassMetadata(FicheMatiere::class);
+        $em->method('getClassMetadata')->willReturn($meta);
+
+        $registry = $this->createMock(ManagerRegistry::class);
+        $registry->method('getManagerForClass')->willReturn($em);
+
+        $qb = $this->createMock(QueryBuilder::class);
+        $query = $this->createMock(Query::class);
+
+        $em->method('createQueryBuilder')->willReturn($qb);
+        $qb->method('select')->willReturnSelf();
+        $qb->method('from')->willReturnSelf();
+        $qb->method('join')->willReturnSelf();
+        $qb->method('where')->willReturnSelf();
+        $qb->method('andWhere')->willReturnSelf();
+        $qb->method('setParameter')->willReturnSelf();
+        $qb->method('getQuery')->willReturn($query);
+
+        $rows = [
+            [
+                'formation_id' => 10,
+                'id' => 101,
+                'remplissage' => ['score' => 5, 'total' => 5],
+                'etatFiche' => ['publie' => 1],
+                'responsable_id' => 42,
+            ],
+            [
+                'formation_id' => 10,
+                'id' => 102,
+                'remplissage' => ['score' => 5, 'total' => 5],
+                'etatFiche' => ['publie' => 1],
+                'responsable_id' => 999, // Un autre enseignant
+            ],
+            [
+                'formation_id' => 20,
+                'id' => 201,
+                'remplissage' => ['score' => 5, 'total' => 5],
+                'etatFiche' => ['publie' => 1],
+                'responsable_id' => 999,
+            ],
+        ];
+
+        $query->method('getArrayResult')->willReturn($rows);
+
+        $repo = new FicheMatiereRepository($registry);
+
+        $f1 = new Formation();
+        $ref = new \ReflectionProperty(Formation::class, 'id');
+        $ref->setValue($f1, 10);
+
+        $f2 = new Formation();
+        $ref->setValue($f2, 20);
+
+        $campagne = new CampagneCollecte();
+
+        $teacher = new \App\Entity\User();
+        $refUser = new \ReflectionProperty(\App\Entity\User::class, 'id');
+        $refUser->setValue($teacher, 42);
+
+        // Cas 1 : Simple enseignant (pas de formation sans restriction)
+        $statsTeacher = $repo->getStatsForFormations([$f1, $f2], $campagne, $teacher, []);
+        $this->assertSame(1, $statsTeacher[10]['stats']->nbFiches); // Seulement sa fiche 101
+        $this->assertSame(0, $statsTeacher[20]['stats']->nbFiches); // Aucune fiche pour lui en formation 20
+
+        // Cas 2 : Enseignant responsable de formation 20 (unrestricted = [20])
+        $statsUnrestricted = $repo->getStatsForFormations([$f1, $f2], $campagne, $teacher, [20]);
+        $this->assertSame(1, $statsUnrestricted[10]['stats']->nbFiches); // Seulement sa fiche sur formation 10
+        $this->assertSame(1, $statsUnrestricted[20]['stats']->nbFiches); // Toutes les fiches sur formation 20
     }
 }

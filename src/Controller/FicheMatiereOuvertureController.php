@@ -31,7 +31,9 @@ class FicheMatiereOuvertureController extends BaseController
             $now = new DateTimeImmutable('now');
             $versioningFiche->saveFicheMatiereVersion($ficheMatiere, $now, withFlush: true, isVersionValide: true);
 
-            return JsonReponse::success('La fiche matière est réouverte');
+            return JsonReponse::success('La fiche matière est réouverte', [
+                'redirect' => $this->generateUrl('fiche_matiere_v2_modifier', ['id' => $ficheMatiere->getId()]),
+            ]);
         }
         return $this->render('fiche_matiere_ouverture/_reouverture.html.twig', [
             'ficheMatiere' => $ficheMatiere,

@@ -20,3 +20,20 @@
 
 {{ include('_ui/_force_close_modal.html.twig') }}
 
+{% if type == 'reouvrir' or transition starts with 'reouvrir' or transition starts with 'rouvrir' %}
+    <turbo-stream action="append" target="flash_toasts">
+        <template>
+            <script>
+                (function () {
+                    const targetUrl = "{{ path('parcours_v2_modifier', {parcours: dpeParcours.parcours.id}) }}";
+                    if (window.Turbo && typeof window.Turbo.visit === 'function') {
+                        window.Turbo.visit(targetUrl, {action: 'advance'});
+                    } else {
+                        window.location.href = targetUrl;
+                    }
+                })();
+            </script>
+        </template>
+    </turbo-stream>
+{% endif %}
+

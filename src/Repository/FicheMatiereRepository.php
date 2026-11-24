@@ -563,9 +563,15 @@ class FicheMatiereRepository extends ServiceEntityRepository
      * les parcours ni les maquettes en mémoire.
      *
      * @param iterable<Formation|int> $formations
+     * @param list<int>|null $unrestrictedFormationIds IDs des formations pour lesquelles compter toutes les fiches sans filtre de responsable
      * @return array<int, array{stats: StatsFichesMatieres}>
      */
-    public function getStatsForFormations(iterable $formations, ?CampagneCollecte $campagneCollecte): array
+    public function getStatsForFormations(
+        iterable          $formations,
+        ?CampagneCollecte $campagneCollecte,
+        ?User             $responsable = null,
+        ?array            $unrestrictedFormationIds = null,
+    ): array
     {
         $formationIds = [];
         $stats = [];
@@ -585,7 +591,7 @@ class FicheMatiereRepository extends ServiceEntityRepository
         }
 
         $qb = $this->createQueryBuilder('fm')
-            ->select('IDENTITY(p.formation) AS formation_id, fm.id, fm.remplissage, fm.etatFiche')
+            ->select('IDENTITY(p.formation) AS formation_id, fm.id, fm.remplissage, fm.etatFiche, IDENTITY(fm.responsableFicheMatiere) AS responsable_id')
             ->join('fm.parcours', 'p')
             ->where('IDENTITY(p.formation) IN (:formationIds)')
             ->andWhere('fm.campagneCollecte = :campagneCollecte')
@@ -593,11 +599,21 @@ class FicheMatiereRepository extends ServiceEntityRepository
             ->setParameter('formationIds', $formationIds)
             ->setParameter('campagneCollecte', $campagneCollecte);
 
-        /** @var list<array{formation_id: int|string, id: int, remplissage: array|null, etatFiche: array|null}> $rows */
+        /** @var list<array{formation_id: int|string, id: int, remplissage: array|null, etatFiche: array|null, responsable_id?: int|string|null}> $rows */
         $rows = $qb->getQuery()->getArrayResult();
+
+        $responsableId = $responsable?->getId();
+        $unrestrictedSet = $unrestrictedFormationIds !== null ? array_flip($unrestrictedFormationIds) : null;
 
         foreach ($rows as $row) {
             $formationId = (int)$row['formation_id'];
+
+            if ($responsableId !== null && ($unrestrictedSet === null || !isset($unrestrictedSet[$formationId]))) {
+                if ((int)($row['responsable_id'] ?? 0) !== $responsableId) {
+                    continue;
+                }
+            }
+
             if (!isset($stats[$formationId])) {
                 $stats[$formationId] = [
                     'stats' => new StatsFichesMatieres(),

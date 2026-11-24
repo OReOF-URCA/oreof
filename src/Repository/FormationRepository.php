@@ -482,6 +482,26 @@ class FormationRepository extends ServiceEntityRepository
             ->getResult();
     }
 
+    /**
+     * @return array<int, Formation>
+     */
+    public function findByResponsableFicheMatiere(UserInterface $user, CampagneCollecte $campagneCollecte): array
+    {
+        return $this->createQueryBuilder('f')
+            ->innerJoin('f.parcours', 'p')
+            ->leftJoin('p.ficheMatieres', 'fm')
+            ->leftJoin('p.ficheMatiereParcours', 'fmp')
+            ->leftJoin('fmp.ficheMatiere', 'fmm')
+            ->leftJoin('f.dpeParcours', 'dp', 'WITH', 'dp.campagneCollecte = :campagneCollecte')
+            ->where('(fm.responsableFicheMatiere = :user AND fm.campagneCollecte = :campagneCollecte) OR (fmm.responsableFicheMatiere = :user AND fmm.campagneCollecte = :campagneCollecte)')
+            ->andWhere('(f.dpe = :campagneCollecte OR dp.id IS NOT NULL)')
+            ->setParameter('user', $user)
+            ->setParameter('campagneCollecte', $campagneCollecte)
+            ->distinct()
+            ->getQuery()
+            ->getResult();
+    }
+
     public function findByComposantePorteuse(mixed $composante, CampagneCollecte $campagneCollecte): array
     {
         return $this->createQueryBuilder('f')

@@ -18,7 +18,9 @@
 {% endblock %}
 
 {% block content %}
-    <twig:FormationHeader formationId="{{ formation.id }}"/>
+    <div id="formation_header_component">
+        <twig:FormationHeader formationId="{{ formation.id }}"/>
+    </div>
     {% if formation.hasParcours == false and parcours is defined and parcours is not null %}
         {# si la formation n'a pas de parcours i.e. parcours par défaut, alors on affiche le menu aussi du parcours pour le processus. #}
         <twig:ParcoursHeader formationId="{{ formation.id }}" parcoursId="{{ parcours.id }}"/>
@@ -275,43 +277,5 @@
 {% endset %}
 
 {% block bouton_header %}
-    <div class="flex flex-wrap gap-2 justify-start lg:justify-end">
-        {% set userCanEditFormation = is_granted('EDIT', {route: 'app_formation', subject: formation})
-            or is_granted('EDIT', {route: 'app_composante', subject: formation})
-            or is_granted('EDIT', {route: 'app_etablissement', subject: formation})
-            or is_granted('ROLE_ADMIN') %}
-        {% if formation.hasParcours == true %}
-            {% set canEditFormation = userCanEditFormation and isOuvert(formation) %}
-            {% if userCanEditFormation %}
-                <twig:Button
-                        href="{{ canEditFormation ? path('formation_v2_modifier', {slug:formation.slug}) : '' }}"
-                        variant="warning"
-                        icon="icon:edit"
-                        label="Modifier la formation"
-                        :disabled="not canEditFormation"
-                        tooltip="{{ canEditFormation ? 'Modifier la formation' : 'Formation verrouillée' }}"
-                />
-            {% endif %}
-        {% else %}
-            {% set canEditFormation = userCanEditFormation and dpeParcours is not null and isOuvert(dpeParcours) and isEditable(dpeParcours) %}
-            {% if userCanEditFormation %}
-                <twig:Button
-                        href="{{ canEditFormation ? path('formation_v2_modifier', {slug:formation.slug}) : '' }}"
-                        variant="warning"
-                        icon="icon:edit"
-                        label="Modifier la formation"
-                        :disabled="not canEditFormation"
-                        tooltip="{{ canEditFormation ? 'Modifier la formation' : 'Formation verrouillée' }}"
-                />
-            {% endif %}
-        {% endif %}
-
-        <twig:Button
-                href="{{ path('app_formation_index') }}"
-                variant="success"
-                icon="icon:arrow-left"
-                label="Retour à la liste des formations"
-                tooltip="Retour à la liste des formations"
-        />
-    </div>
+    {{ include('formation_v2/_voir_actions.html.twig', {formation: formation, dpeParcours: dpeParcours|default(null)}) }}
 {% endblock %}

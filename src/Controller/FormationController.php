@@ -312,10 +312,14 @@ class FormationController extends BaseController
         MentionRepository      $mentionRepository,
         ComposanteRepository   $composanteRepository,
         TypeDiplomeRepository  $typeDiplomeRepository,
+        FormationRepository $formationRepository,
         FicheMatiereRepository $ficheMatiereRepository,
         Request                $request,
     ): Response {
-        $isEtablissement = $getFormations->isEtablissement();
+        $user = $this->getUser();
+        $campagne = $this->getCampagneCollecte();
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
+
         $classiqueParam = $request->query->get('classique');
         $classique = null;
         if ($classiqueParam !== null && $classiqueParam !== '') {
@@ -325,7 +329,12 @@ class FormationController extends BaseController
             }
         }
 
-        if ($isEtablissement) {
+        $params = $request->query->all();
+        if ($classique !== null) {
+            $params['classique'] = $classique ? '1' : '0';
+        }
+
+        if ($isAdmin) {
             $responsables = $userRepository->findUserWithResponsabilites();
             $mentions = $mentionRepository->findBy([], ['libelle' => 'ASC']);
             $composantes = $composanteRepository->findPorteuse();
@@ -334,36 +343,75 @@ class FormationController extends BaseController
                 $criteria['classique'] = $classique;
             }
             $typeDiplomes = $typeDiplomeRepository->findBy($criteria, ['libelle' => 'ASC']);
+
+            $tFormations = $formationRepository->findBySearch($params['q'] ?? null, $campagne, $params);
+            $stats = $ficheMatiereRepository->getStatsForFormations($tFormations, $campagne);
         } else {
-            $baseFormations = $getFormations->getBaseFormations(
-                $this->getUser(),
-                $this->getCampagneCollecte()
-            );
+            $dpeFormations = [];
+            $rfFormations = [];
+            $rpFormations = [];
+            $profilFormations = [];
+
+            if ($user instanceof User) {
+                if ($user->getComposanteResponsableDpe()->count() > 0) {
+                    $dpeFormations = $formationRepository->findByComposanteDpe($user, $campagne);
+                }
+                $rfFormations = $formationRepository->findByResponsableOuCoResponsable($user, $campagne);
+                $rpFormations = $formationRepository->findByResponsableOuCoResponsableParcours($user, $campagne, []);
+
+                foreach ($user->getUserProfils() as $profil) {
+                    if ($profil->getFormation() !== null && $profil->getFormation()->getDpe()?->getId() === $campagne->getId()) {
+                        $profilFormations[] = $profil->getFormation();
+                    }
+                }
+            }
+
+            $teacherFormations = ($user instanceof User)
+                ? $formationRepository->findByResponsableFicheMatiere($user, $campagne)
+                : [];
+
+            $isGestionnaire = !empty($dpeFormations) || !empty($rfFormations) || !empty($rpFormations) || !empty($profilFormations);
+
+            if ($isGestionnaire) {
+                $merged = array_merge($dpeFormations, $rfFormations, $rpFormations, $profilFormations, $teacherFormations);
+                $unrestrictedFormationIds = array_map(
+                    static fn(Formation $f) => (int)$f->getId(),
+                    array_merge($dpeFormations, $rfFormations, $rpFormations, $profilFormations)
+                );
+            } else {
+                $merged = $teacherFormations;
+                $unrestrictedFormationIds = [];
+            }
+
+            $baseFormations = [];
+            foreach ($merged as $f) {
+                if ($f instanceof Formation && $f->getId() !== null) {
+                    $baseFormations[(int)$f->getId()] = $f;
+                }
+            }
+
             if ($classique !== null) {
                 $baseFormations = array_filter(
                     $baseFormations,
                     static fn (Formation $f) => $f->isClassique() === $classique
                 );
             }
+
             $filterOptions = $getFormations->getFilterOptions($baseFormations);
             $responsables = $filterOptions['responsables'];
             $mentions = $filterOptions['mentions'];
             $composantes = $filterOptions['composantes'];
             $typeDiplomes = $filterOptions['typeDiplomes'];
+
+            $tFormations = $getFormations->filterAndSortFormations($baseFormations, $params);
+
+            $stats = $ficheMatiereRepository->getStatsForFormations(
+                $tFormations,
+                $campagne,
+                $user instanceof User ? $user : null,
+                $unrestrictedFormationIds
+            );
         }
-
-        $params = $request->query->all();
-        if ($classique !== null) {
-            $params['classique'] = $classique ? '1' : '0';
-        }
-
-        $tFormations = $getFormations->getFormations(
-            $this->getUser(),
-            $this->getCampagneCollecte(),
-            $params
-        );
-
-        $stats = $ficheMatiereRepository->getStatsForFormations($tFormations, $this->getCampagneCollecte());
 
         return $this->render('formation/_fichesListe.html.twig', [
             'formations' => $tFormations,
@@ -374,7 +422,7 @@ class FormationController extends BaseController
             'params' => $request->query->all(),
             'isCfvu' => false,
             'isConseilComposante' => false,
-            'stats' => $stats
+            'stats' => $stats,
         ]);
     }
 

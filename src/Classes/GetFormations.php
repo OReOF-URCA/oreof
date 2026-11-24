@@ -201,6 +201,22 @@ readonly class GetFormations
         }
 
         $baseFormations = $this->getBaseFormations($user, $campagneCollecte);
+        return $this->filterAndSortFormations($baseFormations, $options);
+    }
+
+    /**
+     * @param array<int, \App\Entity\Formation> $baseFormations
+     * @param array<string, mixed> $options
+     * @return array<int, \App\Entity\Formation>
+     */
+    public function filterAndSortFormations(array $baseFormations, array $options): array
+    {
+        $sort = $options['sort'] ?? 'default';
+        if ($sort === '') {
+            $sort = 'default';
+        }
+        $direction = strtolower($options['direction'] ?? 'asc');
+        $q = $options['q'] ?? null;
         $filtered = [];
 
         foreach ($baseFormations as $formation) {

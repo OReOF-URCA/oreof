@@ -130,41 +130,5 @@
 {% endset %}
 
 {% block bouton_header %}
-    <div class="flex flex-wrap gap-3">
-        {% set canEditFicheMatiere = isEditable is defined ? isEditable : isEditable(ficheMatiere) %}
-        <twig:Button
-                label="Modifier"
-                variant="warning"
-                :soft="false"
-                :outline="true"
-                size="sm"
-                icon="icon:edit"
-                href="{{ canEditFicheMatiere ? path('fiche_matiere_v2_modifier', {id: ficheMatiere.id}) : '' }}"
-                :disabled="not canEditFicheMatiere"
-                tooltip="{{ canEditFicheMatiere ? 'Modifier une fiche EC/matière' : 'Fiche matière verrouillée' }}"
-        />
-
-        <twig:Button
-                label="Télécharger en PDF"
-                variant="info"
-                :soft="false"
-                :outline="true"
-                size="sm"
-                icon="icon:download"
-                :iconEnd="true"
-                href="{{ path('app_fiche_matiere_export', {id: ficheMatiere.id}) }}"
-                tooltip="Télécharger en PDF"
-        />
-
-        <twig:Button
-                label="Retour à la liste des fiches EC/matières"
-                variant="success"
-                :soft="false"
-                :outline="true"
-                size="sm"
-                icon="icon:arrow-left"
-                href="{{ path('structure_fiche_matiere_index') }}"
-                tooltip="Retour à la liste des fiches EC/matières"
-        />
-    </div>
+    {{ include('fiche_matiere_v2/_voir_actions.html.twig', {ficheMatiere: ficheMatiere}) }}
 {% endblock %}
