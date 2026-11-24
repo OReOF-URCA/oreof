@@ -1,6 +1,15 @@
 {% extends 'base.html.twig' %}
 
 {% block bouton_header %}
+    {% if is_granted('ROLE_ADMIN') or is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') %}
+        <twig:Button
+            href="#"
+            variant="info"
+        >
+            <twig:UX:Icon name="icon:add" class="size-4" />
+            Créer une formation non classique
+        </twig:Button>
+    {% endif %}
     {% if is_granted('ROLE_ADMIN') %}
         <twig:Button
                 href="{{ path('app_formation_new', { redirect: composante ? 'app_offre_etablissement_composante_index' : 'app_offre_etablissement_index', composante: composante ? composante.id : null }) }}"
