@@ -444,7 +444,13 @@ class FormationController extends BaseController
         ParcoursRepository   $parcoursRepository,
         EventDispatcherInterface $eventDispatcher,
     ): Response {
-        $this->denyAccessUnlessGranted('ROLE_ADMIN');
+        $canAccess = false;
+        if($this->isGranted('ROLE_ADMIN') || $this->isGranted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION')) {
+            $canAccess = true;
+        }
+        if(!$canAccess) {
+            throw $this->createAccessDeniedException();
+        }
 
         $typeDiplomeId = $request->query->get('typeDiplome') ?? $request->request->get('typeDiplome');
         $selectedTypeDiplome = null;
@@ -455,6 +461,11 @@ class FormationController extends BaseController
         if ($typeDiplomeId !== null) {
             $selectedTypeDiplome = $typeDiplomeRepository->find($typeDiplomeId);
             if ($selectedTypeDiplome !== null) {
+                // Exclusion des type diplômes classiques de la saisie générique
+                if($selectedTypeDiplome->isClassique() === true && !$this->isGranted('ROLE_ADMIN')) {
+                  return new Response('', Response::HTTP_UNPROCESSABLE_ENTITY);
+                }
+
                 $handler = $typeDiplomeResolver->fromTypeDiplome($selectedTypeDiplome);
                 $formTypeClass = $handler->getFormationFormType();
                 $formTemplate = $handler->getFormationFormTemplate();
@@ -521,8 +532,13 @@ class FormationController extends BaseController
             ], new Response(status: $status));
         }
 
+        $typeDiplomeList = $typeDiplomeRepository->findAll();
+        if(!$this->isGranted('ROLE_ADMIN')) {
+            $typeDiplomeList = $typeDiplomeRepository->findBy(['classique' => 0]);
+        }
+
         return $this->render('formation/new.html.twig', [
-            'typeDiplomes' => $typeDiplomeRepository->findAll(),
+            'typeDiplomes' => $typeDiplomeList,
             'selectedTypeDiplome' => $selectedTypeDiplome,
             'formation' => $formation,
             'form' => $form ? $form->createView() : null,
