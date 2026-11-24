@@ -63,7 +63,14 @@ class ParcoursController extends BaseController
         Parcours                   $parcours
     ): Response
     {
-        if (!$this->isGranted('EDIT', $parcours)) {
+        $canAccess = false;
+        if($this->isGranted('EDIT', $parcours) 
+            || (!$parcours->getFormation()->isClassique() && $this->isGranted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION'))
+        ) {
+            $canAccess = true;
+        }
+
+        if (!$canAccess) {
             $reason = $accessExplainer->explainEditDenial($parcours);
             $this->addFlash('danger', $reason);
 
@@ -129,10 +136,16 @@ class ParcoursController extends BaseController
         BreadcrumbService      $breadcrumb,
     ): Response
     {
-        if (!$this->isGranted('SHOW', $parcours)) {
+        $canAccess = false;
+        if ($this->isGranted('SHOW', $parcours) 
+            || (!$parcours->getFormation()->isClassique() && $this->isGranted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION'))
+        ) {
+            $canAccess = true;
+        }
+        if(!$canAccess){
             throw $this->createAccessDeniedException('Vous n\'avez pas accès à ce parcours.');
         }
-
+            
         $formation = $parcours->getFormation();
         if ($formation === null) {
             throw $this->createNotFoundException();
@@ -363,7 +376,14 @@ class ParcoursController extends BaseController
         BreadcrumbService          $breadcrumb
     ): Response
     {
-        if (!$this->isGranted('EDIT', $parcours)) {
+        $canAccess = false;
+        if($this->isGranted('EDIT', $parcours) 
+            || (!$parcours->getFormation()->isClassique() && $this->isGranted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION'))
+        ) {
+            $canAccess = true;
+        }   
+
+        if (!$canAccess) {
             $this->addFlash('danger', 'Le parcours est verrouillé ou vous n\'avez pas les droits de modification.');
 
             $url = $this->generateUrl('parcours_v2_voir', ['parcours' => $parcours->getId()]);
