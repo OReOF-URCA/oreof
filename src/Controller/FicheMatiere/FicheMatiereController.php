@@ -56,7 +56,10 @@ class FicheMatiereController extends BaseController
         $breadcrumb->add('Modifier');
 
         if (!$this->isGranted('EDIT', $ficheMatiere)) {
-            $this->addFlash('danger', 'La fiche matière est verrouillée et ne peut pas être modifiée.');
+            $message = !$ficheMatiere->isModifiable()
+                ? 'La fiche matière est verrouillée et ne peut pas être modifiée.'
+                : 'Vous n\'avez pas les droits de modification sur cette fiche matière.';
+            $this->addFlash('danger', $message);
 
             $url = $this->generateUrl('fiche_matiere_v2_voir', ['slug' => $ficheMatiere->getSlug()]);
             $response = $this->redirect($url);

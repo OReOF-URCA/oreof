@@ -234,7 +234,7 @@
             <div class="flex flex-wrap items-center gap-2">
                 {% set canEditDescriptifs = can_edit_module('descriptifs') %}
                 {# Dropdown Gestion fiche matière #}
-                {% if validationOptions|length > 0 %}
+                {% if canManage and validationOptions|length > 0 %}
                     <div class="relative" data-controller="navbar-dropdown"
                          data-action="click@window->navbar-dropdown#close">
                         <twig:Button
@@ -298,7 +298,7 @@
                             label="Gestion fiche matière"
                             :disabled="true"
                             extraClass="{{ quickBtnSecondary }} opacity-60 cursor-not-allowed"
-                            tooltip="Aucune action disponible pour le statut actuel."
+                            tooltip="{{ not canManage ? 'Vous n\'avez pas les droits de gestion sur cette fiche matière.' : 'Aucune action disponible pour le statut actuel.' }}"
                     />
                 {% endif %}
 

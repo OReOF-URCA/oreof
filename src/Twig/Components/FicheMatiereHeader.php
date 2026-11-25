@@ -4,6 +4,7 @@ namespace App\Twig\Components;
 
 use App\Classes\ValidationProcessFicheMatiere;
 use App\Entity\FicheMatiere;
+use App\Entity\User;
 use App\Repository\HistoriqueFicheMatiereRepository;
 use App\Service\FicheMatiere\FicheMatiereDiffAnalyzer;
 use Dannebicque\WorkflowOperationsBundle\Model\OperationBlocker;
@@ -42,6 +43,7 @@ final class FicheMatiereHeader
     public bool $hasModifications = false;
     public int $modificationsCount = 0;
     public bool $hasVersionReference = false;
+    public bool $canManage = false;
 
     #[LiveProp(writable: true)]
     public ?int $ficheMatiereId = null;
@@ -69,6 +71,10 @@ final class FicheMatiereHeader
             $this->ficheMatiere = $this->em->getRepository(FicheMatiere::class)->find($this->ficheMatiereId);
         }
 
+        $user = $this->security->getUser();
+        $this->canManage = $this->security->isGranted('ROLE_ADMIN')
+            || ($user instanceof User && $this->isAuthorOrPorteurResp($this->ficheMatiere, $user));
+
         $this->init();
         $this->getHistorique();
         $this->processSteps = $this->validationProcess->getProcess();
@@ -82,9 +88,47 @@ final class FicheMatiereHeader
         }
     }
 
+    public function isAuthorOrPorteurResp(?FicheMatiere $fiche, ?User $user): bool
+    {
+        if ($fiche === null || $user === null) {
+            return false;
+        }
+
+        $userId = $user->getId();
+        if ($userId === null) {
+            return false;
+        }
+
+        if ($fiche->getResponsableFicheMatiere()?->getId() === $userId) {
+            return true;
+        }
+
+        $parcours = $fiche->getParcours();
+        if ($parcours !== null) {
+            if (
+                $parcours->getRespParcours()?->getId() === $userId
+                || $parcours->getCoResponsable()?->getId() === $userId
+            ) {
+                return true;
+            }
+
+            $formation = $parcours->getFormation();
+            if ($formation !== null) {
+                if (
+                    $formation->getResponsableMention()?->getId() === $userId
+                    || $formation->getCoResponsable()?->getId() === $userId
+                ) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private function getVisibleValidationOptions(): array
     {
-        if ($this->ficheMatiere === null) {
+        if ($this->ficheMatiere === null || !$this->canManage) {
             return [];
         }
 

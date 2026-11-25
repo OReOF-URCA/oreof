@@ -68,7 +68,6 @@ final class FicheWorkflowOperationVoter extends Voter
         // - Le responsable de la fiche
         // - Le responsable ou co-responsable de parcours (RP)
         // - Le responsable ou co-responsable de mention/formation (RF)
-        // - Le responsable DPE ou gestionnaire DPE de la composante porteuse
         $userId = $user->getId();
         if ($userId !== null && $ficheMatiere->getResponsableFicheMatiere()?->getId() === $userId) {
             return true;
@@ -93,30 +92,9 @@ final class FicheWorkflowOperationVoter extends Voter
                 ) {
                     return true;
                 }
-
-                // Composante
-                $composante = $formation->getComposantePorteuse();
-                if ($composante !== null && (
-                        $composante->getResponsableDpe()?->getId() === $userId
-                    || $user->getComposanteResponsableDpe()->contains($composante)
-                )) {
-                    return true;
-                }
             }
         }
 
-        return $this->security->isGranted('MANAGE', [
-            'route' => 'app_composante',
-            'subject' => $ficheMatiere,
-        ]) || $this->security->isGranted('MANAGE', [
-            'route' => 'app_formation',
-            'subject' => $ficheMatiere,
-        ]) || $this->security->isGranted('MANAGE', [
-            'route' => 'app_parcours',
-            'subject' => $ficheMatiere,
-        ]) || $this->security->isGranted('EDIT', [
-            'route' => 'app_fiche_matiere',
-            'subject' => $ficheMatiere,
-        ]);
+        return false;
     }
 }

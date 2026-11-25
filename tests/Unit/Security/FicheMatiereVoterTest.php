@@ -158,6 +158,43 @@ class FicheMatiereVoterTest extends TestCase
         );
     }
 
+    public function testEditAllowsCoRespParcoursAndCoResponsableMention(): void
+    {
+        $corp = new User();
+        $this->setUserId($corp, 11);
+        $corf = new User();
+        $this->setUserId($corf, 21);
+
+        $formation = new Formation(null);
+        $formation->setCoResponsable($corf);
+
+        $parcours = new Parcours(null);
+        $parcours->setFormation($formation);
+        $parcours->setCoResponsable($corp);
+
+        $fiche = new FicheMatiere();
+        $fiche->setEtatFiche(['en_cours_redaction' => 1]);
+        $fiche->setParcours($parcours);
+
+        $tokenCoRp = $this->createMock(TokenInterface::class);
+        $tokenCoRp->method('getUser')->willReturn($corp);
+
+        $tokenCoRf = $this->createMock(TokenInterface::class);
+        $tokenCoRf->method('getUser')->willReturn($corf);
+
+        $this->security->method('isGranted')->willReturn(false);
+
+        $this->assertSame(
+            VoterInterface::ACCESS_GRANTED,
+            $this->voter->vote($tokenCoRp, $fiche, ['EDIT'])
+        );
+
+        $this->assertSame(
+            VoterInterface::ACCESS_GRANTED,
+            $this->voter->vote($tokenCoRf, $fiche, ['EDIT'])
+        );
+    }
+
     public function testEditDeniesUserWhoIsNotAuthorOrResp(): void
     {
         $author = new User();
@@ -185,6 +222,33 @@ class FicheMatiereVoterTest extends TestCase
         );
 
         // Cannot edit
+        $this->assertSame(
+            VoterInterface::ACCESS_DENIED,
+            $this->voter->vote($token, $fiche, ['EDIT'])
+        );
+    }
+
+    public function testEditDeniesComposanteUserWithoutRole(): void
+    {
+        $composanteUser = new User();
+        $this->setUserId($composanteUser, 99);
+
+        $composante = new Composante();
+        $formation = new Formation(null);
+        $formation->setComposantePorteuse($composante);
+
+        $parcours = new Parcours(null);
+        $parcours->setFormation($formation);
+
+        $fiche = new FicheMatiere();
+        $fiche->setEtatFiche(['en_cours_redaction' => 1]);
+        $fiche->setParcours($parcours);
+
+        $token = $this->createMock(TokenInterface::class);
+        $token->method('getUser')->willReturn($composanteUser);
+
+        $this->security->method('isGranted')->willReturn(false);
+
         $this->assertSame(
             VoterInterface::ACCESS_DENIED,
             $this->voter->vote($token, $fiche, ['EDIT'])

@@ -77,17 +77,9 @@ final class FicheMatiereVoter extends Voter
                 ) {
                     return true;
                 }
-
-                $composante = $formation->getComposantePorteuse();
-                if ($composante !== null && (
-                        $composante->getResponsableDpe()?->getId() === $userId
-                    || $user->getComposanteResponsableDpe()->contains($composante)
-                )) {
-                    return true;
-                }
             }
         }
 
-        return $this->security->isGranted('EDIT', ['route' => 'app_fiche_matiere', 'subject' => $subject]);
+        return false;
     }
 }
