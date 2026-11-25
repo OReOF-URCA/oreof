@@ -1,5 +1,8 @@
 <div id="fiche_matiere_voir_actions" class="flex flex-wrap gap-3">
-    {% set canEditFicheMatiere = isEditable is defined ? isEditable : isEditable(ficheMatiere) %}
+    {% set canEditFicheMatiere = isEditable is defined ? isEditable : is_granted('EDIT', ficheMatiere) %}
+    {% set editTooltip = not ficheMatiere.isModifiable()
+        ? 'Fiche matière verrouillée'
+        : (not canEditFicheMatiere ? 'Vous n\'avez pas les droits de modification sur cette fiche matière' : 'Modifier une fiche EC/matière') %}
     <twig:Button
             label="Modifier"
             variant="warning"
@@ -9,7 +12,7 @@
             icon="icon:edit"
             href="{{ canEditFicheMatiere ? path('fiche_matiere_v2_modifier', {id: ficheMatiere.id}) : '' }}"
             :disabled="not canEditFicheMatiere"
-            tooltip="{{ canEditFicheMatiere ? 'Modifier une fiche EC/matière' : 'Fiche matière verrouillée' }}"
+            tooltip="{{ editTooltip }}"
     />
 
     <twig:Button

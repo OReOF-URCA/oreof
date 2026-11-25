@@ -69,16 +69,17 @@ final class FicheWorkflowOperationVoter extends Voter
         // - Le responsable ou co-responsable de parcours (RP)
         // - Le responsable ou co-responsable de mention/formation (RF)
         // - Le responsable DPE ou gestionnaire DPE de la composante porteuse
-        if ($ficheMatiere->getResponsableFicheMatiere()?->getId() === $user->getId()) {
+        $userId = $user->getId();
+        if ($userId !== null && $ficheMatiere->getResponsableFicheMatiere()?->getId() === $userId) {
             return true;
         }
 
         $parcours = $ficheMatiere->getParcours();
-        if ($parcours !== null) {
+        if ($parcours !== null && $userId !== null) {
             // RP
             if (
-                $parcours->getRespParcours()?->getId() === $user->getId()
-                || $parcours->getCoResponsable()?->getId() === $user->getId()
+                $parcours->getRespParcours()?->getId() === $userId
+                || $parcours->getCoResponsable()?->getId() === $userId
             ) {
                 return true;
             }
@@ -87,8 +88,8 @@ final class FicheWorkflowOperationVoter extends Voter
             if ($formation !== null) {
                 // RF
                 if (
-                    $formation->getResponsableMention()?->getId() === $user->getId()
-                    || $formation->getCoResponsable()?->getId() === $user->getId()
+                    $formation->getResponsableMention()?->getId() === $userId
+                    || $formation->getCoResponsable()?->getId() === $userId
                 ) {
                     return true;
                 }
@@ -96,7 +97,7 @@ final class FicheWorkflowOperationVoter extends Voter
                 // Composante
                 $composante = $formation->getComposantePorteuse();
                 if ($composante !== null && (
-                    $composante->getResponsableDpe()?->getId() === $user->getId()
+                        $composante->getResponsableDpe()?->getId() === $userId
                     || $user->getComposanteResponsableDpe()->contains($composante)
                 )) {
                     return true;

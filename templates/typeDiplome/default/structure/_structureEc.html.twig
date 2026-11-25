@@ -22,7 +22,7 @@
                 {% endif %}
             </a>
             {% if app.user != null and
-                is_granted('CAN_PARCOURS_EDIT_MY', ec.elementConstitutif.ficheMatiere) and
+                is_granted('EDIT', ec.elementConstitutif.ficheMatiere) and
                 workflow_can(ec.elementConstitutif.ficheMatiere, 'valider_fiche_compo') %}
 
                 <a href="{{ url('fiche_matiere_v2_modifier', {id: ec.elementConstitutif.ficheMatiere.id}) }}"

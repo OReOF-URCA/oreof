@@ -182,7 +182,7 @@ class FicheMatiereController extends BaseController
         $ecParcours = $elementConstitutifRepository->findByFicheMatiereParcours($ficheMatiere);
         return $this->render('fiche_matiere_v2/voir.html.twig', [
             'ficheMatiere' => $ficheMatiere,
-            'isEditable' => Access::isEditable($ficheMatiere),
+            'isEditable' => $this->isGranted('EDIT', $ficheMatiere),
             'ficheMatiereParcours' => $ficheMatiereParcours,
             'ecParcours' => $ecParcours,
             'formation' => $formation,

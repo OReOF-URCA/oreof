@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Classes\JsonReponse;
 use App\Classes\Process\FicheMatiereProcess;
 use App\Entity\FicheMatiere;
+use App\Entity\User;
 use App\Service\VersioningFicheMatiere;
 use DateTimeImmutable;
 use Psr\EventDispatcher\EventDispatcherInterface;
@@ -22,7 +23,22 @@ class FicheMatiereOuvertureController extends BaseController
         FicheMatiere $ficheMatiere,
         VersioningFicheMatiere $versioningFiche
     ): Response {
-        //vérifier les droits...
+        $user = $this->getUser();
+        $isAuthorOrResp = $user instanceof User && (
+                $ficheMatiere->getResponsableFicheMatiere()?->getId() === $user->getId()
+                || ($ficheMatiere->getParcours() !== null && (
+                        $ficheMatiere->getParcours()->getRespParcours()?->getId() === $user->getId()
+                        || $ficheMatiere->getParcours()->getCoResponsable()?->getId() === $user->getId()
+                        || ($ficheMatiere->getParcours()->getFormation() !== null && (
+                                $ficheMatiere->getParcours()->getFormation()->getResponsableMention()?->getId() === $user->getId()
+                                || $ficheMatiere->getParcours()->getFormation()->getCoResponsable()?->getId() === $user->getId()
+                            ))
+                    ))
+            );
+
+        if (!$this->isGranted('ROLE_ADMIN') && !$isAuthorOrResp) {
+            throw $this->createAccessDeniedException('Vous n\'avez pas les droits pour réouvrir cette fiche matière.');
+        }
 
         if ($request->isMethod('POST')) {
             $ficheMatiereProcess->ouvertureFicheMatiere($ficheMatiere, $this->getUser(), $request);

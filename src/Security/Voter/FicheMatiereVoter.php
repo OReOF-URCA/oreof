@@ -52,29 +52,35 @@ final class FicheMatiereVoter extends Voter
             return true;
         }
 
-        if ($subject->getResponsableFicheMatiere()?->getId() === $user->getId()) {
+        // Tout utilisateur connecté peut consulter la fiche matière (lecture seule)
+        if ($isView) {
+            return true;
+        }
+
+        $userId = $user->getId();
+        if ($userId !== null && $subject->getResponsableFicheMatiere()?->getId() === $userId) {
             return true;
         }
 
         $parcours = $subject->getParcours();
-        if ($parcours !== null) {
-            if ($parcours->getRespParcours()?->getId() === $user->getId()
-                || $parcours->getCoResponsable()?->getId() === $user->getId()
+        if ($parcours !== null && $userId !== null) {
+            if ($parcours->getRespParcours()?->getId() === $userId
+                || $parcours->getCoResponsable()?->getId() === $userId
             ) {
                 return true;
             }
 
             $formation = $parcours->getFormation();
             if ($formation !== null) {
-                if ($formation->getResponsableMention()?->getId() === $user->getId()
-                    || $formation->getCoResponsable()?->getId() === $user->getId()
+                if ($formation->getResponsableMention()?->getId() === $userId
+                    || $formation->getCoResponsable()?->getId() === $userId
                 ) {
                     return true;
                 }
 
                 $composante = $formation->getComposantePorteuse();
                 if ($composante !== null && (
-                    $composante->getResponsableDpe()?->getId() === $user->getId()
+                        $composante->getResponsableDpe()?->getId() === $userId
                     || $user->getComposanteResponsableDpe()->contains($composante)
                 )) {
                     return true;
@@ -82,7 +88,6 @@ final class FicheMatiereVoter extends Voter
             }
         }
 
-        $permissionToCheck = $isView ? 'SHOW' : 'EDIT';
-        return $this->security->isGranted($permissionToCheck, ['route' => 'app_fiche_matiere', 'subject' => $subject]);
+        return $this->security->isGranted('EDIT', ['route' => 'app_fiche_matiere', 'subject' => $subject]);
     }
 }
