@@ -143,8 +143,8 @@ class ApiJsonExport
 
                             $parcoursData['annee'] = $campagneCourante->getAnnee();
                             $parcoursData['uuid_parcours'] = $this->getUuidForParcours($parcours);
+                            $parcoursData['lien-court'] = $lienCourt;
                             $parcoursData['metadata'] = [
-                                'lien-court' => $lienCourt,
                                 'code-rome' => $codesRome,
                             ];
                         }
@@ -254,8 +254,8 @@ class ApiJsonExport
                                     $lienCourtNext = ($parcoursAnneeSuivante->getLienCourt() !== null && $parcoursAnneeSuivante->getLienCourt() !== '') ? $parcoursAnneeSuivante->getLienCourt() : '';
                                     $parcoursDataNext['annee'] = $campagneSuivante->getAnnee();
                                     $parcoursDataNext['uuid_parcours'] = $this->getUuidForParcours($parcoursAnneeSuivante);
+                                    $parcoursDataNext['lien-court'] = $lienCourtNext;
                                     $parcoursDataNext['metadata'] = [
-                                        'lien-court' => $lienCourtNext,
                                         'code-rome' => $codesRomeNext,
                                     ];
                                 }
