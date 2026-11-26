@@ -1,4 +1,5 @@
 <div id="parcours_voir_actions" class="flex flex-wrap gap-2 justify-start lg:justify-end">
+    {% set canEditGenerique = is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') and  parcours.formation.classique == false %}
     {% set isParcoursEditable = isEditable is defined ? isEditable : isEditable(dpeParcours) %}
     {% set userCanEdit = is_granted('ROLE_ADMIN')
         or is_granted('EDIT', parcours)
@@ -6,14 +7,16 @@
         or is_granted('EDIT', {route: 'app_formation', subject: dpeParcours})
         or is_granted('EDIT', {route: 'app_parcours', subject: dpeParcours})
         or is_granted('EDIT', {route: 'app_etablissement', subject: dpeParcours}) %}
-    {% set canEditParcours = isParcoursEditable and userCanEdit %}
+    {% set canEditParcours = (isParcoursEditable and userCanEdit) or (isParcoursEditable and canEditGenerique) %}
     {% set canSeeActions = userCanEdit
         or is_granted('RELATED_TO_PARCOURS', parcours)
         or is_granted('SHOW', parcours)
         or is_granted('SHOW', {route: 'app_composante', subject: dpeParcours})
         or is_granted('SHOW', {route: 'app_formation', subject: dpeParcours})
         or is_granted('SHOW', {route: 'app_parcours', subject: dpeParcours})
-        or is_granted('SHOW', {route: 'app_etablissement', subject: dpeParcours}) %}
+        or is_granted('SHOW', {route: 'app_etablissement', subject: dpeParcours}) 
+        or canEditGenerique    
+    %}
 
     {% if canSeeActions %}
         <twig:Button
