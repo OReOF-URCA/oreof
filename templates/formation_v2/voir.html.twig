@@ -84,7 +84,9 @@
     {% set userCanEditFormation = is_granted('EDIT', {route: 'app_formation', subject: formation})
         or is_granted('EDIT', {route: 'app_composante', subject: formation})
         or is_granted('EDIT', {route: 'app_etablissement', subject: formation})
-        or is_granted('ROLE_ADMIN') %}
+        or is_granted('ROLE_ADMIN') 
+        or (is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') and formation.classique == false)
+    %}
     {% if formation.hasParcours == true %}
         {% set canEditFormation = userCanEditFormation and isOuvert(formation) %}
     {% else %}
@@ -279,7 +281,9 @@
         {% set userCanEditFormation = is_granted('EDIT', {route: 'app_formation', subject: formation})
             or is_granted('EDIT', {route: 'app_composante', subject: formation})
             or is_granted('EDIT', {route: 'app_etablissement', subject: formation})
-            or is_granted('ROLE_ADMIN') %}
+            or is_granted('ROLE_ADMIN') 
+            or (is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') and formation.classique == false)
+        %}
         {% if formation.hasParcours == true %}
             {% set canEditFormation = userCanEditFormation and isOuvert(formation) %}
             {% if userCanEditFormation %}

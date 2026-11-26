@@ -52,8 +52,10 @@ class FormationController extends BaseController
         $firstParcoursGarde = $formation->isHasParcours() === false ? ($formation->getParcours()->first() ?: null) : null;
         $verrouilleParWorkflow = $firstParcoursGarde instanceof Parcours
             && !Access::isEditable($firstParcoursGarde);
+        
+        $canEditGenerique = $this->isGranted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') && $formation->isClassique() === false;
 
-        if ($verrouilleParWorkflow || !$this->isGranted('EDIT', $formation)) {
+        if ($verrouilleParWorkflow || (!$this->isGranted('EDIT', $formation) && !$canEditGenerique)) {
             $this->addFlash('danger', 'La formation est verrouillée ou vous n\'avez pas les droits de modification.');
 
             $url = $this->generateUrl('formation_v2_voir', ['slug' => $formation->getSlug()]);
