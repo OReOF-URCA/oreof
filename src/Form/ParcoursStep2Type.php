@@ -35,7 +35,7 @@ class ParcoursStep2Type extends AbstractType
                 'setter' => static function ($entity, ?string $value): void { $entity->setModalitesEnseignementValue($value); },
             ]);
 
-        if ($typeDiplome->isHasStage() === true) {
+        //  if ($typeDiplome->isHasStage() === true) {
             $builder->add('hasStage', YesNoType::class, [
                 'choice_attr' => function ($choice) {
                     return [
@@ -58,11 +58,11 @@ class ParcoursStep2Type extends AbstractType
                         'class' => 'col-sm-3',
                     ],
                 ]);
-        }
+        //  }
 
         //alors zone de saisi
         //si L ou M, nombre d'heures
-        if ($typeDiplome->isHasProjet() === true) {
+        //  if ($typeDiplome->isHasProjet() === true) {
             $builder->
             add('hasProjet', YesNoType::class, [
                 'choice_attr' => function ($choice) {
@@ -86,9 +86,9 @@ class ParcoursStep2Type extends AbstractType
                         'class' => 'col-sm-3',
                     ],
                 ]);
-        }
+        //  }
 
-        if ($typeDiplome->isHasMemoire() === true) {
+        //  if ($typeDiplome->isHasMemoire() === true) {
             $builder->add('hasMemoire', YesNoType::class, [
                 'choice_attr' => function ($choice) {
                     // On marque chaque checkbox comme une cible 'trigger'
@@ -104,10 +104,10 @@ class ParcoursStep2Type extends AbstractType
                         'maxlength' => 3000,
                     ],
                 ]);
-        }
+        //  }
 
 
-        if ($typeDiplome->isHasSituationPro()) {
+        //  if ($typeDiplome->isHasSituationPro()) {
             $builder
                 ->add('hasSituationPro', YesNoType::class, [
                     'choice_attr' => function ($choice) {
@@ -133,7 +133,7 @@ class ParcoursStep2Type extends AbstractType
                         'maxlength' => 3000,
                     ],
                 ]);
-        }
+        // }
     }
 
     public function configureOptions(OptionsResolver $resolver): void

@@ -16,6 +16,7 @@ use App\Entity\Formation;
 use App\Entity\User;
 use App\Entity\Ville;
 use App\Enums\RegimeInscriptionEnum;
+use App\Form\Type\RegimeInscriptionType;
 use App\Form\Type\TextareaAutoSaveType;
 use App\Repository\ComposanteRepository;
 use App\Repository\VilleRepository;
@@ -47,7 +48,6 @@ class FormationStep1Type extends AbstractType
                 'query_builder' => fn($er) => $er->createQueryBuilder('u')
                     ->orderBy('u.nom', 'ASC')
                     ->addOrderBy('u.prenom', 'ASC'),
-                'attr' => ['data-action' => 'change->formation--step1#saveRespFormation'],
             ])
             ->add('coResponsable', EntityType::class, [
                 'required' => false,
@@ -59,11 +59,10 @@ class FormationStep1Type extends AbstractType
                 'query_builder' => fn($er) => $er->createQueryBuilder('u')
                     ->orderBy('u.nom', 'ASC')
                     ->addOrderBy('u.prenom', 'ASC'),
-                'attr' => ['data-action' => 'change->formation--step1#saveCoRespFormation'],
             ])
             ->add('sigle', TextType::class, [
                 'required' => false,
-                'attr' => ['data-action' => 'change->formation--step1#changeSigle', 'maxlength' => 250],
+                'attr' => ['maxlength' => 250],
             ])
             ->add('localisationMention', EntityType::class, [
                 'class' => Ville::class,
@@ -76,9 +75,6 @@ class FormationStep1Type extends AbstractType
                 'expanded' => true,
                 'required' => true,
                 'help' => 'Plusieurs choix possibles',
-                'choice_attr' => function () {
-                    return ['data-action' => 'change->formation--step1#changeVille'];
-                },
             ])
             ->add('composantesInscription', EntityType::class, [
                 'class' => Composante::class,
@@ -90,26 +86,6 @@ class FormationStep1Type extends AbstractType
                     return $composanteRepository->createQueryBuilder('comp')
                         ->orderBy('comp.libelle', 'ASC');
                 },
-                'choice_attr' => function () {
-                    return ['data-action' => 'change->formation--step1#changeComposanteInscription'];
-                },
-                'attr' => ['data-action' => 'change->formation--step6#changeComposanteInscription']
-            ])
-            ->add('regimeInscription', \App\Form\Type\RegimeInscriptionType::class, [
-                'translation_domain' => 'form',
-                'getter' => static fn ($entity): array => $entity->getRegimeInscriptionValues(),
-                'setter' => static function ($entity, array $values): void { $entity->setRegimeInscription($values); },
-                'multiple' => true,
-                'expanded' => true,
-                'attr' => ['data-action' => 'change->formation--step1#changeRegimeInscription']
-            ])
-            ->add('modalitesAlternance', TextareaAutoSaveType::class, [
-                'help' => 'Indiquez en 3000 caractères maximum les périodes et leurs durées en centre ou en entreprise.',
-                'attr' => [
-                    'rows' => 10,
-                    'maxlength' => 3000,
-                    'data-action' => 'change->formation--step1#saveModalitesAlternance'
-                ],
             ]);
     }
 

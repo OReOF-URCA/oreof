@@ -50,8 +50,9 @@ final readonly class ReouvrirMcccOperationHandler implements OperationHandlerInt
         }
 
         $argumentaire = trim((string) ($context->input['argumentaire'] ?? ''));
-        if ('' === $argumentaire) {
-            throw new \DomainException('Argumentaire obligatoire.');
+        $cleaned = preg_replace('/\s+/', '', $argumentaire);
+        if (mb_strlen($cleaned) < 5) {
+            throw new \DomainException('Le commentaire doit comporter au moins 5 caractères (hors espaces).');
         }
 
         $parcours = $subject->getParcours();

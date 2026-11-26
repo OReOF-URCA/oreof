@@ -45,7 +45,7 @@ final class ParcoursTabController extends AbstractController
         $isComplete = count($issues) === 0;
 
         $state->setDone(false);
-        $state->setStatus($checker->computeStatus($isComplete, false));
+        $state->setStatus($checker->computeParcoursTabStatus($parcours, $tabKey, $isComplete, false));
         $em->flush();
 
         return $this->turboStreamsResponse($parcours, $tabKey, $state->getStatus(), $state->isDone(), $issues);
@@ -83,7 +83,7 @@ final class ParcoursTabController extends AbstractController
         $isComplete = count($issues) === 0;
 
         $state->setDone($askedDone && $isComplete);
-        $state->setStatus($checker->computeStatus($isComplete, $state->isDone()));
+        $state->setStatus($checker->computeParcoursTabStatus($parcours, $tabKey, $isComplete, $state->isDone()));
         $em->flush();
 
         return $this->turboStreamsResponse($parcours, $tabKey, $state->getStatus(), $state->isDone(), $issues);

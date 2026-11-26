@@ -145,6 +145,7 @@ class Parcours
 
     #[Groups('parcours_json_versioning')]
     #[ORM\Column(nullable: true)]
+    /** @deprecated Conservé pour la transition (campagnes précédentes). La donnée officielle est désormais portée par Annee. */
     private ?array $regimeInscription = [];
 
     #[Groups('parcours_json_versioning')]
@@ -259,6 +260,10 @@ class Parcours
     #[ORM\Column(length: 10, nullable: true)]
     #[Groups('parcours_json_versioning')]
     private ?string $codeRNCP = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    #[Groups('parcours_json_versioning')]
+    private ?string $lienCourt = null;
 
     #[Groups('parcours_json_versioning')]
     #[ORM\Column(length: 20, nullable: true, enumType: TypeParcoursEnum::class)]
@@ -688,6 +693,25 @@ class Parcours
         return $this;
     }
 
+    /**
+     * @return string[]
+     */
+    public function getCodesRomeNormalized(): array
+    {
+        $codes = [];
+        foreach ($this->getCodesRome() as $item) {
+            $value = is_array($item) ? ($item['code'] ?? '') : (string)$item;
+            if (is_string($value) && preg_match_all('/\\t/m', $value)) {
+                $value = (string)preg_replace('/\\t/m', '', $value);
+            }
+            if (is_string($value) && preg_match('/([A-Za-z][0-9]{4})/', $value, $matches) === 1) {
+                $codes[] = strtoupper($matches[1]);
+            }
+        }
+
+        return array_values(array_unique($codes));
+    }
+
     public function remplissageBrut(): Remplissage
     {
         if (null !== $this->getFormation()) {
@@ -767,49 +791,60 @@ class Parcours
     }
 
     /**
+     * Retourne uniquement les régimes directement enregistrés en BDD sur ce parcours (valeur de transition).
+     *
+     * @return list<string>
+     * @deprecated Méthode de transition interne. Utiliser getRegimeInscriptionValues() qui reconstruit dynamiquement depuis les années.
+     */
+    public function getDirectRegimeInscriptionValues(): array
+    {
+        return \App\Referentiel\RegimeInscription::normalize($this->regimeInscription ?? []);
+    }
+
+    /**
      * @deprecated Returns only legacy enum cases and drops custom referential values.
      *             Use getRegimeInscriptionValues() for all new consumers.
      * @return list<\App\Enums\RegimeInscriptionEnum>
      */
     public function getRegimeInscription(): array
     {
-        if ($this->regimeInscription !== null && count($this->regimeInscription) === 0) {
-            $formaRegimes = $this->getFormation()?->getRegimeInscription() ?? [];
-            if (count($formaRegimes) !== 0) {
-                return $formaRegimes;
-            }
-        }
-
-        if ($this->regimeInscription === null) {
-            return $this->getFormation()?->getRegimeInscription() ?? [];
-        }
-
-        $t = [];
-        foreach ($this->regimeInscription as $value) {
-            if ($value instanceof RegimeInscriptionEnum) {
-                $t[] = $value;
-            } elseif (is_string($value)) {
-                $case = RegimeInscriptionEnum::tryFrom($value);
-                if ($case !== null) {
-                    $t[] = $case;
-                }
-            }
-        }
-
-        return $t;
+        return \App\Referentiel\RegimeInscription::legacyCases($this->getRegimeInscriptionValues());
     }
 
     /** @return list<string> */
     public function getRegimeInscriptionValues(): array
     {
-        $values = $this->regimeInscription;
-        if (($values === null || $values === []) && $this->getFormation() !== null) {
-            return $this->getFormation()->getRegimeInscriptionValues();
+        // 1. Reconstruire depuis les années si elles sont renseignées (seule donnée officielle)
+        $regimesFromAnnees = [];
+        foreach ($this->getAnnees() as $annee) {
+            foreach ($annee->getDirectRegimeInscriptionValues() as $val) {
+                $regimesFromAnnees[] = $val;
+            }
         }
 
-        return \App\Referentiel\RegimeInscription::normalize($values ?? []);
+        if ($regimesFromAnnees !== []) {
+            return \App\Referentiel\RegimeInscription::normalize($regimesFromAnnees);
+        }
+
+        // 2. Fallback transition : valeurs en BDD du parcours si existantes (campagnes précédentes non complétées)
+        $direct = $this->getDirectRegimeInscriptionValues();
+        if ($direct !== []) {
+            return $direct;
+        }
+
+        // 3. Fallback transition : valeurs en BDD de la formation parente si existantes
+        return $this->getFormation()?->getDirectRegimeInscriptionValues() ?? [];
     }
 
+    public function hasRegimeInscription(string|RegimeInscriptionEnum $regime): bool
+    {
+        $val = $regime instanceof RegimeInscriptionEnum ? $regime->value : $regime;
+        return in_array($val, $this->getRegimeInscriptionValues(), true);
+    }
+
+    /**
+     * @deprecated Le régime d'inscription doit désormais être configuré sur chaque Annee (source officielle).
+     */
     public function setRegimeInscription(?array $regimeInscription): self
     {
         $this->regimeInscription = $regimeInscription === null ? [] : \App\Referentiel\RegimeInscription::normalize($regimeInscription);
@@ -1377,9 +1412,94 @@ class Parcours
 
     public function isAlternance(): bool
     {
-        // regarder si dans le tableau regimeInscription il y a les valeurs alternance ou apprentissage
+        foreach ($this->getRegimeInscriptionValues() as $val) {
+            if (\App\Referentiel\RegimeInscription::isAlternance($val)) {
+                return true;
+            }
+        }
+
         return in_array(RegimeInscriptionEnum::FI_APPRENTISSAGE, $this->getRegimeInscription(), true) ||
             in_array(RegimeInscriptionEnum::FC_CONTRAT_PRO, $this->getRegimeInscription(), true);
+    }
+
+    /**
+     * @return list<Annee>
+     */
+    public function getAnneesAlternance(): array
+    {
+        $annees = [];
+        foreach ($this->getAnnees() as $annee) {
+            if ($annee->isAlternance()) {
+                $annees[] = $annee;
+            }
+        }
+
+        usort($annees, static fn(Annee $a, Annee $b) => ($a->getOrdre() ?? 0) <=> ($b->getOrdre() ?? 0));
+
+        return $annees;
+    }
+
+    /**
+     * Phrase indiquant par défaut les années proposées en alternance.
+     * Ex : "L'alternance est proposée en 2e et 3e année."
+     */
+    public function getPhraseAnneesAlternance(): ?string
+    {
+        if (!$this->isAlternance()) {
+            return null;
+        }
+
+        $anneesAlt = $this->getAnneesAlternance();
+        if ($anneesAlt === []) {
+            return "L'alternance est proposée pour ce parcours.";
+        }
+
+        $ordresLabels = [];
+        foreach ($anneesAlt as $annee) {
+            $ordre = $annee->getOrdre();
+            $ordresLabels[] = match ($ordre) {
+                1 => '1re',
+                default => $ordre . 'e',
+            };
+        }
+
+        if (count($ordresLabels) === 1) {
+            return sprintf("L'alternance est proposée en %s année.", $ordresLabels[0]);
+        }
+
+        $dernier = array_pop($ordresLabels);
+        return sprintf("L'alternance est proposée en %s et %s année.", implode(', ', $ordresLabels), $dernier);
+    }
+
+    /**
+     * Retourne la phrase par défaut des années en alternance complétée par le texte libre saisi par les collègues.
+     */
+    public function getDisplayModalitesAlternance(): ?string
+    {
+        if (!$this->isAlternance()) {
+            return null;
+        }
+
+        $phrase = $this->getPhraseAnneesAlternance();
+        $texte = $this->modalitesAlternance !== null ? trim($this->modalitesAlternance) : '';
+
+        if ($phrase === null && $texte === '') {
+            return null;
+        }
+
+        if ($texte === '') {
+            return $phrase !== null ? '<p>' . htmlspecialchars($phrase, ENT_NOQUOTES, 'UTF-8') . '</p>' : null;
+        }
+
+        if ($phrase === null) {
+            return $texte;
+        }
+
+        if (str_contains($texte, $phrase)) {
+            return $texte;
+        }
+
+        return '<p>' . htmlspecialchars($phrase, ENT_NOQUOTES, 'UTF-8') . '</p>' . $texte;
     }
 
     public function getDisplay(): string
@@ -1534,6 +1654,18 @@ class Parcours
     public function setCodeRNCP(?string $codeRNCP): static
     {
         $this->codeRNCP = $codeRNCP;
+
+        return $this;
+    }
+
+    public function getLienCourt(): ?string
+    {
+        return $this->lienCourt;
+    }
+
+    public function setLienCourt(?string $lienCourt): static
+    {
+        $this->lienCourt = $lienCourt;
 
         return $this;
     }
@@ -2083,9 +2215,102 @@ class Parcours
         return $this;
     }
 
-    public function addLogo(string $filename): static
+    /**
+     * @return array<int, array{filename: string, url: ?string}>
+     */
+    public function getLogosNormalized(): array
     {
-        $this->logo[] = $filename;
+        if (empty($this->logo)) {
+            return [];
+        }
+
+        $normalized = [];
+        foreach ($this->logo as $item) {
+            if (is_string($item)) {
+                $trimmed = trim($item);
+                if ($trimmed !== '') {
+                    $normalized[] = [
+                        'filename' => $trimmed,
+                        'url' => null,
+                    ];
+                }
+            } elseif (is_array($item) && !empty($item['filename'])) {
+                $normalized[] = [
+                    'filename' => trim((string)$item['filename']),
+                    'url' => !empty($item['url']) ? trim((string)$item['url']) : null,
+                ];
+            }
+        }
+
+        return $normalized;
+    }
+
+    public function addLogo(string $filename, ?string $url = null): static
+    {
+        if (!is_array($this->logo)) {
+            $this->logo = [];
+        }
+
+        $url = $url !== null ? trim($url) : null;
+        if ($url === '') {
+            $url = null;
+        }
+
+        $this->logo[] = [
+            'filename' => $filename,
+            'url' => $url,
+        ];
+
+        return $this;
+    }
+
+    public function updateLogoUrl(string $filename, ?string $url): static
+    {
+        if (!is_array($this->logo)) {
+            return $this;
+        }
+
+        $url = $url !== null ? trim($url) : null;
+        if ($url === '') {
+            $url = null;
+        }
+
+        $newLogos = [];
+        foreach ($this->logo as $item) {
+            $currentFilename = is_array($item) ? ($item['filename'] ?? '') : (string)$item;
+            $currentUrl = is_array($item) ? ($item['url'] ?? null) : null;
+            if ($currentFilename === $filename) {
+                $newLogos[] = [
+                    'filename' => $filename,
+                    'url' => $url,
+                ];
+            } else {
+                $newLogos[] = is_array($item) ? $item : [
+                    'filename' => $currentFilename,
+                    'url' => $currentUrl,
+                ];
+            }
+        }
+        $this->logo = $newLogos;
+
+        return $this;
+    }
+
+    public function removeLogo(string $filename): static
+    {
+        if (!is_array($this->logo)) {
+            return $this;
+        }
+
+        $newLogos = [];
+        foreach ($this->logo as $item) {
+            $currentFilename = is_array($item) ? ($item['filename'] ?? '') : (string)$item;
+            if ($currentFilename !== $filename) {
+                $newLogos[] = $item;
+            }
+        }
+        $this->logo = array_values($newLogos);
+
         return $this;
     }
 

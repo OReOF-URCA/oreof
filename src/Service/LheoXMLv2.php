@@ -10,6 +10,7 @@ use App\Entity\Ville;
 use App\Enums\CampagnePublicationTagEnum;
 use App\Enums\TypeModificationDpeEnum;
 use App\Enums\TypeParcoursEnum;
+use App\Referentiel\NiveauFormation;
 use App\Repository\ElementConstitutifRepository;
 use App\TypeDiplome\TypeDiplomeResolver;
 use Doctrine\ORM\EntityManagerInterface;
@@ -86,7 +87,7 @@ class LheoXMLv2 extends LheoXML {
         // Niveau d'entree
         $niveauEntree = -1;
         if (($niveauVal = $parcours->getFormation()?->getNiveauEntreeValue()) !== null) {
-            $legacy = \App\Referentiel\NiveauFormation::legacyCase($niveauVal);
+            $legacy = NiveauFormation::legacyCase($niveauVal);
             $niveauEntree = $legacy !== null ? $legacy->value : (is_numeric($niveauVal) ? (int) $niveauVal : -1);
         }
 
@@ -237,7 +238,18 @@ HTML;
                 foreach ($competences as $comp) {
                     $competencesHTML = "";
                     foreach ($comp->getButNiveaux() as $niveau) {
-                        $competencesHTML .= "<li>Niveau {$niveau->getOrdre()} - {$niveau->getLibelle()}</li>";
+                        $acHTML = "";
+                        if ($niveau->getButApprentissageCritiques()->count() > 0) {
+                            $acHTML = "<ul>";
+                            foreach ($niveau->getButApprentissageCritiques() as $ac) {
+                                $acLibelle = $ac->getCode() !== null && $ac->getCode() !== ''
+                                    ? "{$ac->getCode()} - {$ac->getLibelle()}"
+                                    : (string)$ac->getLibelle();
+                                $acHTML .= "<li>{$acLibelle}</li>";
+                            }
+                            $acHTML .= "</ul>";
+                        }
+                        $competencesHTML .= "<li>Niveau {$niveau->getOrdre()} - {$niveau->getLibelle()}{$acHTML}</li>";
                     }
                     $competencesAcquisesExtra .= <<<HTML
                     <li>
@@ -571,6 +583,10 @@ HTML;
             'informations-pratiques' => $this->cleanString($informationsPratiques),
             'admission' => $this->cleanString($admissionParcours),
             'formation-continue-et-apprentissage' => [],
+            // 'niveau-entree-code' => $parcours->getFormation()->getNiveauEntreeValue(), pour éviter le doublons
+            'niveau-entree-libelle' => NiveauFormation::legacyCase($parcours->getFormation()->getNiveauEntreeValue())?->libelle() ?? "0",
+            // 'niveau-sortie-code' => $parcours->getFormation()->getNiveauSortieValue(), pour éviter le doublons
+            'niveau-sortie-libelle' => NiveauFormation::legacyCase($parcours->getFormation()->getNiveauSortieValue())?->libelle() ?? "0",
         ];
 
         // Nouvelle balise extra - organisation pédagogique

@@ -77,25 +77,37 @@ export default class extends Controller {
     })
       .then(async (response) => {
         const result = await JsonResponse(response)
-        return response.ok && result.success === true
-      })
-      .then(async (success) => {
-        if (!success) return
-          if (this.modal && typeof this.modal.hide === 'function') {
-              this.modal.hide()
+          return {
+              ok: response.ok && result.success === true,
+              redirect: result?.payload?.redirect || result?.payload?.redirectUrl || null,
           }
-          window.dispatchEvent(new CustomEvent('modal:close'))
+      })
+        .then(async ({ok, redirect}) => {
+            if (!ok) return
+            if (this.modal && typeof this.modal.hide === 'function') {
+                this.modal.hide()
+            }
+            window.dispatchEvent(new CustomEvent('modal:close'))
         document.querySelectorAll('.modal-backdrop').forEach((e) => {
           e.remove()
         })
 
+            if (redirect) {
+                if (window.Turbo && typeof window.Turbo.visit === 'function') {
+                    window.Turbo.visit(redirect, {action: 'advance'})
+                } else {
+                    window.location.href = redirect
+                }
+                return
+            }
+
         // tester si l'objet json updateComponent n'est pas vide et contient les clés id et event
-          if (this.updateComponent && Object.keys(this.updateComponent).length > 0 && this.updateComponent.id && this.updateComponent.event) {
+            if (this.updateComponent && Object.keys(this.updateComponent).length > 0 && this.updateComponent.id && this.updateComponent.event) {
           // this.refreshPage()
-              const component = document.getElementById(this.updateComponent.id)?.__component
-              component?.emit(this.updateComponent.event)
-          } else {
-              window.location.reload()
+                const component = document.getElementById(this.updateComponent.id)?.__component
+                component?.emit(this.updateComponent.event)
+            } else {
+                window.location.reload()
         }
 
         this.dispatch(this.nomEvenement, { detail: this.details })

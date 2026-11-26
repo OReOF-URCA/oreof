@@ -68,6 +68,10 @@ final readonly class DpeReopeningOperationHandler implements OperationHandlerInt
         }
 
         $argumentaire = trim((string) ($context->input['argumentaire'] ?? ''));
+        $cleaned = preg_replace('/\s+/', '', $argumentaire);
+        if (mb_strlen($cleaned) < 5) {
+            throw new \DomainException('Le commentaire doit comporter au moins 5 caractères (hors espaces).');
+        }
         $sansCfvu = in_array($operation->transitionName, ['reouvrir_sans_cfvu', 'reouvrir_tacite_sans_cfvu'], true);
         $mcccOnly = in_array($operation->transitionName, ['reouvrir_mccc', 'reouvrir_tacite_mccc'], true);
         $niveauModification = match (true) {

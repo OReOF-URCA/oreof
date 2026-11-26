@@ -1,11 +1,21 @@
 <turbo-frame id="logos-container">
     <div class="d-flex flex-wrap gap-3 p-2">
-        {% for filename in parcours.logo %}
+        {% for item in parcours.logosNormalized %}
+            {% set filename = item.filename %}
             <div class="position-relative logo-container" style="display: inline-block;">
-                <img src="{{ asset('uploads/logos/' ~ filename) }}"
-                     alt="Logo"
-                     style="max-height: 75px; max-width: 100px; object-fit: contain;"
-                >
+                {% if item.url %}
+                    <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" title="{{ item.url }}">
+                        <img src="{{ asset('uploads/logos/' ~ filename) }}"
+                             alt="Logo"
+                             style="max-height: 75px; max-width: 100px; object-fit: contain;"
+                        >
+                    </a>
+                {% else %}
+                    <img src="{{ asset('uploads/logos/' ~ filename) }}"
+                         alt="Logo"
+                         style="max-height: 75px; max-width: 100px; object-fit: contain;"
+                    >
+                {% endif %}
                 {% if editable is defined and editable == true %}
                     <button class="btn btn-danger btn-sm position-absolute top-0 end-0 logo-delete-btn"
                             style="display: none; line-height: 1; width: 24px; height: 24px; padding: 0; align-items: center; justify-content: center;"

@@ -12,6 +12,8 @@ app_admin_pilotage_campagne_index.description: "Tableau de bord stratégique : m
 app_admin_pilotage_campagne_index.title: 'Tour de Contrôle & Pilotage de Campagne'
 app_admin_pilotage_descriptifs_index.description: 'Revue et édition des textes de présentation en haut de page (automatiques ou spécifiques) des parcours de la campagne en cours.'
 app_admin_pilotage_descriptifs_index.title: 'Pilotage des descriptifs haut de page'
+app_admin_pilotage_liens_courts_index.description: 'Revue et édition des liens courts (permaliens) des parcours de la campagne vers les plateformes externes.'
+app_admin_pilotage_liens_courts_index.title: 'Pilotage des liens courts des parcours'
 app_admin_pilotage_parcours_descriptifs.description: 'Revue et édition des textes de présentation en haut de page (automatiques ou spécifiques) des parcours de la campagne en cours.'
 app_admin_pilotage_parcours_descriptifs.title: 'Pilotage des descriptifs haut de page'
 app_admin_statistiques_visites_index.description: "Connexions, utilisateurs uniques et pages vues, calculés à partir des journaux de l'application."
@@ -210,6 +212,13 @@ texte_help.fiche_matiere.volumes_horaires.header: 'Indiquez les volumes horaires
 texte_help.formation.localisation.header: "Informations sur la localisation et l'organisation de la formation"
 texte_help.formation.presentation.header: 'Informations générales de la formation'
 texte_help.formation.structure.header: 'Structure de la formation en terme de parcours'
+texte_help.parcours.admission.header: "Indiquez les modalités d'admission et d'inscription au parcours"
+texte_help.parcours.configuration.header: 'Paramètres de configuration du parcours'
+texte_help.parcours.descriptif.header: "Indiquez l'organisation des études et les modalités pédagogiques du parcours"
+texte_help.parcours.et_apres.header: "Indiquez les poursuites d'études et les débouchés du parcours"
+texte_help.parcours.maquette.header: 'Indiquez la structure de la maquette : semestres, UE et EC du parcours'
+texte_help.parcours.presentation.header: 'Informations générales et objectifs du parcours'
+texte_help.parcours.presentation_formation.header: 'Informations générales de la formation à laquelle le parcours est rattaché'
 titre.fiche_matiere.competences.header: Compétences
 titre.fiche_matiere.identite.header: 'Identité de la fiche matière'
 titre.fiche_matiere.mccc.header: MCCC

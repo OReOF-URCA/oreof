@@ -94,8 +94,7 @@
                                placeholder="{{ isRomeApiConnected ? 'Rechercher un métier par nom ou taper un code ROME (ex: M1805, Développeur)...' : 'Ex: M1805' }}"
                                class="w-full p-2 bg-secondary-50 border border-secondary-200 rounded-sm font-semibold text-sm placeholder:text-secondary-400 dark:bg-secondary-800 dark:border-secondary-700 dark:text-secondary-100"
                                 {{ stimulus_target('parcours--rome', 'codeInput') }}
-                                {{ stimulus_action('parcours--rome', 'onSearchInput', 'input') }}
-                                {{ stimulus_action('parcours--rome', 'addCodeFromEnter', 'keydown') }}>
+                                {{ stimulus_action('parcours--rome', 'onSearchInput', 'input')|stimulus_action('parcours--rome', 'addCodeFromEnter', 'keydown') }}>
 
                         {% if isRomeApiConnected %}
                             {# Liste déroulante des résultats de recherche API #}

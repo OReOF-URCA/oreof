@@ -1,0 +1,22 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier le lien court — {{ parcours.display }}{% endblock %}
+
+{% block bouton_header %}
+    <twig:Button variant="secondary" icon="icon:arrow-left" href="{{ path('app_admin_pilotage_liens_courts_index') }}">
+        Retour à la liste
+    </twig:Button>
+{% endblock %}
+
+{% block content %}
+    <div class="max-w-3xl mx-auto space-y-6 pb-12">
+        <div class="bg-surface border border-secondary-200 dark:border-secondary-700 rounded-2xl p-6 shadow-sm">
+            {{ include('admin/pilotage/liens_courts/_modal_edit.html.twig') }}
+
+            <div class="mt-6 pt-4 border-t border-secondary-200 dark:border-secondary-700 flex justify-end gap-3">
+                <a href="{{ path('app_admin_pilotage_liens_courts_index') }}" class="btn btn-secondary">Annuler</a>
+                <button type="submit" form="modal_form" class="btn btn-primary">Enregistrer</button>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -64,7 +64,8 @@
                 <p class="text-[10px] font-black text-secondary-400 uppercase mb-4 tracking-widest px-3">Configuration
                     Formation</p>
 
-                <div class="p-6 bg-secondary-200 dark:bg-secondary-800" id="percent_completude">{# a mettre à jour avec turbo #}
+                <div class="p-6 bg-secondary-200 dark:bg-secondary-800"
+                     id="percent_completude">{# a mettre à jour avec turbo #}
                     {% set percent = formation.remplissage.calcul() %}
                     {% set percentColor = formation.remplissage.isFull() == true ? 'green' : 'orange' %}
                     <div class="flex justify-between items-end mb-2">
@@ -72,7 +73,8 @@
                         <span class="text-xs font-bold text-{{ percentColor }}-600 italic">{{ percent|number_format(2) }}%</span>
                     </div>
                     <div class="w-full h-1 bg-secondary-700 rounded-full overflow-hidden">
-                        <div class="bg-{{ percentColor }}-500 h-full" style="width: {{ percent|number_format(0) }}%;"></div>
+                        <div class="bg-{{ percentColor }}-500 h-full"
+                             style="width: {{ percent|number_format(0) }}%;"></div>
                     </div>
                 </div>
 
@@ -160,11 +162,9 @@
                       {{ include('communs/_badge.html.twig', { tabKey: 'maquette', status: tabStatesParcours['maquette'].status ?? 'red' }) }}
                     </span>
                     </a>
-
                     <turbo-frame id="sidebar-tree" class="space-y-2">
                         {{ include('parcours_v2/_sideBarStructure.html.twig') }}
                     </turbo-frame>
-
                     <a class="nav-link w-full flex items-center justify-between p-3 rounded-2xl text-sm font-bold text-secondary-500 hover:bg-surface transition group"
                        href="{{ path('parcours_v2_tabs', { parcours: parcours.id, tab: 'admission' }) }}"
                        data-turbo-frame="tab-content"

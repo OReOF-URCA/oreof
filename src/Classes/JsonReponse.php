@@ -21,11 +21,15 @@ class JsonReponse
     {
     }
 
-    public static function success(string $message): Response
+    /**
+     * @param array<string, mixed> $extra
+     */
+    public static function success(string $message, array $extra = []): Response
     {
-        return new Response(json_encode([
+        return new Response(json_encode(array_merge([
             'message' => $message,
-        ], JSON_THROW_ON_ERROR), Response::HTTP_OK, ['Content-Type' => 'application/json']);
+            'success' => true,
+        ], $extra), JSON_THROW_ON_ERROR), Response::HTTP_OK, ['Content-Type' => 'application/json']);
     }
 
     public static function error(string $message): Response

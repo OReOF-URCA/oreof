@@ -244,9 +244,7 @@ class ParcoursController extends BaseController
                 foreach ($logoFiles as $logoFile) {
                     try {
                         $uploaded = $this->secureUploadService->upload($logoFile, 'logos');
-                        $logos = $parcours->getLogo() ?? [];
-                        $logos[] = $uploaded->getStoredFilename();
-                        $parcours->setLogo($logos);
+                        $parcours->addLogo($uploaded->getStoredFilename());
                     } catch (FileUploadException $e) {
                         if (str_contains($e->getMessage(), 'volumineux')) {
                             $hasSizeError = true;
@@ -993,12 +991,15 @@ class ParcoursController extends BaseController
         $hasFormatError = false;
         $hasSizeError = false;
 
+        $url = trim((string)$request->request->get('url'));
+        if ($url !== '' && !preg_match('~^https?://~i', $url)) {
+            $url = 'https://' . $url;
+        }
+
         foreach ($files as $file) {
             try {
                 $uploaded = $this->secureUploadService->upload($file, 'logos');
-                $logos = $parcours->getLogo() ?? [];
-                $logos[] = $uploaded->getStoredFilename();
-                $parcours->setLogo($logos);
+                $parcours->addLogo($uploaded->getStoredFilename(), $url !== '' ? $url : null);
             } catch (\Exception $e) {
                 if (str_contains($e->getMessage(), 'volumineux')) {
                     $hasSizeError = true;
@@ -1034,24 +1035,17 @@ class ParcoursController extends BaseController
     {
         $this->denyAccessUnlessGranted('EDIT', ['route' => 'app_parcours', 'subject' => $parcours]);
 
-        $data = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent(), true) ?? $request->request->all();
         $filename = $data['filename'] ?? null;
 
         if (!$filename) {
             return new JsonResponse(['success' => false, 'error' => 'Nom de fichier manquant'], 400);
         }
 
-        $logos = $parcours->getLogo() ?? [];
-
-        if (!in_array($filename, $logos)) {
-            return new JsonResponse(['success' => false, 'error' => 'Fichier introuvable'], 404);
-        }
-
-        $logos = array_values(array_filter($logos, fn($l) => $l !== $filename));
-        $parcours->setLogo($logos);
+        $parcours->removeLogo((string)$filename);
         $this->entityManager->flush();
 
-        $this->secureUploadService->delete('logos', $filename);
+        $this->secureUploadService->delete('logos', (string)$filename);
 
         return new JsonResponse(['success' => true]);
     }

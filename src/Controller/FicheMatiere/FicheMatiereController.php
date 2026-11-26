@@ -24,6 +24,7 @@ use App\Repository\BlocCompetenceRepository;
 use App\Repository\ButCompetenceRepository;
 use App\Repository\ElementConstitutifRepository;
 use App\Repository\FicheMatiereMutualisableRepository;
+use App\Repository\FicheMatiereRepository;
 use App\Repository\FicheMatiereTabStateRepository;
 use App\Repository\TypeDiplomeRepository;
 use App\Service\Ai\FicheMatiereAiSynthesizer;
@@ -43,12 +44,11 @@ use Symfony\Component\Security\Http\Attribute\IsGranted;
 #[Route('/fiche-matiere/v2', name: 'fiche_matiere_v2_')]
 class FicheMatiereController extends BaseController
 {
-    #[Route('/{slug}/modifier', name: 'modifier')]
+    #[Route('/{id}/modifier', name: 'modifier', requirements: ['id' => '\d+'])]
     #[Breadcrumb(menuKey: 'offre.detail_fiches')]
     public function modifier(
         Request                        $request,
         FicheMatiereTabStateRepository $statesRepo,
-        #[MapEntity(mapping: ['slug' => 'slug'])]
         FicheMatiere                   $ficheMatiere,
         BreadcrumbService              $breadcrumb
     ): Response {
@@ -56,7 +56,10 @@ class FicheMatiereController extends BaseController
         $breadcrumb->add('Modifier');
 
         if (!$this->isGranted('EDIT', $ficheMatiere)) {
-            $this->addFlash('danger', 'La fiche matière est verrouillée et ne peut pas être modifiée.');
+            $message = !$ficheMatiere->isModifiable()
+                ? 'La fiche matière est verrouillée et ne peut pas être modifiée.'
+                : 'Vous n\'avez pas les droits de modification sur cette fiche matière.';
+            $this->addFlash('danger', $message);
 
             $url = $this->generateUrl('fiche_matiere_v2_voir', ['slug' => $ficheMatiere->getSlug()]);
             $response = $this->redirect($url);
@@ -100,11 +103,20 @@ class FicheMatiereController extends BaseController
         return $this->render('fiche_matiere_v2/modifier.html.twig', array_merge($parameters, []));
     }
 
+    #[Route('/{slug}/modifier', name: 'modifier_slug_fallback')]
+    public function modifierSlugFallback(
+        #[MapEntity(mapping: ['slug' => 'slug'])]
+        FicheMatiere $ficheMatiere
+    ): Response
+    {
+        return $this->redirectToRoute('fiche_matiere_v2_modifier', ['id' => $ficheMatiere->getId()]);
+    }
+
     #[Route('/{slug}', name: 'voir', methods: ['GET'])]
     #[Breadcrumb(menuKey: 'offre.detail_fiches')]
     public function show(
-        #[MapEntity(mapping: ['slug' => 'slug'])]
-        FicheMatiere                       $ficheMatiere,
+        string                 $slug,
+        FicheMatiereRepository $ficheMatiereRepository,
         ElementConstitutifRepository       $elementConstitutifRepository,
         FicheMatiereMutualisableRepository $ficheMatiereMutualisableRepository,
         TypeDiplomeRepository              $typeDiplomeRepository,
@@ -112,6 +124,22 @@ class FicheMatiereController extends BaseController
         FicheMatiereDiffAnalyzer           $ficheMatiereDiffAnalyzer,
         BreadcrumbService                  $breadcrumb
     ): Response {
+        $ficheMatiere = $ficheMatiereRepository->findOneBy(['slug' => $slug]);
+        if (null === $ficheMatiere && is_numeric($slug)) {
+            $ficheMatiere = $ficheMatiereRepository->find((int)$slug);
+            if ($ficheMatiere !== null && $ficheMatiere->getSlug() !== null) {
+                return $this->redirectToRoute('fiche_matiere_v2_voir', ['slug' => $ficheMatiere->getSlug()]);
+            }
+        }
+
+        if (null === $ficheMatiere) {
+            throw $this->createNotFoundException(sprintf('Fiche matière non trouvée pour "%s".', $slug));
+        }
+
+        if (!$this->isGranted('SHOW', $ficheMatiere)) {
+            throw $this->createAccessDeniedException('Vous n\'avez pas accès à cette fiche matière.');
+        }
+
         $breadcrumb->add($ficheMatiere->getLibelle());
 
 
@@ -157,7 +185,7 @@ class FicheMatiereController extends BaseController
         $ecParcours = $elementConstitutifRepository->findByFicheMatiereParcours($ficheMatiere);
         return $this->render('fiche_matiere_v2/voir.html.twig', [
             'ficheMatiere' => $ficheMatiere,
-            'isEditable' => Access::isEditable($ficheMatiere),
+            'isEditable' => $this->isGranted('EDIT', $ficheMatiere),
             'ficheMatiereParcours' => $ficheMatiereParcours,
             'ecParcours' => $ecParcours,
             'formation' => $formation,
@@ -220,14 +248,23 @@ class FicheMatiereController extends BaseController
     }
 
 
-    #[Route('/{slug}/modifier/tabs/{tab}', name: 'tabs')]
+    #[Route('/{slug}/modifier/tabs/{tab}', name: 'tabs_slug_fallback')]
+    public function tabsSlugFallback(
+        #[MapEntity(mapping: ['slug' => 'slug'])]
+        FicheMatiere $ficheMatiere,
+        string       $tab
+    ): Response
+    {
+        return $this->redirectToRoute('fiche_matiere_v2_tabs', ['id' => $ficheMatiere->getId(), 'tab' => $tab]);
+    }
+
+    #[Route('/{id}/modifier/tabs/{tab}', name: 'tabs', requirements: ['id' => '\d+'])]
     public function tabs(
         FicheMatiereTabStateRepository $statesRepo,
         BlocCompetenceRepository       $blocCompetenceRepository,
         ButCompetenceRepository        $butCompetenceRepository,
         ElementConstitutifRepository   $elementConstitutifRepository,
         TypeDiplomeRepository          $typeDiplomeRepository,
-        #[MapEntity(mapping: ['slug' => 'slug'])]
         FicheMatiere                   $ficheMatiere,
         string                         $tab,
         Request                        $request

@@ -56,6 +56,10 @@ class ParcoursStep1Type extends AbstractType
                 'placeholder' => 'Choisir dans la liste ou choisir "+ Créer Nouveau" pour ajouter un utilisateur',
                 'new_placeholder' => 'Email du co-responsable du parcours'
             ])
+            ->add('contenuFormation', TextareaAutoSaveType::class, [
+                'attr' => ['rows' => 20, 'maxlength' => 3000,],
+            ])
+
             ->add('objectifsParcours', TextareaAutoSaveType::class, [
                 'attr' => [
                     'rows' => 10,
@@ -70,9 +74,6 @@ class ParcoursStep1Type extends AbstractType
             ])
             ->add('resultatsAttendus', TextareaAutoSaveType::class, [
                 'attr' => ['rows' => 10, 'maxlength' => 3000,],
-            ])
-            ->add('contenuFormation', TextareaAutoSaveType::class, [
-                'attr' => ['rows' => 20, 'maxlength' => 3000,],
             ])
             ->add('rythmeFormation', EntityType::class, [
                 'placeholder' => 'Choisissez un rythme de formation ou complétez le champ ci-dessous',
@@ -93,15 +94,8 @@ class ParcoursStep1Type extends AbstractType
                 'data' => $options['data']->getLocalisation(),
                 'autocomplete' => true,
             ]);
-            //->add('logo', FileType::class, [
-            //    'help' => 'Logo du parcours',
-            //    'multiple' => true,
-            //    'required' => false,
-            //    'mapped' => false,
-            //    'attr' => ['accept' => 'image/png, image/jpeg'],
-            //])
-            ;
-        ;
+        // Note : En V2, la gestion des logos et de leurs liens web associés est prise
+        // en charge par la carte dédiée et asynchrone sur l'onglet Présentation (_presentation.html.twig).
     }
 
     public function configureOptions(OptionsResolver $resolver): void

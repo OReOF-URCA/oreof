@@ -418,6 +418,9 @@ class RessourceVoter extends Voter
         if ($isRespParcours || $userProfil->getProfil()?->getCentre() === CentreGestionEnum::CENTRE_GESTION_PARCOURS) {
             if ($this->dpeParcoursWorkflow->can($dpeParcours, 'autoriser') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_parcours') ||
+                $this->dpeParcoursWorkflow->can($dpeParcours, 'transmettre_ses_etablissement') ||
+                $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_etablissement') ||
+                $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_relecture_etablissement') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_reserve_central_cfvu') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_ouverture_sans_cfvu')) {
                 return true;
@@ -427,6 +430,9 @@ class RessourceVoter extends Voter
         if ($isRespFormation || $userProfil->getProfil()?->getCentre() === CentreGestionEnum::CENTRE_GESTION_FORMATION) {
             if ($this->dpeParcoursWorkflow->can($dpeParcours, 'autoriser') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_parcours') ||
+                $this->dpeParcoursWorkflow->can($dpeParcours, 'transmettre_ses_etablissement') ||
+                $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_etablissement') ||
+                $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_relecture_etablissement') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_reserve_central_cfvu') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_ouverture_sans_cfvu') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_publication') ||
@@ -438,6 +444,9 @@ class RessourceVoter extends Voter
         if ($isRespComposante || $userProfil->getProfil()?->getCentre() === CentreGestionEnum::CENTRE_GESTION_COMPOSANTE) {
             if ($this->dpeParcoursWorkflow->can($dpeParcours, 'autoriser') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_parcours') ||
+                $this->dpeParcoursWorkflow->can($dpeParcours, 'transmettre_ses_etablissement') ||
+                $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_etablissement') ||
+                $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_relecture_etablissement') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_ouverture_sans_cfvu') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_reserve_central_cfvu') ||
                 $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_dpe_composante') ||
@@ -469,11 +478,17 @@ class RessourceVoter extends Voter
         return $this->dpeParcoursWorkflow->can($dpeParcours, 'autoriser') ||
             $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_ouverture_sans_cfvu') ||
             $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_parcours') ||
+            $this->dpeParcoursWorkflow->can($dpeParcours, 'transmettre_ses_etablissement') ||
+            $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_ses_etablissement') ||
+            $this->dpeParcoursWorkflow->can($dpeParcours, 'reserver_ses_etablissement') ||
+            $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_etablissement') ||
+            $this->dpeParcoursWorkflow->can($dpeParcours, 'reouvrir_relecture_etablissement') ||
             $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_rf') ||
             $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_dpe_composante') ||
             $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_reserve_central_cfvu') ||
             $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_conseil') ||
             $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_publication') ||
+            $this->dpeParcoursWorkflow->can($dpeParcours, 'publier') ||
             $this->dpeParcoursWorkflow->can($dpeParcours, 'valider_central');
     }
 }

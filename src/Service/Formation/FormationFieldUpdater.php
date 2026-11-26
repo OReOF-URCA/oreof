@@ -42,6 +42,8 @@ final class FormationFieldUpdater extends AbstractFieldUpdater
     {
         return [
             'localisation' => [
+                'formation_step1[responsableMention]',
+                'formation_step1[coResponsable]',
                 'formation_step1[sigle]',
                 'formation_step1[localisationMention][]',
                 'formation_step1[composantesInscription][]',
@@ -65,9 +67,15 @@ final class FormationFieldUpdater extends AbstractFieldUpdater
     private function handlers(): array
     {
         return [
-            // ----------------- STEP 1 (presentation) -----------------
-            'formation_step1[sigle]' => function (Formation $p, $v) {
+            // ----------------- STEP 1 (localisation) -----------------
+            'formation_step1[responsableMention]' => function (Formation $p, $v) {
                 $p->setResponsableMention($this->toEntity($this->userRepo, $v));
+            },
+            'formation_step1[coResponsable]' => function (Formation $p, $v) {
+                $p->setCoResponsable($this->toEntity($this->userRepo, $v));
+            },
+            'formation_step1[sigle]' => function (Formation $p, $v) {
+                $p->setSigle($this->toStringOrNull($v));
             },
             'formation_step1[localisationMention][]' => function (Formation $f, $v) {
                 $this->syncCollection(
@@ -90,27 +98,76 @@ final class FormationFieldUpdater extends AbstractFieldUpdater
                 );
             },
             'formation_step1[regimeInscription][]' => function (Formation $p, $v) {
-                $p->setRegimeInscription(\App\Referentiel\RegimeInscription::normalize((array) $v));
+                $regimes = \App\Referentiel\RegimeInscription::normalize($this->toArray($v));
+                $p->setRegimeInscription($regimes);
+                if ($p->isHasParcours() === false) {
+                    $premierParcours = $p->getParcours()->first();
+                    if ($premierParcours instanceof Parcours) {
+                        $premierParcours->setRegimeInscription($regimes);
+                    }
+                }
             },
             'formation_step1[modalitesAlternance]' => function (Formation $p, $v) {
-                $p->setModalitesAlternance($this->toString($v));
+                $texte = $this->toString($v);
+                $p->setModalitesAlternance($texte);
+                if ($p->isHasParcours() === false) {
+                    $premierParcours = $p->getParcours()->first();
+                    if ($premierParcours instanceof Parcours) {
+                        $premierParcours->setModalitesAlternance($texte);
+                    }
+                }
             },
-            // ----------------- STEP 2 (descriptif) -----------------
+            // ----------------- STEP 2 (presentation) -----------------
             // EnumType : si ton setter attend un enum, adapte via toEnum()
             'formation_step2[objectifsFormation]' => function (Formation $p, $v) {
-                $p->setObjectifsFormation($this->toString($v));
+                $texte = $this->toString($v);
+                $p->setObjectifsFormation($texte);
+                if ($p->isHasParcours() === false) {
+                    $premierParcours = $p->getParcours()->first();
+                    if ($premierParcours instanceof Parcours) {
+                        $premierParcours->setObjectifsParcours($texte);
+                    }
+                }
             },
             'formation_step2[resultatsAttendus]' => function (Formation $p, $v) {
-                $p->setResultatsAttendus($this->toString($v));
+                $texte = $this->toString($v);
+                $p->setResultatsAttendus($texte);
+                if ($p->isHasParcours() === false) {
+                    $premierParcours = $p->getParcours()->first();
+                    if ($premierParcours instanceof Parcours) {
+                        $premierParcours->setResultatsAttendus($texte);
+                    }
+                }
             },
             'formation_step2[contenuFormation]' => function (Formation $p, $v) {
-                $p->setContenuFormation($this->toString($v));
+                $texte = $this->toString($v);
+                $p->setContenuFormation($texte);
+                if ($p->isHasParcours() === false) {
+                    $premierParcours = $p->getParcours()->first();
+                    if ($premierParcours instanceof Parcours) {
+                        $premierParcours->setContenuFormation($texte);
+                    }
+                }
             },
             'formation_step2[rythmeFormation]' => function (Formation $p, $v) {
-                $p->setRythmeFormation($this->toEntity($this->rythmeRepo, $v));
+                $rythme = $this->toEntity($this->rythmeRepo, $v);
+                $p->setRythmeFormation($rythme);
+                if ($p->isHasParcours() === false) {
+                    $premierParcours = $p->getParcours()->first();
+                    if ($premierParcours instanceof Parcours) {
+                        $premierParcours->setRythmeFormation($rythme);
+                    }
+                }
             },
             'formation_step2[rythmeFormationTexte]' => function (Formation $p, $v) {
-                $p->setRythmeFormationTexte($this->toString($v));
+                $texte = $this->toString($v);
+                $p->setRythmeFormationTexte($texte);
+                if ($p->isHasParcours() === false) {
+                    $premierParcours = $p->getParcours()->first();
+                    if ($premierParcours instanceof Parcours) {
+                        $premierParcours->setRythmeFormationTexte($texte);
+                    }
+                }
             },
 
             // ----------------- STEP 3 (Structure maquette) -----------------

@@ -13,9 +13,15 @@ use App\DTO\TabIssue;
 use App\Entity\Parcours;
 use App\Enums\RegimeInscriptionEnum;
 use App\Service\AbstractChecker;
+use App\TypeDiplome\TypeDiplomeResolver;
 
 class ParcoursTabCompletionChecker extends AbstractChecker
 {
+    public function __construct(
+        private readonly TypeDiplomeResolver $typeDiplomeResolver,
+    )
+    {
+    }
 
     public function isTabComplete(Parcours $p, string $tabKey): bool
     {
@@ -28,6 +34,7 @@ class ParcoursTabCompletionChecker extends AbstractChecker
         return match ($tabKey) {
             'presentation' => $this->presentationIssues($p),
             'descriptif' => $this->descriptifIssues($p),
+            'competences' => $this->competencesIssues($p),
             'maquette' => $this->maquetteIssues($p), //structure semestre début/fin uniquement
             'admission' => $this->admissionIssues($p),
             'et_apres' => $this->etApresIssues($p),
@@ -147,16 +154,14 @@ class ParcoursTabCompletionChecker extends AbstractChecker
             $issues[] = new TabIssue('parcours_step5[composanteInscription]', 'Composante d’inscription', 'Choisissez une composante.');
         }
 
-        if ($this->filled($p->getModalitesAlternance()) === false && (in_array(RegimeInscriptionEnum::FC_CONTRAT_PRO, $p->getRegimeInscription(), true) || in_array(RegimeInscriptionEnum::FI_APPRENTISSAGE, $p->getRegimeInscription(), true))) {
-            $issues[] = new TabIssue('parcours_step5[modalitesAlternance]', 'Modalités d\'alternance', 'Vous avez indiqué FC en contrat pro ou FI en apprentissage, vous devez préciser les modalités.');
+        if ($this->filled($p->getDisplayModalitesAlternance()) === false && $p->isAlternance()) {
+            $issues[] = new TabIssue('parcours_step5[modalitesAlternance]', 'Modalités d\'alternance', 'Ce parcours propose de l\'alternance, vous devez préciser les modalités.');
         }
 
         if ($p->getContacts()->count() === 0) {
             $issues[] = new TabIssue('parcours_step5[coordSecretariat]', 'Coordonnées secrétariat', 'Renseignez les coordonnées.');
         }
-        if (!$this->filled($p->getModalitesAdmission())) {
-            $issues[] = new TabIssue('parcours_step5[modalitesAdmission]', 'Modalités d’admission', 'Renseignez les modalités.');
-        }
+
 
         return $issues;
     }
@@ -190,4 +195,39 @@ class ParcoursTabCompletionChecker extends AbstractChecker
         return $issues;
     }
 
+    /** @return TabIssue[] */
+    private function competencesIssues(Parcours $p): array
+    {
+        if ($this->isCompetencesImposees($p)) {
+            return [];
+        }
+
+        $issues = [];
+
+        if ($p->getBlocCompetences()->count() === 0) {
+            $issues[] = new TabIssue('competences', 'Compétences', 'Vous devez ajouter au moins un bloc de compétences.');
+        } else {
+            foreach ($p->getBlocCompetences() as $bloc) {
+                if ($bloc->getCompetences()->count() === 0) {
+                    $issues[] = new TabIssue('competences', 'Compétences', sprintf('Le bloc de compétences « %s » ne contient aucune compétence.', $bloc->getLibelle() ?? ''));
+                }
+            }
+        }
+
+        return $issues;
+    }
+
+    public function isCompetencesImposees(Parcours $p): bool
+    {
+        return $this->typeDiplomeResolver->fromParcours($p)->hasReferentielCompetencesImpose($p);
+    }
+
+    public function computeParcoursTabStatus(Parcours $p, string $tabKey, bool $isComplete, bool $done): string
+    {
+        if ($tabKey === 'competences' && $this->isCompetencesImposees($p)) {
+            return 'green';
+        }
+
+        return $this->computeStatus($isComplete, $done);
+    }
 }

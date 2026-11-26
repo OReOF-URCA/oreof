@@ -57,6 +57,22 @@ class ValidationProcess extends AbstractValidationProcess
         'en_cours_redaction_ss_cfvu',
     ];
 
+    public const ETAPES_NON_CLASSIQUE = [
+        'en_cours_redaction',
+        'soumis_central',
+        'valide_cfvu',
+        'valide_a_publier',
+    ];
+
+    public function getProcess(?bool $isClassique = true): array
+    {
+        if ($isClassique === false) {
+            return array_intersect_key($this->process, array_flip(self::ETAPES_NON_CLASSIQUE));
+        }
+
+        return $this->process;
+    }
+
     public function getProcessComposante(): array
     {
         return array_intersect_key($this->processAll, array_flip(self::ETAPES_COMPOSANTE));

@@ -6,6 +6,7 @@ use App\Classes\GetDpeParcours;
 use App\Entity\Parcours;
 use App\Entity\ParcoursVersioning;
 use App\Enums\TypeParcoursEnum;
+use App\Referentiel\NiveauFormation;
 use App\Repository\ParcoursVersioningRepository;
 use App\Service\ParcoursExportV2;
 use App\Service\SecureUploadService;
@@ -171,6 +172,13 @@ final class PublicationController extends AbstractController
         $logoTypeDiplomeArray = $this->getLogoTypeDiplomeParcoursApi($parcoursVersion->getParcours());
         $logosParcours = $this->getLogoArrayParcoursApi($parcoursVersion->getParcours());
 
+        $codesRome = $parcoursVersionData->getCodesRomeNormalized();
+        if (empty($codesRome)) {
+            $codesRome = $parcours->getCodesRomeNormalized();
+        }
+
+        $lienCourt = ($parcours->getLienCourt() !== null && $parcours->getLienCourt() !== '') ? $parcours->getLienCourt() : '';
+
         $data = [
             'description' => '',
             'ects' => $ects ?? 0,
@@ -182,6 +190,12 @@ final class PublicationController extends AbstractController
                 'faculte-ecole-institut' => $faculteEcoleInstitut,
                 'public-concerne' => $parcoursVersionData->getRegimeInscription() ?? [], // Certains sont des tableaux, d'autres en JSON
                 'niveau-francais' => $parcoursVersionData->getNiveauFrancais()?->libelle() ?? '-',
+                'niveau-entree-code' => $parcours->getFormation()->getNiveauEntreeValue(), 
+                'niveau-entree-libelle' => NiveauFormation::legacyCase($parcours->getFormation()->getNiveauEntreeValue())?->libelle() ?? "0",
+                'niveau-sortie-code' => $parcours->getFormation()->getNiveauSortieValue(),
+                'niveau-sortie-libelle' => NiveauFormation::legacyCase($parcours->getFormation()->getNiveauSortieValue())?->libelle() ?? "0",
+                'lien-court' => $lienCourt,
+                'code-rome' => $codesRome,
             ],
             'xml-lheo' => $this->generateUrl('app_parcours_export_xml_lheo_v2', ['parcours' => $parcoursVersion->getParcours()->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'fiche-pdf' => $this->generateUrl('app_parcours_export_pdf_versioning', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
@@ -301,6 +315,9 @@ final class PublicationController extends AbstractController
         $logoTypeDiplomeArray = $this->getLogoTypeDiplomeParcoursApi($parcours);
         $logosParcours = $this->getLogoArrayParcoursApi($parcours);
 
+        $codesRome = $parcours->getCodesRomeNormalized();
+        $lienCourt = ($parcours->getLienCourt() !== null && $parcours->getLienCourt() !== '') ? $parcours->getLienCourt() : '';
+
         $data = [
             'description' => '',
             'ects' => $ects,
@@ -312,6 +329,12 @@ final class PublicationController extends AbstractController
                 'faculte-ecole-institut' => $faculteEcoleInstitut,
                 'public-concerne' => $parcours->getRegimeInscription(), // Certains sont des tableaux, d'autres en JSON
                 'niveau-francais' => $parcours->getNiveauFrancais()?->libelle() ?? '-',
+                'niveau-entree-code' => $parcours->getFormation()->getNiveauEntreeValue(),
+                'niveau-entree-libelle' => NiveauFormation::legacyCase($parcours->getFormation()->getNiveauEntreeValue())?->libelle() ?? "0",
+                'niveau-sortie-code' => $parcours->getFormation()->getNiveauSortieValue(),
+                'niveau-sortie-libelle' => NiveauFormation::legacyCase($parcours->getFormation()->getNiveauSortieValue())?->libelle() ?? "0",
+                'lien-court' => $lienCourt,
+                'code-rome' => $codesRome,
             ],
             'xml-lheo' => $this->generateUrl('app_parcours_export_xml_lheo_v2', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
             'fiche-pdf' => $this->generateUrl('app_parcours_export', ['parcours' => $parcours->getId()], UrlGeneratorInterface::ABSOLUTE_URL),
@@ -326,7 +349,8 @@ final class PublicationController extends AbstractController
     private function getLogoArrayParcoursApi(Parcours $parcours): array
     {
         $result = [];
-        foreach ($parcours->getLogo() ?? [] as $filename) {
+        foreach ($parcours->getLogosNormalized() as $logo) {
+            $filename = $logo['filename'];
             $filePath = $this->secureUploadService->resolveStoredFilePath('logos', $filename);
             $result[] = [
                 'image_data' => $this->generateUrl(
@@ -336,6 +360,7 @@ final class PublicationController extends AbstractController
                 ),
                 'image_type' => file_exists($filePath) ? mime_content_type($filePath) : null,
                 'id' => pathinfo($filename, PATHINFO_FILENAME),
+                'url' => $logo['url'],
             ];
         }
 

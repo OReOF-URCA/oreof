@@ -47,19 +47,6 @@ class ParcoursStep5Type extends AbstractType
                 },
                 'autocomplete' => true,
             ])
-            ->add('regimeInscription', \App\Form\Type\RegimeInscriptionType::class, [
-                'translation_domain' => 'enum',
-                'getter' => static fn ($entity): array => $entity->getRegimeInscriptionValues(),
-                'setter' => static function ($entity, array $values): void { $entity->setRegimeInscription($values); },
-                'multiple' => true,
-                'expanded' => true,
-                'choice_attr' => function ($choice) {
-                    return [
-                        'data-conditional-field-target' => 'trigger',
-                        'data-action' => 'change->conditional-field#toggle'
-                    ];
-                },
-            ])
             ->add('modalitesAlternance', TextareaAutoSaveType::class, [
                 'attr' => ['rows' => 20, 'maxlength' => 3000],
             ])

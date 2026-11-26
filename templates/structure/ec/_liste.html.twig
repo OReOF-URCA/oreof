@@ -97,9 +97,9 @@
                                             <div class="text-muted text-small d-md-none">Remplissage</div>
                                             {% if (is_granted('EDIT', {route: 'app_formation', subject: parcours.formation}) or is_granted('EDIT', {route: 'app_parcours', subject: dpeParcours})) %}
                                                 {% if ec.ficheMatiere != null %}
-                                                    {% if isBut %}
+                                                    {% if is_granted('EDIT', ec.ficheMatiere) %}
                                                         <a
-                                                                href="{{ path('fiche_matiere_v2_modifier',{slug: ec.ficheMatiere.slug}) }}"
+                                                                href="{{ path('fiche_matiere_v2_modifier',{id: ec.ficheMatiere.id}) }}"
                                                                 class="btn btn-sm btn-outline-info  px-1"
                                                                 data-bs-toggle="tooltip"
                                                                 target="_blank" data-bs-placement="bottom"
@@ -112,31 +112,15 @@
                                                             {% endif %}
                                                         </a>
                                                     {% else %}
-                                                        {% if ec.ficheMatiere.parcours != null and ec.ficheMatiere.parcours.id == parcours.id %}
-                                                            <a
-                                                                    href="{{ path('fiche_matiere_v2_modifier',{slug: ec.ficheMatiere.slug}) }}"
-                                                                    class="btn btn-sm btn-outline-info  px-1"
-                                                                    data-bs-toggle="tooltip"
-                                                                    target="_blank" data-bs-placement="bottom"
-                                                                    title="Modifier la fiche EC/matière"
-                                                            >
-                                                                {% if ec.ficheMatiere.remplissage.isFull() == true %}
-                                                                    <span class="badge bg-success">Fiche</span>
-                                                                {% else %}
-                                                                    <span class="badge bg-warning">Fiche</span>
-                                                                {% endif %}
-                                                            </a>
-                                                        {% else %}
-                                                            <a
-                                                                    href="{{ path('fiche_matiere_v2_voir',{slug: ec.ficheMatiere.slug}) }}"
-                                                                    class="btn btn-sm btn-outline-info  px-1"
-                                                                    data-bs-toggle="tooltip"
-                                                                    target="_blank" data-bs-placement="bottom"
-                                                                    title="Voir la fiche EC/matière"
-                                                            >
-                                                                <span class="badge bg-info">Voir la fiche</span>
-                                                            </a>
-                                                        {% endif %}
+                                                        <a
+                                                                href="{{ path('fiche_matiere_v2_voir',{slug: ec.ficheMatiere.slug}) }}"
+                                                                class="btn btn-sm btn-outline-info  px-1"
+                                                                data-bs-toggle="tooltip"
+                                                                target="_blank" data-bs-placement="bottom"
+                                                                title="Voir la fiche EC/matière"
+                                                        >
+                                                            <span class="badge bg-info">Voir la fiche</span>
+                                                        </a>
                                                     {% endif %}
                                                 {% else %}
                                                     <span class="badge bg-info">EC Libre</span>
@@ -480,10 +464,10 @@
                                                         or is_granted('EDIT', {route: 'app_parcours', subject: dpeParcours})
                                                         or is_granted('EDIT', {route: 'app_ec', subject: ece})) %}
                                                         {% if ece.ficheMatiere != null %}
-                                                            {% if editable == true and isUeRaccrochee == false %}
+                                                            {% if editable == true and isUeRaccrochee == false and is_granted('EDIT', ece.ficheMatiere) %}
                                                                 <a
-                                                                        href="{{ path('fiche_matiere_v2_modifier',{slug: ece
-                                                                        .ficheMatiere.slug}) }}"
+                                                                        href="{{ path('fiche_matiere_v2_modifier',{id: ece
+                                                                        .ficheMatiere.id}) }}"
                                                                         class="btn btn-sm btn-outline-info px-1"
                                                                         data-bs-toggle="tooltip" target="_blank"
                                                                         data-bs-placement="bottom"

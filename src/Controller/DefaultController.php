@@ -9,11 +9,10 @@
 
 namespace App\Controller;
 
-use App\DTO\StatsFichesMatieres;
 use App\DTO\TranslatableKey;
 use App\Repository\ComposanteRepository;
+use App\Repository\FicheMatiereRepository;
 use App\Repository\FormationRepository;
-use App\TypeDiplome\TypeDiplomeResolver;
 use App\Utils\TurboStreamResponseFactory;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -163,10 +162,10 @@ class DefaultController extends BaseController
 
     #[Route('/ses/fiches-composante', name: 'app_fiches_composantes')]
     public function fichesComposante(
-        TypeDiplomeResolver $typeDiplomeResolver,
         ComposanteRepository   $composanteRepository,
-        FormationRepository $formationRepository,
-        Request               $request,
+        FormationRepository    $formationRepository,
+        FicheMatiereRepository $ficheMatiereRepository,
+        Request                $request,
     ): Response {
         $composante = $composanteRepository->find($request->query->get('value'));
 
@@ -175,20 +174,7 @@ class DefaultController extends BaseController
         }
 
         $tFormations = $formationRepository->findByComposanteAndDpe($composante->getId(), $this->getCampagneCollecte());
-
-        $stats = [];
-        foreach ($tFormations as $formation) {
-            $typeD = $typeDiplomeResolver->fromTypeDiplome($formation->getTypeDiplome());
-            $parcourss = $formation->getParcours();
-            $stats[$formation->getId()]['stats'] = new StatsFichesMatieres();
-
-            foreach ($parcourss as $parcours) {
-                $stats[$formation->getId()][$parcours->getId()] = $typeD->calcul($parcours);
-                $stats[$formation->getId()]['stats']->addStatsParcours(
-                    $stats[$formation->getId()][$parcours->getId()]->statsFichesMatieresParcours
-                );
-            }
-        }
+        $stats = $ficheMatiereRepository->getStatsForFormations($tFormations, $this->getCampagneCollecte());
 
         return $this->render('default/_fiches_composante.html.twig', [
             'formations' => $tFormations,

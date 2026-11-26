@@ -120,6 +120,8 @@ class ParcoursExportV2 {
             'formation_id_old' => $idOldFormation,
             'formation' => $parcours->getFormation()?->getDisplay(),
             'parcours' => $parcours->isParcoursDefaut() ? '' : $parcours->getLibelle(),
+            'lien-court' => $actualParcours->getLienCourt() ?? '',
+            'code-rome' => $actualParcours->getCodesRomeNormalized(),
             'typeDiplome' => $typeDiplome->getLibelle(),
             'composante' => $parcours->getFormation()?->getComposantePorteuse()?->getLibelle(),
             'volumes'=> [
@@ -341,6 +343,8 @@ class ParcoursExportV2 {
             'formation_id_old' => $p->getFormation()?->getFormationOrigineCopie()?->getId(),
             'formation' => $p->getFormation()?->getDisplay(),
             'parcours' => $p->isParcoursDefaut() ? '' : $p->getLibelle(),
+            'lien-court' => $p->getLienCourt() ?? '',
+            'code-rome' => $p->getCodesRomeNormalized(),
             'typeDiplome' => $td->getLibelle(),
             'composante' => $p->getFormation()?->getComposantePorteuse()?->getLibelle(),
             'volumes' => [

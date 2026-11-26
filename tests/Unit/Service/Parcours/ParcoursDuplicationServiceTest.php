@@ -89,6 +89,7 @@ final class ParcoursDuplicationServiceTest extends TestCase
         $parcours = new Parcours($formation);
         $parcours->setLibelle('Parcours Master');
         $parcours->setSigle('PM');
+        $parcours->setLienCourt('https://monmaster.gouv.fr/formation/master-pm');
 
         $config = new ParcoursDuplicationConfig();
         $config->nouveauLibelle = 'Parcours Master (copie)';
@@ -118,5 +119,6 @@ final class ParcoursDuplicationServiceTest extends TestCase
         $this->assertSame('Parcours Master (copie)', $result->nouveauParcours->getLibelle());
         $this->assertSame('PM-2', $result->nouveauParcours->getSigle());
         $this->assertSame($parcours, $result->nouveauParcours->getParcoursOrigineCopie());
+        $this->assertSame('https://monmaster.gouv.fr/formation/master-pm', $result->nouveauParcours->getLienCourt());
     }
 }

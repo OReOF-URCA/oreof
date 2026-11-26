@@ -62,6 +62,11 @@ final class ButHandler extends AbstractTypeDiplomeHandler implements McccDisplay
         return self::TEMPLATE_COMPETENCES;
     }
 
+    public function hasReferentielCompetencesImpose(?Parcours $parcours = null): bool
+    {
+        return true;
+    }
+
     private array $typeEpreuves = [
         'sae' => [
             'iut_portfolio', 'iut_livrable', 'iut_rapport', 'iut_soutenance',

@@ -242,16 +242,12 @@ class ParcoursState
                 $tab['error'][] = 'Vous devez indiquer la composante d\'inscription.';
             }
 
-            if (count($this->parcours->getRegimeInscription()) === 0) {
-                $tab['error'][] = 'Vous devez indiquer le régime d\'inscription.';
+            if (count($this->parcours->getRegimeInscriptionValues()) === 0) {
+                $tab['error'][] = 'Les régimes d\'inscription doivent être configurés sur les années du parcours.';
             }
 
-            foreach ($this->parcours->getRegimeInscription() as $regimeInscription) {
-                if ($regimeInscription !== RegimeInscriptionEnum::FI && $regimeInscription !== RegimeInscriptionEnum::FC) {
-                    if ($this->parcours->getModalitesAlternance() === null) {
-                        $tab['error'][] = 'Vous devez indiquer les modalités de l\'alternance.';
-                    }
-                }
+            if ($this->parcours->isAlternance() && $this->parcours->getDisplayModalitesAlternance() === null) {
+                $tab['error'][] = 'Vous devez indiquer les modalités de l\'alternance.';
             }
         }
 

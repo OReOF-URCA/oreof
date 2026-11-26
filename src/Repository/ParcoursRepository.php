@@ -478,5 +478,43 @@ class ParcoursRepository extends ServiceEntityRepository
             'count_both' => (int)($result['count_both'] ?? 0),
         ];
     }
+
+    /**
+     * @return array{total: int, count_with_link: int, count_without_link: int, percent: float}
+     */
+    public function getStatsLiensCourtsByCampagne(?CampagneCollecte $campagne): array
+    {
+        if ($campagne === null) {
+            return [
+                'total' => 0,
+                'count_with_link' => 0,
+                'count_without_link' => 0,
+                'percent' => 0.0,
+            ];
+        }
+
+        $qb = $this->createQueryBuilder('p')
+            ->select(
+                'COUNT(DISTINCT p.id) AS total',
+                "COUNT(DISTINCT CASE WHEN p.lienCourt IS NOT NULL AND TRIM(p.lienCourt) != '' THEN p.id ELSE NULL END) AS count_with_link"
+            )
+            ->leftJoin('p.dpeParcours', 'dp')
+            ->leftJoin('p.formation', 'f')
+            ->andWhere('dp.campagneCollecte = :campagne OR f.dpe = :campagne')
+            ->setParameter('campagne', $campagne);
+
+        $result = $qb->getQuery()->getOneOrNullResult();
+        $total = (int)($result['total'] ?? 0);
+        $withLink = (int)($result['count_with_link'] ?? 0);
+        $withoutLink = max(0, $total - $withLink);
+        $percent = $total > 0 ? round(($withLink / $total) * 100, 1) : 0.0;
+
+        return [
+            'total' => $total,
+            'count_with_link' => $withLink,
+            'count_without_link' => $withoutLink,
+            'percent' => $percent,
+        ];
+    }
 }
 

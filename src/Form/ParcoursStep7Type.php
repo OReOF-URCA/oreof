@@ -13,6 +13,7 @@ use App\Entity\Parcours;
 use App\Form\Type\TextareaAutoSaveType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
@@ -43,6 +44,14 @@ class ParcoursStep7Type extends AbstractType
             ->add('codeRNCP', TextType::class, [
                 'required' => false,
                 'attr' => ['maxlength' => 10],
+            ])
+            ->add('lienCourt', UrlType::class, [
+                'required' => false,
+                'default_protocol' => 'https',
+                'attr' => [
+                    'placeholder' => 'https://...',
+                    'maxlength' => 255,
+                ],
             ])
         ;
     }

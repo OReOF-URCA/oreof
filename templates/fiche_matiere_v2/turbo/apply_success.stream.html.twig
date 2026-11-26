@@ -8,7 +8,32 @@
     </template>
 </turbo-stream>
 
+{# Boutons de la page « voir » : dépendent de l'état de la fiche matière. Sans effet si la cible est absente (page « modifier »). #}
+<turbo-stream action="replace" target="fiche_matiere_voir_actions">
+    <template>
+        {{ include('fiche_matiere_v2/_voir_actions.html.twig', {ficheMatiere: ficheMatiere}) }}
+    </template>
+</turbo-stream>
+
 {{ include('_ui/_toast.stream.html.twig', { message: ('toast.'~transition~'.'~type~'.success')|trans({},'process'), undo: null, type: 'success' }) }}
 
 {{ include('_ui/_force_close_modal.html.twig') }}
+
+{% if type == 'reouvrir' or transition starts with 'rouvrir' or transition starts with 'reouvrir' %}
+    <turbo-stream action="append" target="flash_toasts">
+        <template>
+            <script>
+                (function () {
+                    const targetUrl = "{{ path('fiche_matiere_v2_modifier', {id: ficheMatiere.id}) }}";
+                    if (window.Turbo && typeof window.Turbo.visit === 'function') {
+                        window.Turbo.visit(targetUrl, {action: 'advance'});
+                    } else {
+                        window.location.href = targetUrl;
+                    }
+                })();
+            </script>
+        </template>
+    </turbo-stream>
+{% endif %}
+
 

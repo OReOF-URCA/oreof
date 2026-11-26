@@ -1,5 +1,5 @@
 <tr id="parcours_{{ formation.id }}" class="bg-secondary-100 dark:bg-secondary-800">
-    <td colspan="5" class="p-0">
+    <td colspan="6" class="p-0">
         <div class="border-l-4 border-info-400 bg-surface p-4 dark:border-info-300 dark:bg-surface">
             {% set nbParcoursTotal = formation.hasParcours ? formation.parcours|filter(parcours => parcours.formation.hasParcours)|length : (formation.parcours|length > 0 ? 1 : 0) %}
             {% set nbParcoursNonOuverts = 0 %}
@@ -125,8 +125,8 @@
                                                         color: 'primary',
                                                         url: path('parcours_v2_dupliquer', {'parcours': parcours.id, 'from': 'formation_detail'}),
                                                         modal: true,
-                                                        disabled: not (canEdit and canAccess),
-                                                        help: not (canEdit and canAccess) ? 'Vous n\'avez pas les droits pour dupliquer ce parcours' : null
+                                                        disabled: not (is_granted('ROLE_ADMIN') and canEdit and canAccess),
+                                                        help: not is_granted('ROLE_ADMIN') ? 'Action réservée aux administrateurs' : (not (canEdit and canAccess) ? 'Vous n\'avez pas les droits pour dupliquer ce parcours' : null)
                                                     },
                                                     {
                                                         label: 'Supprimer',
@@ -134,7 +134,8 @@
                                                         color: 'danger',
                                                         url: path('parcours_v2_supprimer', {'parcours': parcours.id}),
                                                         modal: true,
-                                                        disabled: not is_granted('ROLE_ADMIN')
+                                                        disabled: not (is_granted('ROLE_ADMIN') and canEdit and canAccess),
+                                                        help: not is_granted('ROLE_ADMIN') ? 'Action réservée aux administrateurs' : (not (canEdit and canAccess) ? 'Vous n\'avez pas les droits pour supprimer ce parcours' : null)
                                                     }
                                                 ]
                                             }) }}

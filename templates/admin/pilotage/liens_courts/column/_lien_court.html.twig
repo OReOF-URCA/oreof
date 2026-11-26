@@ -1,0 +1,17 @@
+{% if row.lienCourt %}
+    <div class="flex items-center gap-2">
+        <a href="{{ row.lienCourt }}" target="_blank" rel="noopener noreferrer"
+           class="font-mono text-xs text-primary hover:underline truncate max-w-xs inline-flex items-center gap-1.5"
+           title="{{ row.lienCourt }}">
+            <twig:UX:Icon name="ph:link-light" class="h-3.5 w-3.5 shrink-0 text-primary"/>
+            <span class="truncate">{{ row.lienCourt }}</span>
+            <twig:UX:Icon name="ph:arrow-square-out-light" class="h-3.5 w-3.5 shrink-0 text-secondary-400"/>
+        </a>
+        <twig:CopyLinkButton url="{{ row.lienCourt }}" label="" copiedLabel="" size="sm" class="shrink-0"/>
+    </div>
+{% else %}
+    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
+        <twig:UX:Icon name="ph:warning-circle-light" class="h-3 w-3"/>
+        Non renseigné
+    </span>
+{% endif %}

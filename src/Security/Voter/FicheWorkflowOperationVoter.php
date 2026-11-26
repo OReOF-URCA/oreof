@@ -68,17 +68,17 @@ final class FicheWorkflowOperationVoter extends Voter
         // - Le responsable de la fiche
         // - Le responsable ou co-responsable de parcours (RP)
         // - Le responsable ou co-responsable de mention/formation (RF)
-        // - Le responsable DPE ou gestionnaire DPE de la composante porteuse
-        if ($ficheMatiere->getResponsableFicheMatiere()?->getId() === $user->getId()) {
+        $userId = $user->getId();
+        if ($userId !== null && $ficheMatiere->getResponsableFicheMatiere()?->getId() === $userId) {
             return true;
         }
 
         $parcours = $ficheMatiere->getParcours();
-        if ($parcours !== null) {
+        if ($parcours !== null && $userId !== null) {
             // RP
             if (
-                $parcours->getRespParcours()?->getId() === $user->getId()
-                || $parcours->getCoResponsable()?->getId() === $user->getId()
+                $parcours->getRespParcours()?->getId() === $userId
+                || $parcours->getCoResponsable()?->getId() === $userId
             ) {
                 return true;
             }
@@ -87,35 +87,14 @@ final class FicheWorkflowOperationVoter extends Voter
             if ($formation !== null) {
                 // RF
                 if (
-                    $formation->getResponsableMention()?->getId() === $user->getId()
-                    || $formation->getCoResponsable()?->getId() === $user->getId()
+                    $formation->getResponsableMention()?->getId() === $userId
+                    || $formation->getCoResponsable()?->getId() === $userId
                 ) {
-                    return true;
-                }
-
-                // Composante
-                $composante = $formation->getComposantePorteuse();
-                if ($composante !== null && (
-                    $composante->getResponsableDpe()?->getId() === $user->getId()
-                    || $user->getComposanteResponsableDpe()->contains($composante)
-                )) {
                     return true;
                 }
             }
         }
 
-        return $this->security->isGranted('MANAGE', [
-            'route' => 'app_composante',
-            'subject' => $ficheMatiere,
-        ]) || $this->security->isGranted('MANAGE', [
-            'route' => 'app_formation',
-            'subject' => $ficheMatiere,
-        ]) || $this->security->isGranted('MANAGE', [
-            'route' => 'app_parcours',
-            'subject' => $ficheMatiere,
-        ]) || $this->security->isGranted('EDIT', [
-            'route' => 'app_fiche_matiere',
-            'subject' => $ficheMatiere,
-        ]);
+        return false;
     }
 }

@@ -388,9 +388,9 @@
                         {% endif %}
                     </dd>
 
-                    {% if parcours.modalitesAlternance or (formation != null and formation.modalitesAlternance) %}
+                    {% if parcours.displayModalitesAlternance or parcours.modalitesAlternance or (formation != null and formation.modalitesAlternance) %}
                         <dt>Modalités de l'alternance</dt>
-                        <dd>{{ (parcours.modalitesAlternance|default(formation.modalitesAlternance))|raw }}</dd>
+                        <dd>{{ (parcours.displayModalitesAlternance|default(parcours.modalitesAlternance|default(formation.modalitesAlternance)))|raw }}</dd>
                     {% endif %}
                 </dl>
             </div>

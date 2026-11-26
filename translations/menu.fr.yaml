@@ -8,6 +8,7 @@ breadcrumb.home: Accueil
 menu.admin.consulter_offre: "Consulter l'offre de formation"
 menu.admin.controle_lheo: 'Controle LHEO'
 menu.admin.descriptifs_parcours: 'Descriptifs haut de page'
+menu.admin.liens_courts_parcours: 'Liens courts des parcours'
 menu.admin.dpe_ouverts: 'DPE ouverts'
 menu.admin.exports: Exports
 menu.admin.gestion_offre: "Gestion de l'offre et capacités"
@@ -15,6 +16,10 @@ menu.admin.gestion_offre_etablissement: "Offre d'établissement"
 menu.admin.gestion_offre_old: "Gestion de l'offre et capacités"
 menu.admin.impersonation.user: "Impersonation d'un utilisateur"
 menu.admin.logs.applicatifs: "Logs de l'application"
+menu.admin.menu_offre: 'Offre de formation'
+menu.admin.menu_publication: 'Publication et export'
+menu.admin.menu_suivi: 'Suivi de campagne'
+menu.admin.menu_validation: Validation
 menu.admin.pilotage: Pilotage
 menu.admin.statistiques_offre: "Statistiques et synthèse de l'offre"
 menu.admin.tour_de_controle: 'Tour de contrôle & SLA'
@@ -50,6 +55,7 @@ menu.config.help: 'Configurations des aides'
 menu.config.langues: Langues
 menu.config.mentions: Mentions
 menu.config.menu_config_globale: 'Configuration globale'
+menu.config.menu_assistance: Assistance
 menu.config.menu_developpement: Développement
 menu.config.menu_etablissement: 'Configuration établissement'
 menu.config.nature_ue: 'Nature des UE/EC'
@@ -160,6 +166,8 @@ page.app_offre_index.description: 'Synthèse de l’offre de formation. Ouvertur
 page.app_offre_index.title: "Gestion de l'offre et capacités"
 page.app_admin_pilotage_descriptifs_index.description: 'Revue et édition des textes de haut de page (automatiques ou spécifiques) des parcours de la campagne en cours.'
 page.app_admin_pilotage_descriptifs_index.title: 'Descriptifs haut de page'
+page.app_admin_pilotage_liens_courts_index.description: 'Revue et édition des liens courts (permaliens) des parcours de la campagne vers les plateformes externes.'
+page.app_admin_pilotage_liens_courts_index.title: 'Liens courts des parcours'
 page.app_admin_pilotage_parcours_descriptifs.description: 'Revue et édition des textes de haut de page (automatiques ou spécifiques) des parcours de la campagne en cours.'
 page.app_admin_pilotage_parcours_descriptifs.title: 'Descriptifs haut de page'
 page.app_parcours_lheo_invalid_list.description: "Contrôle de la conformité au format LHEO de l'offre"

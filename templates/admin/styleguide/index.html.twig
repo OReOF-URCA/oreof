@@ -1043,6 +1043,42 @@
             </div>
         </twig:Card>
 
+        {# Section Composant : DocumentPreview #}
+        <twig:Card title="DocumentPreview" description="Bouton loupe ouvrant un aperçu du document dans une modale (PDF, vidéo, audio, image). Réutilisable sur n'importe quelle page.">
+
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Exemple</h3>
+                    <p class="text-xs text-secondary-500 mb-3">Aperçu : pdf / video / audio / image, Word (.docx, via docx-preview) et Excel (.xlsx, via read-excel-file). Autres formats (.doc, .xls, PowerPoint) : la modale propose le téléchargement.</p>
+                    <div class="flex items-center gap-3">
+                        <twig:DocumentPreview id="styleguide-pdf" url="{{ asset('docs/guide.pdf') }}" title="Guide" type="pdf"/>
+                        <twig:DocumentPreview id="styleguide-word" url="{{ asset('docs/' ~ 'Aide à la rédaction v2 - fiche parcours 2024-2028.docx'|url_encode) }}" title="Fiche parcours (docx)" type="word"/>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Propriétés</h3>
+                    <ul class="text-sm text-secondary space-y-1 list-disc list-inside">
+                        <li><code>url</code> - URL du document</li>
+                        <li><code>title</code> - Titre de la modale</li>
+                        <li><code>type</code> - word / excel / pdf / powerpoint / video / audio / image / file</li>
+                        <li><code>tooltip</code>, <code>size</code>, <code>variant</code>, <code>id</code> - optionnels</li>
+                        <li><code>DownloadCard</code> : prop <code>previewUrl</code> pour afficher la loupe, contenu du composant pour des actions (ex. <code>DeleteButton</code>)</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3 class="text-sm font-semibold text-secondary mb-3 pb-2 border-b">Exemple de code</h3>
+                    <pre class="bg-secondary-900 text-secondary-200 p-4 rounded-md text-xs overflow-x-auto"><code>{% verbatim %}&lt;twig:DocumentPreview
+    url="{{ asset('docs/guide.pdf') }}"
+    title="Guide de validation"
+    type="pdf" />
+
+&lt;twig:DownloadCard title="Guide" href="..." type="pdf" previewUrl="..." />{% endverbatim %}</code></pre>
+                </div>
+            </div>
+        </twig:Card>
+
         {# Section Composant : Kpi #}
         <twig:Card title="Kpi" description="Indicateur clé de performance et compteur statistique synthétique avec variantes de couleur, barre de progression et icônes.">
 

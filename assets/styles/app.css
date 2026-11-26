@@ -556,6 +556,55 @@ html[data-a11y-size="xlarge"] .topbar-right > * {
     @apply bg-warning-500 dark:bg-warning-500 ;
   }
 
+  /*
+   * Texte riche saisi dans Trix (aperçu `.texte-riche` et éditeur `trix-editor`) :
+   * le preflight Tailwind retire puces, numérotation, liens et marges.
+   */
+  .texte-riche p,
+  .texte-riche ul,
+  .texte-riche ol,
+  .texte-riche blockquote,
+  trix-editor ul,
+  trix-editor ol,
+  trix-editor blockquote {
+    @apply mb-2;
+  }
+
+  .texte-riche > :last-child {
+    @apply mb-0;
+  }
+
+  .texte-riche ul,
+  trix-editor ul {
+    @apply list-disc pl-6;
+  }
+
+  .texte-riche ol,
+  trix-editor ol {
+    @apply list-decimal pl-6;
+  }
+
+  .texte-riche li,
+  trix-editor li {
+    @apply ml-0;
+  }
+
+  .texte-riche a,
+  trix-editor a {
+    @apply text-primary-600 underline dark:text-primary-300;
+  }
+
+  .texte-riche strong,
+  trix-editor strong {
+    @apply font-semibold;
+  }
+
+  .texte-riche h1,
+  .texte-riche h2,
+  .texte-riche h3 {
+    @apply mt-3 mb-1 font-semibold;
+  }
+
   /* Markdown in help drawer */
   .app-help-markdown {
     @apply text-[0.95rem] leading-7 text-secondary-700;

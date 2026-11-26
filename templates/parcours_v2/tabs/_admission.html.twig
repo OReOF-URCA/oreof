@@ -29,17 +29,45 @@
         {{ form_row(form.prerequis) }}
         {{ form_row(form.composanteInscription) }}
 
-        <div data-controller="conditional-field"
-             data-conditional-field-expected-values-value='{{ [
-                 enum("App\\Enums\\RegimeInscriptionEnum").FI_APPRENTISSAGE.value,
-                 enum("App\\Enums\\RegimeInscriptionEnum").FC_CONTRAT_PRO.value
-             ] | json_encode | e("html_attr") }}'>
-            {{ form_row(form.regimeInscription) }} {# Contient les targets "trigger" #}
-
-            <div data-conditional-field-target="container" class="hidden" hidden>
+            {% if parcours.isAlternance %}
+                <div class="mb-4">
+                    <twig:alerte type="info">
+                        <div class="space-y-2">
+                            <p class="font-bold text-secondary-900 dark:text-secondary-100">
+                                {{ parcours.phraseAnneesAlternance|default("Ce parcours est proposé en alternance.") }}*
+                            </p>
+                            <p>* Cette phrase est ajoutée automatiquement au paragraphe ci-dessous.</p>
+                            <p class="text-xs text-secondary-600 dark:text-secondary-400">
+                                Les régimes d'inscription sont configurés sur chaque année dans l'Offre de formation.
+                                L'alternance étant proposée sur ce parcours, veuillez préciser ci-dessous les modalités
+                                d'organisation pédagogique (calendrier, rythme, etc.).
+                            </p>
+                            {% if parcours.annees|length > 0 %}
+                                <div class="mt-2 pt-2 border-t border-info-200/60 dark:border-info-800/60 text-xs flex flex-wrap gap-x-4 gap-y-1.5">
+                                    {% for annee in parcours.annees %}
+                                        <div class="inline-flex items-center gap-1.5">
+                                        <span class="font-semibold text-secondary-800 dark:text-secondary-200">
+                                            {{ parcours.formation.typeDiplome.libelleCourt|default('Année') }} {{ annee.ordre }} :
+                                        </span>
+                                            {% if annee.regimeInscriptionValues|length > 0 %}
+                                                <span class="text-secondary-600 dark:text-secondary-400">
+                                                {{ annee.regimeInscriptionValues|join(', ') }}
+                                            </span>
+                                            {% else %}
+                                                <span class="italic text-secondary-400">Non renseigné</span>
+                                            {% endif %}
+                                            {% if annee.isAlternance %}
+                                                <span class="inline-flex items-center rounded-full bg-primary-100 px-1.5 py-0.5 text-[10px] font-bold text-primary-700 dark:bg-primary-900/40 dark:text-primary-300">Alternance</span>
+                                            {% endif %}
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </twig:alerte>
+                </div>
                 {{ form_row(form.modalitesAlternance) }}
-            </div>
-        </div>
+            {% endif %}
 
         {{ form_end(form) }}
 

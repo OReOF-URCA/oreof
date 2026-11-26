@@ -1,0 +1,44 @@
+{# Rafraîchissement direct de l'en-tête de la formation si présent sur la page #}
+{% if formation is defined and formation is not null %}
+    <turbo-stream action="replace" target="formation_header_component">
+        <template>
+            <div id="formation_header_component">
+                <twig:FormationHeader
+                        formationId="{{ formation.id }}"
+                />
+            </div>
+        </template>
+    </turbo-stream>
+
+    <turbo-stream action="replace" target="formation_voir_actions">
+        <template>
+            {{ include('formation_v2/_voir_actions.html.twig', {formation: formation, dpeParcours: dpeParcours|default(null)}) }}
+        </template>
+    </turbo-stream>
+{% endif %}
+
+{# Affichage du toast standard unifié (Tailwind / Stimulus dans #flash_toasts) #}
+{{ include('_ui/_toast.stream.html.twig', {
+    message: message|default('Mention réouverte'),
+    undo: null,
+    type: 'success'
+}) }}
+
+{# Fermeture propre de la modal #}
+{{ include('_ui/_force_close_modal.html.twig') }}
+
+{# Redirection vers l'édition de la formation #}
+<turbo-stream action="append" target="flash_toasts">
+    <template>
+        <script>
+            (function () {
+                const targetUrl = "{{ redirectUrl }}";
+                if (window.Turbo && typeof window.Turbo.visit === 'function') {
+                    window.Turbo.visit(targetUrl, {action: 'advance'});
+                } else {
+                    window.location.href = targetUrl;
+                }
+            })();
+        </script>
+    </template>
+</turbo-stream>

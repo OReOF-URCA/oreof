@@ -12,8 +12,11 @@ import callOut from '../../js/callOut'
 export default class extends Controller {
   connect () {
     // Afficher le nom du fichier PDF sélectionné dans le label drag-and-drop
-    const fileInput = this.element.querySelector('input[type="file"]')
-    if (fileInput) {
+      const fileInputs = this.element.querySelectorAll('input[type="file"]')
+      fileInputs.forEach((fileInput) => {
+          // Ignorer l'input logo qui a son propre formulaire
+          if (fileInput.name === 'logo') return
+
       fileInput.addEventListener('change', (e) => {
         const label = fileInput.closest('label')
         if (!label) return
@@ -28,11 +31,12 @@ export default class extends Controller {
           label.classList.remove('border-primary-400', 'bg-primary-50/50')
         }
       })
-    }
+      })
   }
 
-  valideConseil() {
-    const liste = document.querySelectorAll('.check-all:checked')
+    valideConseil(event) {
+        const selector = event?.params?.selector || '.check-accreditees:checked, .check-all:checked'
+        const liste = document.querySelectorAll(selector)
     if (liste.length === 0) {
       callOut('Veuillez sélectionner au moins une formation', 'danger')
       return
@@ -48,6 +52,27 @@ export default class extends Controller {
     liste.forEach((item) => formations.push(item.value))
 
     // TODO: soumettre via fetch ou FormData vers la route appropriée
-    callOut(`${formations.length} formation(s) sélectionnée(s) — en attente d'implémentation du endpoint`, 'info')
+        callOut(`${formations.length} formation(s) accréditée(s) sélectionnée(s) — en attente d'implémentation du endpoint`, 'info')
+    }
+
+    valideEtablissement(event) {
+        const selector = event?.params?.selector || '.check-non-accreditees:checked'
+        const liste = document.querySelectorAll(selector)
+        if (liste.length === 0) {
+            callOut('Veuillez sélectionner au moins une formation', 'danger')
+            return
+        }
+
+        const dateInput = this.element.querySelector('input[name="date_etablissement"]')
+        if (!dateInput || !dateInput.value) {
+            callOut('Veuillez renseigner la date de validation', 'danger')
+            return
+        }
+
+        const formations = []
+        liste.forEach((item) => formations.push(item.value))
+
+        // TODO: soumettre via fetch ou FormData vers la route appropriée
+        callOut(`${formations.length} formation(s) d'établissement sélectionnée(s) — en attente d'implémentation du endpoint`, 'info')
   }
 }

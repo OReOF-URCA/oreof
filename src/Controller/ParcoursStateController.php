@@ -19,7 +19,8 @@ class ParcoursStateController extends BaseController
         Parcours                   $parcours): Response
     {
         $typeDiplome = $parcours->getFormation()?->getTypeDiplome();
-        $valideParcours = new ParcoursValide($parcours, $typeDiplome);
+        $typeDiplomeHandler = $this->typeDiplomeResolver->fromParcours($parcours);
+        $valideParcours = new ParcoursValide($parcours, $typeDiplome, $typeDiplomeHandler);
 
         return $turboStream->streamOpenModalFromTemplates(
             new TranslatableKey('verifier.saisie.parcours.titre', ['%libelle%' => $parcours->getDisplay()]),

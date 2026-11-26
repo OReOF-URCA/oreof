@@ -264,12 +264,16 @@ Vert: Vert
 'Veuillez choisir la localisation du parcours': '-'
 Ville: Ville
 actualite.labels.affiche: 'Actualité publiée ?'
+actualite.labels.affiche.label: 'Actualité publiée ?'
 actualite.labels.datePublication.label: "Date de publication de l'actualité"
 actualite.labels.texte: "Texte de l'actualité"
 actualite.labels.titre: "Titre de l'actualité"
+bloc_competence.labels.code: 'Code du bloc'
 bloc_competence.labels.libelle: 'Libellé du bloc de compétences'
 but: 'Bachelor Universitaire de Technologie'
+campagnecollecte.timelineDates.help: 'Dates jalons de la campagne de collecte.'
 change_rf_formation.labels.typeRf.label: 'La demande concerne le responsable ou le co-responsable de la formation'
+competence.labels.code: 'Code de la compétence'
 competence.labels.libelle: 'Libellé de la compétence'
 composante.labels.composanteParent: 'Composante parente'
 contact.labels.adresse.label: 'Adresse du contact'
@@ -306,12 +310,12 @@ element_constitutif.helps.ordre: ''
 element_constitutif.labels.code: "Code de l'EC"
 element_constitutif.labels.ficheMatiere: element_constitutif.labels.ficheMatiere
 element_constitutif.labels.libelle: "Libellé de l'EC"
-element_constitutif.labels.libelleChoix: element_constitutif.labels.libelleChoix
-element_constitutif.labels.libelleLibre: element_constitutif.labels.libelleLibre
+element_constitutif.labels.libelleChoix: "Libellé de l'EC à choix"
+element_constitutif.labels.libelleLibre: "Libellé de l'EC libre"
 element_constitutif.labels.natureUeEc: "Nature de l'EC"
 element_constitutif.labels.ordre: "Numéro de l'EC"
 element_constitutif.labels.responsableEc: element_constitutif.labels.responsableEc
-element_constitutif.labels.texteEcLibre: element_constitutif.labels.texteEcLibre
+element_constitutif.labels.texteEcLibre: "Descriptif de l'EC libre"
 element_constitutif.labels.typeEc: "Type de l'EC"
 element_constitutif.labels.typeEcTexte: "Type de l'EC si non présent dans la liste"
 element_constitutif_edit.labels.libelle: "Libellé de l'EC"
@@ -346,7 +350,7 @@ fiche_matiere_step1.labels.responsableEc: "Responsable de l'enseignement"
 fiche_matiere_step1.labels.responsableFicheMatiere: "Référent de l'enseignement"
 fiche_matiere_step1.labels.sigle: "Sigle de l'enseignement"
 fiche_matiere_step1.labels.typeMatiere.label: 'Type de "matière" pour les BUT'
-fiche_matiere_step1b.labels.enseignementMutualise.label: fiche_matiere_step1b.labels.enseignementMutualise.label
+fiche_matiere_step1b.labels.enseignementMutualise.label: 'Enseignement mutualisé ?'
 fiche_matiere_step2.labels.description: "Description de l'enseignement"
 fiche_matiere_step2.labels.langueDispense.label: 'Enseignement dispensé en :'
 fiche_matiere_step2.labels.langueSupport.label: 'Support de cours en :'
@@ -427,6 +431,9 @@ mention.labels.domaine: 'Domaine de formation'
 nature_ue_ec.labels.choix.label: "Précisez si l'élément est à choix :"
 nature_ue_ec.labels.libelle: Libellé
 nature_ue_ec.labels.libre.label: 'Pour les éléments à choix, précisez si celui-ci est libre :'
+nature_ue_ec.type.ec: 'Élément constitutif (EC)'
+nature_ue_ec.type.label: "Type d'élément"
+nature_ue_ec.type.ue: "Unité d'enseignement (UE)"
 'niveau I (supérieur à la maîtrise)': 'niveau I (supérieur à la maîtrise)'
 'niveau II (licence ou maîtrise universitaire)': 'niveau II (licence ou maîtrise universitaire)'
 'niveau III (BTS, DUT)': 'niveau III (BTS, DUT)'
@@ -449,6 +456,7 @@ parcours.labels.codeMentionApogee: 'Code Apogée de la mention'
 parcours.labels.las1.label: 'Parcours LAS1'
 parcours.labels.las23.label: 'Parcours LAS2 ou 3'
 parcours.labels.libelle: 'Libellé du parcours'
+parcours.labels.logo: 'Logo du parcours'
 parcours.labels.parcoursOrigine: "Parcours d'origine"
 parcours.labels.respParcours: 'Responsable du parcours'
 parcours.labels.sigle: 'Sigle du parcours'
@@ -476,8 +484,8 @@ parcours_step2.labels.nbHeuresStages: "Nombre d'heures de stage(s) prévu"
 parcours_step2.labels.projetText: 'Description du/des projet(s) tutoré(s)'
 parcours_step2.labels.situationProText: 'Description de la/des mise(s) en situation professionnelle'
 parcours_step2.labels.stageText: 'Description du/des stage(s)'
-parcours_step3.labels.semestreDebut: parcours_step3.labels.semestreDebut
-parcours_step3.labels.semestreFin: parcours_step3.labels.semestreFin
+parcours_step3.labels.semestreDebut: 'Semestre de début'
+parcours_step3.labels.semestreFin: 'Semestre de fin'
 parcours_step5.labels.adresses.label: parcours_step5.labels.adresses.label
 parcours_step5.labels.adresses.label.0.label: parcours_step5.labels.adresses.label.0.label
 parcours_step5.labels.adresses.label.__name__.label: parcours_step5.labels.adresses.label.__name__.label
@@ -514,6 +522,7 @@ parcours_step7.labels.debouches: Débouchés
 parcours_step7.labels.descriptifBasPage: 'Descriptif bas page sur le site institutionnel'
 parcours_step7.labels.descriptifHautPage: 'Descriptif haut page sur le site institutionnel'
 parcours_step7.labels.descriptifHautPageAutomatique: 'Descriptif haut page sur le site institutionnel, généré automatiquement'
+parcours_step7.labels.lienCourt: 'Lien court (permalien)'
 parcours_step7.labels.poursuitesEtudes: "Poursuites d'études envisageables"
 parcours_step8.labels.coordSecretariat: 'Coordonnées du secrétariat'
 parcours_step8.labels.respParcours: 'Responsable du parcours'

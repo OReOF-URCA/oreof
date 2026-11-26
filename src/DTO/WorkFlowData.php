@@ -40,7 +40,7 @@ class WorkFlowData
             case DpeParcours::class:
                 $this->dpeParcours = $data;
                 $this->parcours = $data->getParcours();
-                $this->formation = $this->parcours?->getFormation();
+                $this->formation = $this->parcours?->getFormation() ?? $data->getFormation();
                 $this->hasParcours = $this->parcours?->isParcoursDefaut() === false;
                 $this->composante = $this->formation?->getComposantePorteuse();
                 $this->fiche = null;
@@ -88,14 +88,17 @@ class WorkFlowData
 
     public function getTitre(array $meta): ?string
     {
+        $formationDisplay = $this->formation?->getDisplay() ?? '';
+        $parcoursLibelle = $this->parcours?->getLibelle() ?? '';
+
         if ($this->hasParcours) {
             if (array_key_exists('titre_with_parcours', $meta) && $meta['titre_with_parcours'] !== '') {
-                return sprintf($meta['titre_with_parcours'], $this->parcours->getLibelle(), $this->formation->getDisplay());
+                return sprintf($meta['titre_with_parcours'], $parcoursLibelle, $formationDisplay);
             }
         }
 
         if (array_key_exists('titre', $meta) && $meta['titre'] !== '') {
-            return sprintf($meta['titre'], $this->formation->getDisplay());
+            return sprintf($meta['titre'], $formationDisplay);
         }
 
         return '';

@@ -14,6 +14,7 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 final class FicheMatiereVoter extends Voter
 {
     public const EDIT = 'EDIT_FICHE_MATIERE';
+    public const VIEW = 'VIEW_FICHE_MATIERE';
 
     public function __construct(
         private readonly Security $security,
@@ -22,7 +23,7 @@ final class FicheMatiereVoter extends Voter
 
     protected function supports(string $attribute, mixed $subject): bool
     {
-        return self::EDIT === $attribute && $subject instanceof FicheMatiere;
+        return in_array($attribute, [self::EDIT, self::VIEW, 'EDIT', 'SHOW', 'VIEW'], true) && $subject instanceof FicheMatiere;
     }
 
     protected function voteOnAttribute(
@@ -35,7 +36,10 @@ final class FicheMatiereVoter extends Voter
             return false;
         }
 
-        if (!$subject->isModifiable()) {
+        $isView = in_array($attribute, [self::VIEW, 'SHOW', 'VIEW'], true);
+
+        // Seule la modification nécessite que la fiche soit modifiable
+        if (!$isView && !$subject->isModifiable()) {
             return false;
         }
 
@@ -48,36 +52,34 @@ final class FicheMatiereVoter extends Voter
             return true;
         }
 
-        if ($subject->getResponsableFicheMatiere()?->getId() === $user->getId()) {
+        // Tout utilisateur connecté peut consulter la fiche matière (lecture seule)
+        if ($isView) {
+            return true;
+        }
+
+        $userId = $user->getId();
+        if ($userId !== null && $subject->getResponsableFicheMatiere()?->getId() === $userId) {
             return true;
         }
 
         $parcours = $subject->getParcours();
-        if ($parcours !== null) {
-            if ($parcours->getRespParcours()?->getId() === $user->getId()
-                || $parcours->getCoResponsable()?->getId() === $user->getId()
+        if ($parcours !== null && $userId !== null) {
+            if ($parcours->getRespParcours()?->getId() === $userId
+                || $parcours->getCoResponsable()?->getId() === $userId
             ) {
                 return true;
             }
 
             $formation = $parcours->getFormation();
             if ($formation !== null) {
-                if ($formation->getResponsableMention()?->getId() === $user->getId()
-                    || $formation->getCoResponsable()?->getId() === $user->getId()
+                if ($formation->getResponsableMention()?->getId() === $userId
+                    || $formation->getCoResponsable()?->getId() === $userId
                 ) {
-                    return true;
-                }
-
-                $composante = $formation->getComposantePorteuse();
-                if ($composante !== null && (
-                    $composante->getResponsableDpe()?->getId() === $user->getId()
-                    || $user->getComposanteResponsableDpe()->contains($composante)
-                )) {
                     return true;
                 }
             }
         }
 
-        return $this->security->isGranted('EDIT', ['route' => 'app_fiche_matiere', 'subject' => $subject]);
+        return false;
     }
 }

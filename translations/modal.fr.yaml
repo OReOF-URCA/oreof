@@ -118,7 +118,7 @@ modal_submit.valider_central.valider: 'Valider et transmettre'
 modal_submit.valider_cfvu.valider: 'Valider'
 modal_submit.valider_conseil.valider: 'Valider et transmettre'
 modal_submit.valider_dpe_composante.valider: 'Valider et transmettre'
-modal_submit.valider_fiche_compo.valider: "Valider (Composante)"
+modal_submit.valider_fiche_compo.valider: "Valider et transmettre"
 modal_submit.valider_fiche_ses.valider: "Valider et transmettre (SES)"
 modal_submit.valider_non_ouverture_ses.valider: 'Valider'
 modal_submit.valider_ouverture_sans_cfvu.valider: 'Soumettre au SES'
@@ -704,6 +704,7 @@ fiche_matiere_v2.synthese_modifications.apres: 'Après (Version actuelle)'
 fiche_matiere_v2.synthese_modifications_footer.fermer: 'Fermer'
 fiche_matiere_v2.synthese_modifications_footer.sauvegarder_snapshot: 'Figer un nouveau snapshot JSON'
 parcours_descriptifs.edit.title: 'Modifier les descriptifs haut de page'
+parcours_liens_courts.edit.title: 'Modifier le lien court du parcours'
 
 
 

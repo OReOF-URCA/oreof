@@ -10,11 +10,15 @@ export default class extends Controller {
 
   toggle () {
     const expected = this.expectedValuesValue.map(String)
-    const visible = this.triggerTargets.some(input =>
-      (input.type === 'checkbox' || input.type === 'radio') &&
-      input.checked &&
-      expected.includes(input.value)
-    )
+      const visible = this.triggerTargets.some(input => {
+          if (input.type === 'checkbox' || input.type === 'radio') {
+              return input.checked && expected.includes(input.value)
+          }
+          if (input.tagName === 'SELECT') {
+              return expected.includes(input.value)
+          }
+          return false
+      })
 
     // Tailwind V2 does not provide Bootstrap's d-none utility.
     // Keep both the semantic hidden property and the Tailwind class in sync.

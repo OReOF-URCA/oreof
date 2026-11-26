@@ -131,8 +131,22 @@ class ApiJsonExport
                             )
                         ];
                         if ($isV2) {
+                            $parcoursVersionObj = ($lastVersionData !== null && isset($lastVersionData['parcours']) && $lastVersionData['parcours'] instanceof Parcours)
+                                ? $lastVersionData['parcours']
+                                : $parcours;
+                            $codesRome = $parcoursVersionObj->getCodesRomeNormalized();
+                            if (empty($codesRome)) {
+                                $codesRome = $parcours->getCodesRomeNormalized();
+                            }
+
+                            $lienCourt = ($parcours->getLienCourt() !== null && $parcours->getLienCourt() !== '') ? $parcours->getLienCourt() : '';
+
                             $parcoursData['annee'] = $campagneCourante->getAnnee();
                             $parcoursData['uuid_parcours'] = $this->getUuidForParcours($parcours);
+                            $parcoursData['metadata'] = [
+                                'lien-court' => $lienCourt,
+                                'code-rome' => $codesRome,
+                            ];
                         }
                         $tParcours[] = $parcoursData;
 
@@ -236,8 +250,14 @@ class ApiJsonExport
                                     )
                                 ];
                                 if ($isV2) {
+                                    $codesRomeNext = $parcoursAnneeSuivante->getCodesRomeNormalized();
+                                    $lienCourtNext = ($parcoursAnneeSuivante->getLienCourt() !== null && $parcoursAnneeSuivante->getLienCourt() !== '') ? $parcoursAnneeSuivante->getLienCourt() : '';
                                     $parcoursDataNext['annee'] = $campagneSuivante->getAnnee();
                                     $parcoursDataNext['uuid_parcours'] = $this->getUuidForParcours($parcoursAnneeSuivante);
+                                    $parcoursDataNext['metadata'] = [
+                                        'lien-court' => $lienCourtNext,
+                                        'code-rome' => $codesRomeNext,
+                                    ];
                                 }
                                 $addedParcours[] = $parcoursDataNext;
                             }
