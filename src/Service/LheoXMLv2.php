@@ -399,6 +399,7 @@ HTML;
         $admissionParcours .= $parcours->getTypeDiplome()?->getModalitesAdmission() ?? "";
         $admissionParcours .= "<h3>Calendrier d'inscription</h3>";
         $admissionParcours .= $etablissementInformation->getCalendrierInscription() ?? "";
+        $admissionParcours .= "<h3>Tarifs d'inscription</h3>";
         $admissionParcours .= $commonData['tarif_inscription'];
 
         // Poursuite d'études
@@ -713,8 +714,7 @@ HTML;
             // à mettre dans : <extras><extra><organisation-pedagogique>
             'handicap' => $infoEtabV2->getMentionHandicap() ?? "",
             // à mettre dans : <extras><extra><admission>
-            'tarif_inscription' => "<br><div><a href=\"#\">&nbsp;Lien vers la page présentant 
-                                    les tarifs d'inscription&nbsp;</a></div>",
+            'tarif_inscription' => $infoEtabV2->getTarifInscription() ?? "",
             // à mettre dans <extras><extra><informations-pratiques>
             'devenir_des_etudiants' => $linkedData['devenir_etudiants'] ?? "",
             // à mettre dans <extras><extra><informations-pratiques>
