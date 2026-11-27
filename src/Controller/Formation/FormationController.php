@@ -325,7 +325,8 @@ class FormationController extends BaseController
         BreadcrumbService           $breadcrumb,
     ): Response
     {
-        if (!$this->isGranted('EDIT', $formation)) {
+        $canEditGenerique = $this->isGranted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') && $formation->isClassique() === false;
+        if (!$this->isGranted('EDIT', $formation) && !$canEditGenerique) {
             $this->addFlash('danger', 'La formation est verrouillée ou vous n\'avez pas les droits de modification.');
 
             $url = $this->generateUrl('formation_v2_voir', ['slug' => $formation->getSlug()]);
