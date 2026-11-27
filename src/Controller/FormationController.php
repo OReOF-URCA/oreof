@@ -572,6 +572,7 @@ class FormationController extends BaseController
 
         $form = $this->createForm(FormationSesType::class, $formation, [
             'action' => $this->generateUrl('app_formation_edit_modal', ['slug' => $formation->getSlug()]),
+            'is_admin' => $isAdmin
         ]);
         $form->handleRequest($request);
 

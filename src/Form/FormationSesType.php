@@ -44,9 +44,16 @@ class FormationSesType extends AbstractType
         $builder
             ->add('typeDiplome', EntityType::class, [
                 'class' => TypeDiplome::class,
-                'query_builder' => static function ($er) {
-                    return $er->createQueryBuilder('t')
-                        ->orderBy('t.libelle', 'ASC');
+                'query_builder' => static function ($er) use ($options) {
+                    if($options['is_admin']) {
+                        return $er->createQueryBuilder('t')
+                            ->orderBy('t.libelle', 'ASC');
+                    }
+                    else {
+                        return $er->createQueryBuilder('td')
+                            ->andWhere('td.classique = 0')
+                            ->orderBy('td.libelle', 'ASC');
+                    }
                 },
                 'choice_label' => 'libelle',
             ])
@@ -252,7 +259,8 @@ class FormationSesType extends AbstractType
         $resolver->setDefaults([
             'data_class' => Formation::class,
             'typesDiplomes' => [],
-            'translation_domain' => 'form'
+            'translation_domain' => 'form',
+            'is_admin' => false
         ]);
     }
 }
