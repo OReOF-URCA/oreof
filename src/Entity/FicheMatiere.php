@@ -255,6 +255,9 @@ class FicheMatiere implements McccCompletionCheckerInterface
     #[ORM\OneToMany(mappedBy: 'ficheMatiere', targetEntity: FicheMatiereTabState::class, orphanRemoval: true)]
     private ?Collection $ficheMatiereTabStates = null;
 
+    #[ORM\OneToOne(mappedBy: 'ficheMatiere', targetEntity: CoherenceAnalyse::class)]
+    private ?CoherenceAnalyse $coherenceAnalyse = null;
+
     public function __construct()
     {
         $this->mcccs = new ArrayCollection();
@@ -1512,6 +1515,26 @@ class FicheMatiere implements McccCompletionCheckerInterface
                 $ficheMatiereTabState->setFicheMatiere(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCoherenceAnalyse(): ?CoherenceAnalyse
+    {
+        return $this->coherenceAnalyse;
+    }
+
+    public function setCoherenceAnalyse(?CoherenceAnalyse $coherenceAnalyse): static
+    {
+        if ($coherenceAnalyse === null && $this->coherenceAnalyse !== null) {
+            $this->coherenceAnalyse->setFicheMatiere(null);
+        }
+
+        if ($coherenceAnalyse !== null && $coherenceAnalyse->getFicheMatiere() !== $this) {
+            $coherenceAnalyse->setFicheMatiere($this);
+        }
+
+        $this->coherenceAnalyse = $coherenceAnalyse;
 
         return $this;
     }

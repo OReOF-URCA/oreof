@@ -153,6 +153,37 @@ SQL;
             $sql['Finalisation timeline_date.flag'] = "ALTER TABLE timeline_date CHANGE flag flag VARCHAR(30) NOT NULL, CHANGE heure heure TIME DEFAULT NULL, CHANGE date_debut date_debut DATE DEFAULT NULL";
         }
 
+        if (!$this->tableExists('coherence_analyse')) {
+            $sql['Création coherence_analyse'] = <<<'SQL'
+CREATE TABLE coherence_analyse (
+    id INT AUTO_INCREMENT NOT NULL,
+    parcours_id INT DEFAULT NULL,
+    fiche_matiere_id INT DEFAULT NULL,
+    entity_type VARCHAR(32) NOT NULL,
+    entity_id INT NOT NULL,
+    content_hash VARCHAR(64) NOT NULL,
+    status VARCHAR(24) NOT NULL,
+    score INT DEFAULT NULL,
+    deterministic_score INT DEFAULT NULL,
+    summary LONGTEXT DEFAULT NULL,
+    issues JSON NOT NULL,
+    is_ai_generated TINYINT NOT NULL,
+    provider_label VARCHAR(120) DEFAULT NULL,
+    analyzed_at DATETIME DEFAULT NULL,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    UNIQUE INDEX UNIQ_67890A124E38C15 (parcours_id),
+    UNIQUE INDEX UNIQ_67890A12C4E86A7F (fiche_matiere_id),
+    INDEX IDX_COHERENCE_STATUS (status),
+    INDEX IDX_COHERENCE_ANALYZED_AT (analyzed_at),
+    UNIQUE INDEX UNIQ_COHERENCE_ENTITY (entity_type, entity_id),
+    PRIMARY KEY(id)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci ENGINE = InnoDB
+SQL;
+            $sql['FK coherence_analyse.parcours'] = 'ALTER TABLE coherence_analyse ADD CONSTRAINT FK_COHERENCE_PARCOURS FOREIGN KEY (parcours_id) REFERENCES parcours (id) ON DELETE CASCADE';
+            $sql['FK coherence_analyse.fiche_matiere'] = 'ALTER TABLE coherence_analyse ADD CONSTRAINT FK_COHERENCE_FICHE_MATIERE FOREIGN KEY (fiche_matiere_id) REFERENCES fiche_matiere (id) ON DELETE CASCADE';
+        }
+
         return $sql;
     }
 

@@ -1,0 +1,9 @@
+{% set analyse = row.coherenceAnalyse %}
+{% if analyse and analyse.analyzedAt %}
+    <div class="text-xs">
+        <div class="font-medium text-text">{{ analyse.analyzedAt|date('d/m/Y H:i') }}</div>
+        <div class="text-[11px] text-secondary-500 dark:text-secondary-400">{{ analyse.providerLabel }}</div>
+    </div>
+{% else %}
+    <span class="text-xs italic text-secondary-400">Calcul instantané uniquement</span>
+{% endif %}

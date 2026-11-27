@@ -1,0 +1,124 @@
+{% extends 'base.html.twig' %}
+
+{% set header_title = 'app_admin_pilotage_coherence_index.title'|trans({}, 'header') %}
+{% set header_description = 'app_admin_pilotage_coherence_index.description'|trans({}, 'header') %}
+
+{% block bouton_header %}
+    <twig:Button variant="secondary" icon="icon:arrow-left" href="{{ path('app_section_pilotage') }}">
+        Pilotage
+    </twig:Button>
+{% endblock %}
+
+{% block content %}
+    <div class="space-y-8 pb-12">
+        {# Synthèse & Contexte Campagne + Actions batch #}
+        <div class="flex flex-col gap-4 rounded-2xl border border-secondary-200 bg-surface p-6 shadow-sm lg:flex-row lg:items-center lg:justify-between dark:border-secondary-700">
+            <div class="space-y-1.5">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="inline-flex items-center rounded-full bg-primary-100 px-2.5 py-0.5 text-xs font-bold text-primary-800 dark:bg-primary-900 dark:text-primary-200">
+                        Campagne en cours
+                    </span>
+                    {% if selectedCampagne and selectedCampagne.anneeUniversitaire %}
+                        <span class="font-mono text-xs font-semibold text-secondary-500 dark:text-secondary-400">
+                            {{ selectedCampagne.anneeUniversitaire }}
+                        </span>
+                    {% endif %}
+                    <twig:Badge
+                            :variant="aiConfigured ? 'success' : 'warning'"
+                            :label="aiConfigured ? 'Moteur IA configuré' : 'IA non configurée (pré-filtre actif)'"
+                            icon="mdi:robot-outline"
+                            size="sm"
+                    />
+                </div>
+                <h2 class="text-xl font-extrabold tracking-tight text-text">
+                    {{ selectedCampagne ? selectedCampagne.libelle : 'Campagne non définie' }}
+                </h2>
+                <p class="text-xs text-secondary-500 dark:text-secondary-400">
+                    Détection des contenus fictifs (« lorem ipsum », « à compléter »), textes de remplissage et écarts
+                    sémantiques entre descriptifs et maquette (UE/EC/compétences).
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <form method="post" action="{{ path('app_admin_pilotage_coherence_batch_deterministic') }}">
+                    <input type="hidden" name="_token"
+                           value="{{ csrf_token('pilotage_coherence_batch_deterministic') }}">
+                    <twig:Button
+                            type="submit"
+                            variant="secondary"
+                            size="sm"
+                            :outline="true"
+                            icon="icon:filter"
+                            label="Pré-filtrer les parcours non analysés"
+                            tooltip="Exécute immédiatement le contrôle déterministe (0 appel LLM) sur jusqu'à 80 parcours sans analyse enregistrée"
+                    />
+                </form>
+
+                {% if aiConfigured %}
+                    <form method="post" action="{{ path('app_admin_pilotage_coherence_batch_dispatch_ai') }}">
+                        <input type="hidden" name="_token" value="{{ csrf_token('pilotage_coherence_batch_ai') }}">
+                        <input type="hidden" name="scope" value="not_ai">
+                        <input type="hidden" name="limit" value="50">
+                        <twig:Button
+                                type="submit"
+                                variant="primary"
+                                size="sm"
+                                :soft="false"
+                                :outline="false"
+                                icon="icon:star"
+                                label="Lancer IA asynchrone (lot 50)"
+                                tooltip="Envoie jusqu'à 50 parcours sans analyse IA dans la file Messenger async_export"
+                        />
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+
+        {# KPIs Principaux #}
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-5">
+            <twig:Kpi
+                    title="Parcours campagne"
+                    value="{{ stats.total }}"
+                    description="{{ stats.analyzed }} analysé(s) · {{ stats.not_analyzed }} en attente"
+                    variant="primary"
+                    icon="ph:stack-light"
+            />
+
+            <twig:Kpi
+                    title="Analysés par IA"
+                    value="{{ stats.ai_analyzed }}"
+                    total="{{ stats.total }}"
+                    variant="info"
+                    icon="mdi:robot-outline"
+                    description="Analyses sémantiques persistées"
+            />
+
+            <twig:Kpi
+                    title="Cohérents"
+                    value="{{ stats.ok }}"
+                    variant="success"
+                    icon="icon:check-circle"
+                    description="Aucune anomalie bloquante"
+            />
+
+            <twig:Kpi
+                    title="À vérifier"
+                    value="{{ stats.warning }}"
+                    variant="warning"
+                    icon="icon:warning"
+                    description="Textes succincts ou écarts mineurs"
+            />
+
+            <twig:Kpi
+                    title="Alertes suspectes"
+                    value="{{ stats.alert }}"
+                    variant="danger"
+                    icon="icon:danger"
+                    description="Contenus fictifs ou incohérents"
+            />
+        </div>
+
+        {# UX-DATATABLE CARD #}
+        {{ include('_ui/_datatable_card.html.twig', { table: table }) }}
+    </div>
+{% endblock %}

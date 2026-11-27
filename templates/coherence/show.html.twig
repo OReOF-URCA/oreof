@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block content %}
+    <div class="mx-auto max-w-4xl space-y-6 py-4">
+        <div class="rounded-2xl border border-secondary-200 bg-surface p-6 shadow-sm dark:border-secondary-700">
+            <div class="mb-4 flex flex-wrap items-center justify-between gap-3 border-b border-secondary-200 pb-4 dark:border-secondary-700">
+                <div>
+                    <h1 class="text-lg font-bold text-text">{{ title }}</h1>
+                    <p class="text-xs text-secondary-500 dark:text-secondary-400">
+                        Diagnostic qualité &amp; cohérence des contenus saisis
+                    </p>
+                </div>
+                <twig:Button variant="secondary" size="sm" icon="icon:arrow-left" href="{{ viewUrl }}">
+                    Retour à la fiche
+                </twig:Button>
+            </div>
+
+            {{ include('coherence/_modal.html.twig') }}
+        </div>
+    </div>
+{% endblock %}

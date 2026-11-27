@@ -1,0 +1,56 @@
+{% if result is not null %}
+    {% set targetUrl = this.targetUrl %}
+    {% set markerClass = this.streamMarkerClass %}
+    {% set tooltipText = this.tooltipText %}
+    <span class="inline-flex flex-wrap items-center gap-1.5 {{ markerClass }}">
+        {% if targetUrl %}
+            <twig:Badge
+                    :variant="result.variant"
+                    :label="this.badgeLabel"
+                    :icon="this.badgeIcon"
+                    size="sm"
+                    :href="targetUrl"
+                    data-action="click->modalturbo#open"
+                    data-turbo="true"
+                    data-controller="tooltip"
+                    data-tooltip-title-value="{{ tooltipText }}"
+                    data-tooltip-placement-value="bottom"
+            />
+        {% else %}
+            <twig:Badge
+                    :variant="result.variant"
+                    :label="this.badgeLabel"
+                    :icon="this.badgeIcon"
+                    size="sm"
+                    data-controller="tooltip"
+                    data-tooltip-title-value="{{ tooltipText }}"
+                    data-tooltip-placement-value="bottom"
+            />
+        {% endif %}
+
+        {% if not compact %}
+            {% if result.isAiGenerated %}
+                <twig:Badge
+                        variant="primary"
+                        label="IA"
+                        icon="icon:star"
+                        size="sm"
+                        data-controller="tooltip"
+                        data-tooltip-title-value="{{ result.providerLabel }}"
+                        data-tooltip-placement-value="bottom"
+                />
+            {% endif %}
+            {% if result.isStale %}
+            <twig:Badge
+                    variant="warning"
+                    label="À actualiser"
+                    icon="icon:sync"
+                    size="sm"
+                    data-controller="tooltip"
+                    data-tooltip-title-value="Le contenu a changé depuis la dernière analyse enregistrée."
+                    data-tooltip-placement-value="bottom"
+            />
+        {% endif %}
+        {% endif %}
+    </span>
+{% endif %}

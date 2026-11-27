@@ -178,6 +178,12 @@
                             Suivez l'avancement et les actions disponibles pour ce parcours.
                         {% endif %}
                     </p>
+                    {% if is_granted('ROLE_ADMIN') and parcours != null %}
+                        <div class="mt-2 flex flex-wrap items-center gap-2">
+                            <span class="text-[11px] font-semibold uppercase tracking-wider opacity-75">Cohérence :</span>
+                            <twig:CoherenceBadge :parcours="parcours"/>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -384,6 +390,20 @@
                         <span>Vérifier la saisie</span>
                     </a>
                 </div>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <div>
+                        <a
+                                href="{{ path('app_coherence_parcours_modal', {parcours: parcours.id}) }}"
+                                class="{{ quickBtnInfo }} w-full"
+                                {{ stimulus_controller('tooltip') }}
+                                data-turbo="true"
+                                data-action="click->modalturbo#open"
+                                title="Diagnostic IA et règles de cohérence des contenus saisis">
+                            {{ ux_icon('icon:star', {class: 'h-4 w-4'}) }}
+                            <span>Cohérence IA</span>
+                        </a>
+                    </div>
+                {% endif %}
                 <div>
                     <a href="{{ path('fiche_matiere_valide_parcours', {parcours: this.parcours.id}) }}"
                        class="{{ quickBtnSuccess }} w-full"

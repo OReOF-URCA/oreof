@@ -189,6 +189,12 @@
                             Suivez l'avancement et les actions disponibles pour cette fiche.
                         {% endif %}
                     </p>
+                    {% if is_granted('ROLE_ADMIN') and ficheMatiere != null %}
+                        <div class="mt-2 flex flex-wrap items-center gap-2">
+                            <span class="text-[11px] font-semibold uppercase tracking-wider opacity-75">Cohérence :</span>
+                            <twig:CoherenceBadge :ficheMatiere="ficheMatiere"/>
+                        </div>
+                    {% endif %}
                 </div>
             </div>
 
@@ -379,6 +385,24 @@
                             extraClass="{{ quickBtnSuccess }}"
                     />
                 </div>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <div>
+                        <twig:Button
+                                type="button"
+                                variant="info"
+                                :soft="false"
+                                :outline="true"
+                                size="sm"
+                                icon="icon:star"
+                                label="Cohérence IA"
+                                :fullWidth="true"
+                                dataAction="click->modalturbo#open"
+                                href="{{ path('app_coherence_fiche_modal', {ficheMatiere: ficheMatiere.id}) }}"
+                                tooltip="Diagnostic IA et règles de cohérence de la fiche matière"
+                                extraClass="{{ quickBtnInfo }}"
+                        />
+                    </div>
+                {% endif %}
                 <div>
                     <twig:Button
                             type="button"

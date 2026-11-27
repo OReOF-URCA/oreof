@@ -1,0 +1,25 @@
+<div class="flex w-full flex-wrap items-center justify-between gap-2">
+    <twig:Button variant="secondary" size="sm" :outline="true" dataAction="modalturbo#close">
+        Fermer
+    </twig:Button>
+
+    <div class="flex flex-wrap items-center gap-2">
+        {% if editUrl %}
+            <twig:Button
+                    variant="warning"
+                    size="sm"
+                    icon="icon:edit"
+                    label="Modifier les contenus"
+                    href="{{ editUrl }}"
+            />
+        {% endif %}
+        <twig:Button
+                variant="info"
+                size="sm"
+                :outline="true"
+                icon="icon:eye"
+                label="Consulter la fiche"
+                href="{{ viewUrl }}"
+        />
+    </div>
+</div>

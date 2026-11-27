@@ -361,6 +361,9 @@ class Parcours
     #[ORM\OneToMany(mappedBy: 'parcoursCible', targetEntity: ParcoursRamification::class)]
     private Collection $parcoursCibleRamifications;
 
+    #[ORM\OneToOne(mappedBy: 'parcours', targetEntity: CoherenceAnalyse::class)]
+    private ?CoherenceAnalyse $coherenceAnalyse = null;
+
     public function __construct(?Formation $formation = null)
     {
         $this->formation = $formation;
@@ -2577,6 +2580,26 @@ class Parcours
     public function isOrdreAnneeValide(int $ordre): bool
     {
         return in_array($ordre, $this->getOrdresAnneesPossibles(), true);
+    }
+
+    public function getCoherenceAnalyse(): ?CoherenceAnalyse
+    {
+        return $this->coherenceAnalyse;
+    }
+
+    public function setCoherenceAnalyse(?CoherenceAnalyse $coherenceAnalyse): static
+    {
+        if ($coherenceAnalyse === null && $this->coherenceAnalyse !== null) {
+            $this->coherenceAnalyse->setParcours(null);
+        }
+
+        if ($coherenceAnalyse !== null && $coherenceAnalyse->getParcours() !== $this) {
+            $coherenceAnalyse->setParcours($this);
+        }
+
+        $this->coherenceAnalyse = $coherenceAnalyse;
+
+        return $this;
     }
 }
 

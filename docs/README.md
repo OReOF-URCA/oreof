@@ -2,32 +2,33 @@
 
 Point d'entrée agents : `AGENTS.md` (racine). Chaque fichier ci-dessous est autonome : ne lire que celui utile.
 
-| Fichier | Contenu | Lire quand |
-|---|---|---|
-| `ui-conventions/ui-conventions.md` | Composants UI Twig, tokens Tailwind, migration Bootstrap, opacité, checklist PR | toute modif de template/CSS |
-| `ui-conventions/icones.md` | Correspondance FontAwesome → alias `icon:*` | remplacement d'icône |
-| `composants/navigation.md` | `MenuItem`, providers, droits, pages de section, breadcrumbs | ajout de page/menu |
-| `composants/recherche.md` | Recherche approchée (fuzzy) des parcours : moteur, pondération, affichage | page `/recherche/parcours`, réutiliser le moteur fuzzy |
-| `composants/synchronisation-orebut.md` | Synchronisation des maquettes, compétences et parcours B.U.T. avec l'API ORéBUT | synchronisation B.U.T. / ORéBUT |
-| `composants/rncp-api.md` | API Apprentissage / France Compétences, composant RncpField et vérification | code RNCP, API Apprentissage, composant RncpField |
-| `composants/synthese-ia.md` | Analyseur d'écarts `FicheMatiere` (snapshot JSON / N-1) et synthèse IA (`ROLE_ADMIN`) | synthèse des modifications de fiche matière, configuration `AI_*` |
-| `composants/aides-faq.md` | Aides contextuelles, FAQ, galerie d'images, éditeur Markdown, import/export entre instances | admin aides/FAQ, transfert vers la pré-prod |
-| `composants/redaction-aides-faq.md` | Guide de rédaction (ton, structure, Markdown autorisé, images, archive d'import, prompt IA, checklist) | écrire/faire écrire une aide ou une question de FAQ |
-| `composants/tutoriels-video.md` | Page `/tutoriels` des vidéos tutoriel (une page par vidéo), administration, bouton « Copier le lien » | page tutoriels, lien partageable, composant CopyLinkButton |
-| `formulaires/README.md` | `JsonConfigType` + `DynamicFieldsType` (technique) | champ JSON configurable |
-| `formulaires/exemples-plateformes.md` | Définitions de champs par plateforme d'admission | configurer une plateforme |
-| `formulaires/guide-mode-assistant.md` | Guide utilisateur final du mode assistant | doc/aide utilisateur |
-| `architecture/migration-v2.md` | Commande `app:migrate:v2`, étapes, décisions de reprise | schéma BDD, bascule main → V2 |
-| `architecture/modifications-bdd-v1-v2.md` | Référentiel complet des écarts de schéma BDD main (V1) vs V2 | comparaison schéma V1/V2, audit BDD |
-| `architecture/maquette-modulaire.md` | Architecture cible maquette par profils de diplôme (non implémentée) | refonte structure/validation/rendu |
-| `testing/audit-form-feedback.md` | Audit des validations, retours usagers, usages callOut et points FORM-AUDIT | poursuivre les corrections de formulaires et fetch |
-| `testing/README.md` | Organisation des tests, helpers, commandes, priorités | écrire/lancer des tests |
-| `ops/install.md` | Installation dev (Docker) et prod | installation, déploiement |
-| `ops/ci-cd.md` | CI GitHub Actions, PHPStan, modèle de branches, déploiement cible (heures creuses, quasi sans coupure), tâches restantes | modifier la CI, préparer une release ou un hotfix |
-| `ops/command.md` | Commandes console `app:*` | exécuter/modifier une commande |
-| `ops/recopie-fiche-matiere.md` | Procédure `app:parcours-copy-data` | recopie des données vers fiches matières |
-| `produit/roadmap-pilotage-admin.md` | Idées fonctionnelles pilotage/admin | cadrage produit uniquement |
-| `archives/` | **Obsolète** (dont SQL historiques repris par `app:migrate:v2`) | jamais pour générer du code |
+| Fichier                                   | Contenu                                                                                                                  | Lire quand                                                                     |
+|-------------------------------------------|--------------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| `ui-conventions/ui-conventions.md`        | Composants UI Twig, tokens Tailwind, migration Bootstrap, opacité, checklist PR                                          | toute modif de template/CSS                                                    |
+| `ui-conventions/icones.md`                | Correspondance FontAwesome → alias `icon:*`                                                                              | remplacement d'icône                                                           |
+| `composants/navigation.md`                | `MenuItem`, providers, droits, pages de section, breadcrumbs                                                             | ajout de page/menu                                                             |
+| `composants/recherche.md`                 | Recherche approchée (fuzzy) des parcours : moteur, pondération, affichage                                                | page `/recherche/parcours`, réutiliser le moteur fuzzy                         |
+| `composants/synchronisation-orebut.md`    | Synchronisation des maquettes, compétences et parcours B.U.T. avec l'API ORéBUT                                          | synchronisation B.U.T. / ORéBUT                                                |
+| `composants/rncp-api.md`                  | API Apprentissage / France Compétences, composant RncpField et vérification                                              | code RNCP, API Apprentissage, composant RncpField                              |
+| `composants/synthese-ia.md`               | Analyseur d'écarts `FicheMatiere` (snapshot JSON / N-1) et synthèse IA (`ROLE_ADMIN`)                                    | synthèse des modifications de fiche matière, configuration `AI_*`              |
+| `composants/coherence-ia.md`              | Indicateur hybride (règles déterministes + IA) de cohérence des contenus (`Parcours` / `FicheMatiere`) et page Pilotage  | badge/modale cohérence, détection contenus fictifs/remplissage, audit pilotage |
+| `composants/aides-faq.md`                 | Aides contextuelles, FAQ, galerie d'images, éditeur Markdown, import/export entre instances                              | admin aides/FAQ, transfert vers la pré-prod                                    |
+| `composants/redaction-aides-faq.md`       | Guide de rédaction (ton, structure, Markdown autorisé, images, archive d'import, prompt IA, checklist)                   | écrire/faire écrire une aide ou une question de FAQ                            |
+| `composants/tutoriels-video.md`           | Page `/tutoriels` des vidéos tutoriel (une page par vidéo), administration, bouton « Copier le lien »                    | page tutoriels, lien partageable, composant CopyLinkButton                     |
+| `formulaires/README.md`                   | `JsonConfigType` + `DynamicFieldsType` (technique)                                                                       | champ JSON configurable                                                        |
+| `formulaires/exemples-plateformes.md`     | Définitions de champs par plateforme d'admission                                                                         | configurer une plateforme                                                      |
+| `formulaires/guide-mode-assistant.md`     | Guide utilisateur final du mode assistant                                                                                | doc/aide utilisateur                                                           |
+| `architecture/migration-v2.md`            | Commande `app:migrate:v2`, étapes, décisions de reprise                                                                  | schéma BDD, bascule main → V2                                                  |
+| `architecture/modifications-bdd-v1-v2.md` | Référentiel complet des écarts de schéma BDD main (V1) vs V2                                                             | comparaison schéma V1/V2, audit BDD                                            |
+| `architecture/maquette-modulaire.md`      | Architecture cible maquette par profils de diplôme (non implémentée)                                                     | refonte structure/validation/rendu                                             |
+| `testing/audit-form-feedback.md`          | Audit des validations, retours usagers, usages callOut et points FORM-AUDIT                                              | poursuivre les corrections de formulaires et fetch                             |
+| `testing/README.md`                       | Organisation des tests, helpers, commandes, priorités                                                                    | écrire/lancer des tests                                                        |
+| `ops/install.md`                          | Installation dev (Docker) et prod                                                                                        | installation, déploiement                                                      |
+| `ops/ci-cd.md`                            | CI GitHub Actions, PHPStan, modèle de branches, déploiement cible (heures creuses, quasi sans coupure), tâches restantes | modifier la CI, préparer une release ou un hotfix                              |
+| `ops/command.md`                          | Commandes console `app:*`                                                                                                | exécuter/modifier une commande                                                 |
+| `ops/recopie-fiche-matiere.md`            | Procédure `app:parcours-copy-data`                                                                                       | recopie des données vers fiches matières                                       |
+| `produit/roadmap-pilotage-admin.md`       | Idées fonctionnelles pilotage/admin                                                                                      | cadrage produit uniquement                                                     |
+| `archives/`                               | **Obsolète** (dont SQL historiques repris par `app:migrate:v2`)                                                          | jamais pour générer du code                                                    |
 
 ## Convention de rédaction (pour garder la doc économe en contexte)
 

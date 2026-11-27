@@ -271,7 +271,20 @@ class ValidationAdminController extends BaseController
                 'filterable' => true,
                 'searchable' => false,
                 'template' => 'validation/datatable/_remplissage.html.twig',
-            ])
+            ]);
+
+        if ($this->isGranted('ROLE_ADMIN')) {
+            $builder->addColumn('parcours.coherenceAnalyse', [
+                'label' => 'Cohérence',
+                'sortable' => false,
+                'filterable' => false,
+                'searchable' => false,
+                'template' => 'validation/datatable/_coherence.html.twig',
+                'class' => 'min-w-[9rem]',
+            ]);
+        }
+
+        $table = $builder
             ->addColumn('id', [
                 'label' => 'Actions',
                 'sortable' => false,

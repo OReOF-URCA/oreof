@@ -121,6 +121,13 @@ final readonly class PilotageMenuProvider implements MenuProviderInterface
                 )->inColumn('menu.admin.menu_validation'),
 
                 MenuItem::link(
+                    'pilotage.coherence_ia',
+                    'menu.admin.coherence_ia',
+                    'app_admin_pilotage_coherence_index',
+                    icon: 'mdi:robot-outline',
+                )->requiresRole('ROLE_ADMIN')->inColumn('menu.admin.menu_validation'),
+
+                MenuItem::link(
                     'pilotage.controle_lheo',
                     'menu.admin.controle_lheo',
                     'app_parcours_lheo_invalid_list',

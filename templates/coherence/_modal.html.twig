@@ -1,0 +1,171 @@
+<div class="space-y-5 text-sm">
+    {# ── Bandeau d'état & KPIs ── #}
+    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <twig:Kpi
+                title="Score de cohérence"
+                value="{{ result.score }}"
+                unit="/ 100"
+                :percent="result.score"
+                variant="{{ result.variant }}"
+                icon="icon:star"
+                description="{{ result.getStatusLabel() }}"
+                help="Score combinant contrôles automatiques et analyse sémantique IA"
+        />
+
+        <twig:Kpi
+                title="Points détectés"
+                value="{{ result.issues|length }}"
+                variant="{{ result.alertsCount > 0 ? 'danger' : (result.warningsCount > 0 ? 'warning' : 'success') }}"
+                icon="{{ result.alertsCount > 0 ? 'icon:danger' : (result.warningsCount > 0 ? 'icon:warning' : 'icon:check-circle') }}"
+                description="{{ result.alertsCount }} alerte(s) · {{ result.warningsCount }} à vérifier"
+                help="Anomalies de contenu fictif, remplissage ou incohérence"
+        />
+
+        <twig:Kpi
+                title="Moteur d'analyse"
+                value="{{ result.isAiGenerated ? 'IA + Règles' : 'Pré-filtre' }}"
+                variant="{{ result.isAiGenerated ? 'primary' : 'secondary' }}"
+                icon="mdi:robot-outline"
+                description="{{ result.analyzedAt ? ('Analysé le ' ~ result.analyzedAt|date('d/m/Y H:i')) : 'Calcul instantané non persisté' }}"
+                help="L'analyse reste en cache tant que le contenu ne change pas"
+        />
+    </div>
+
+    {% if result.isStale %}
+        {{ component('alerte', {
+            type: 'warning',
+            message: 'Le contenu de la fiche a été modifié depuis la dernière analyse enregistrée. Relancez l\'analyse pour actualiser le diagnostic.'
+        }) }}
+    {% endif %}
+
+    {% if result.fallbackReason %}
+        {{ component('alerte', {
+            type: 'info',
+            message: 'Analyse IA non exécutée (' ~ result.fallbackReason ~ '). Le diagnostic ci-dessous repose sur le pré-filtre déterministe.'
+        }) }}
+    {% endif %}
+
+    {# ── Synthèse & actions d'analyse ── #}
+    <section
+            class="rounded-xl border border-primary-300 bg-primary-50 p-4 shadow-sm dark:border-primary-700 dark:bg-primary-900">
+        <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div class="space-y-1.5">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="flex h-7 w-7 items-center justify-center rounded-lg bg-primary-100 text-primary-700 dark:bg-primary-800 dark:text-primary-200">
+                        {{ ux_icon('icon:star', {class: 'h-4 w-4'}) }}
+                    </span>
+                    <h3 class="text-sm font-bold text-primary-900 dark:text-primary-100">
+                        Synthèse du diagnostic
+                    </h3>
+                    <twig:Badge
+                            :label="result.providerLabel"
+                            :variant="result.isAiGenerated ? 'primary' : 'secondary'"
+                            size="sm"
+                    />
+                </div>
+                <p class="leading-relaxed text-primary-900 dark:text-primary-100">
+                    {{ result.summary }}
+                </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <form method="post" action="{{ analyzeRoute }}" data-turbo="true" class="inline-flex">
+                    <input type="hidden" name="_token" value="{{ csrf_token(csrfTokenId) }}">
+                    <input type="hidden" name="use_ai" value="{{ aiConfigured ? '1' : '0' }}">
+                    <input type="hidden" name="force" value="1">
+                    <twig:Button
+                            type="submit"
+                            variant="{{ aiConfigured ? 'primary' : 'secondary' }}"
+                            size="sm"
+                            :soft="false"
+                            :outline="false"
+                            icon="icon:sync"
+                            label="{{ aiConfigured ? (result.isAiGenerated ? 'Relancer l\'analyse IA' : 'Lancer l\'analyse IA') : 'Enregistrer le pré-filtre' }}"
+                    />
+                </form>
+            </div>
+        </div>
+        <p class="mt-2 border-t border-primary-200 pt-2 text-xs text-primary-800 dark:border-primary-800 dark:text-primary-200">
+            Indicateur purement informatif : il aide à repérer les contenus fictifs, textes de remplissage ou
+            incohérences avant validation, sans bloquer le circuit DPE.
+        </p>
+    </section>
+
+    {# ── Détail des points relevés ── #}
+    {% if result.issues is empty %}
+        <div class="rounded-2xl border border-success-200 bg-success-50 p-6 text-center dark:border-success-800/70 dark:bg-success-900">
+            <div class="mx-auto mb-2 flex h-11 w-11 items-center justify-center rounded-full bg-success-100 text-success-700 dark:bg-success-800 dark:text-success-200">
+                {{ ux_icon('icon:check-circle', {class: 'h-6 w-6'}) }}
+            </div>
+            <h4 class="text-base font-semibold text-success-900 dark:text-success-100">
+                Aucune anomalie détectée
+            </h4>
+            <p class="mt-1 text-xs text-success-800 dark:text-success-200">
+                {% if result.isAiGenerated %}
+                    L'analyse combinée (règles + IA) n'a relevé ni contenu fictif, ni remplissage, ni contradiction majeure.
+                {% elseif aiConfigured %}
+                    Le pré-filtre n'a pas trouvé d'anomalie évidente. Vous pouvez lancer l'analyse IA ci-dessus pour vérifier la cohérence sémantique avec la maquette.
+                {% else %}
+                    Le pré-filtre déterministe n'a relevé aucune anomalie manifeste.
+                {% endif %}
+            </p>
+        </div>
+    {% else %}
+        <div class="space-y-3">
+            <div class="flex items-center justify-between">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                    Points d'attention détaillés ({{ result.issues|length }})
+                </h4>
+            </div>
+
+            <ul class="space-y-2.5" role="list">
+                {% for issue in result.issues %}
+                    {% set isAlert = issue.severity == 'alert' %}
+                    {% set isWarning = issue.severity == 'warning' %}
+                    {% set cardClass = isAlert
+                        ? 'border-danger-300 bg-danger-50 dark:border-danger-700 dark:bg-danger-900'
+                        : (isWarning
+                        ? 'border-warning-300 bg-warning-50 dark:border-warning-700 dark:bg-warning-900'
+                        : 'border-info-300 bg-info-50 dark:border-info-700 dark:bg-info-900') %}
+                    {% set textClass = isAlert
+                        ? 'text-danger-900 dark:text-danger-100'
+                        : (isWarning
+                        ? 'text-warning-900 dark:text-warning-100'
+                        : 'text-info-900 dark:text-info-100') %}
+                    <li class="rounded-xl border p-3.5 shadow-2xs {{ cardClass }}">
+                        <div class="flex flex-wrap items-start justify-between gap-2">
+                            <div class="flex items-center gap-2 {{ textClass }}">
+                                {{ ux_icon(isAlert ? 'icon:danger' : (isWarning ? 'icon:warning' : 'icon:info'), {class: 'h-4 w-4 shrink-0'}) }}
+                                <span class="font-semibold">{{ issue.fieldLabel }}</span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <twig:Badge
+                                        :variant="isAlert ? 'danger' : (isWarning ? 'warning' : 'info')"
+                                        :label="issue.categoryLabel"
+                                        size="sm"
+                                />
+                                <twig:Badge
+                                        :variant="issue.source == 'ai' ? 'primary' : 'secondary'"
+                                        :label="issue.source == 'ai' ? 'IA' : 'Règle'"
+                                        :icon="issue.source == 'ai' ? 'icon:star' : null"
+                                        size="sm"
+                                />
+                            </div>
+                        </div>
+
+                        <p class="mt-2 text-xs leading-relaxed {{ textClass }}">
+                            {{ issue.message }}
+                        </p>
+
+                        {% if issue.excerpt %}
+                            <blockquote
+                                    class="mt-2 rounded-lg border border-secondary-200 bg-white px-3 py-2 font-mono text-[11px] text-secondary-700 dark:border-secondary-700 dark:bg-secondary-900 dark:text-secondary-300">
+                                « {{ issue.excerpt }} »
+                            </blockquote>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+</div>

@@ -5,6 +5,7 @@
 Modifier: Modifier
 'UFR Sciences Economiques, Sociales et de Gestion': 'UFR Sciences Economiques, Sociales et de Gestion'
 breadcrumb.home: Accueil
+menu.admin.coherence_ia: 'Audit cohérence IA'
 menu.admin.consulter_offre: "Consulter l'offre de formation"
 menu.admin.controle_lheo: 'Controle LHEO'
 menu.admin.descriptifs_parcours: 'Descriptifs haut de page'

@@ -24,6 +24,9 @@
                 <th class="px-4 py-3">Parcours</th>
                 <th class="px-4 py-3">Etat</th>
                 <th class="px-4 py-3">Remplissage</th>
+                {% if is_granted('ROLE_ADMIN') %}
+                    <th class="px-4 py-3">Cohérence</th>
+                {% endif %}
                 <th class="px-4 py-3 text-right"></th>
             </tr>
             </thead>
@@ -62,6 +65,11 @@
 
                     <td class="px-4 py-3">{{ include('communs/_badge_collection.html.twig', { badges: fiche.etatFiche|badgeFicheDto }) }}</td>
                     <td class="px-4 py-3">{{ component('remplissage_progress', { value: fiche.remplissage }) }}</td>
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <td class="px-4 py-3">
+                            <twig:CoherenceBadge :ficheMatiere="fiche" :compact="true"/>
+                        </td>
+                    {% endif %}
                     <td class="px-4 py-3 text-right">
                         <twig:Button
                                 label="Voir"
@@ -76,7 +84,7 @@
                 </tr>
             {% else %}
                 <tr>
-                    <td colspan="8"
+                    <td colspan="{{ is_granted('ROLE_ADMIN') ? 9 : 8 }}"
                         class="px-4 py-6 text-center text-sm font-medium text-secondary-500 dark:text-secondary-400">
                         Aucun enregistrement trouvé
                     </td>

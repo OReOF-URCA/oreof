@@ -29,23 +29,24 @@ conteneur, `--help` pour les options). Exécution : `make cli APP=v2` puis `php 
 
 ## Calculs / mises à jour en masse
 
-| Commande | Rôle | Options |
-|---|---|---|
-| `app:calcul-volume-horaire` | calcule et stocke les volumes horaires de tous les parcours | argument `campagne`, `--all`, `--historique` |
-| `app:formation:check-completion` | vérifie/met à jour la complétion des onglets de formation (`formation_tab_state`) | `--formation`, `--parcours`, `--fichematiere`, `--all`, `--dry-run`, `--save`, `--format`, `--output` |
-| `app:parcours:check-completion` | vérifie/met à jour la complétion des onglets de parcours (`parcours_tab_state`) et optionnellement des semestres | `--parcours`, `--formation`, `--campagne`, `--all`, `--with-semestres`, `--dry-run`, `--save`, `--format`, `--output` |
-| `app:fiche-matiere:check-completion` | vérifie/met à jour la complétion des onglets de fiche matière (`fiche_matiere_tab_state`) d'une campagne | `--campagne`, `--fiche-matiere`, `--parcours`, `--formation`, `--all`, `--dry-run`, `--save`, `--format`, `--output` |
-| `app:update-pourcentage` | champ pourcentage des `FicheMatiere` | — |
-| `app:update-codification` | génère la codification des formations | — |
-| `app:update-code-bcc`, `app:update-ac` | codes BCC / apprentissages critiques | — |
-| `app:update-dpe`, `app:update-slug` | DPE / slugs | — |
-| `app:update-droits` | profils selon les responsabilités | — |
-| `app:update-notif` | active les notifications par défaut | — |
-| `app:recopie-profils` | recopie les profils utilisateurs d'une campagne vers une autre | `[annee-depart]`, `[annee-arrivee]`, `--annee-depart=`, `--annee-arrivee=`, `--dry-run`, `--force` |
-| `app:recopie-domaine` | recopie les domaines | — |
-| `app:translations:import-missing` | importe les traductions manquantes, reformate `translations/*.yaml` | `--translations-dir`, `--simulate`, `--overwrite`, `--format`, `--no-backup` |
-| `app:parcours:fix-coherence-ouverture` | corrige les incohérences d'ouverture parcours / années (dry-run par défaut) | `--campagne=2027-2028`, `--apply`, `--action=all\|fermer-annees\|fermer-parcours` |
-| `app:workflow:check-metadata-completeness` | contrôle les metadata des workflows | — |
+| Commande                                   | Rôle                                                                                                             | Options                                                                                                               |
+|--------------------------------------------|------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| `app:calcul-volume-horaire`                | calcule et stocke les volumes horaires de tous les parcours                                                      | argument `campagne`, `--all`, `--historique`                                                                          |
+| `app:formation:check-completion`           | vérifie/met à jour la complétion des onglets de formation (`formation_tab_state`)                                | `--formation`, `--parcours`, `--fichematiere`, `--all`, `--dry-run`, `--save`, `--format`, `--output`                 |
+| `app:parcours:check-completion`            | vérifie/met à jour la complétion des onglets de parcours (`parcours_tab_state`) et optionnellement des semestres | `--parcours`, `--formation`, `--campagne`, `--all`, `--with-semestres`, `--dry-run`, `--save`, `--format`, `--output` |
+| `app:fiche-matiere:check-completion`       | vérifie/met à jour la complétion des onglets de fiche matière (`fiche_matiere_tab_state`) d'une campagne         | `--campagne`, `--fiche-matiere`, `--parcours`, `--formation`, `--all`, `--dry-run`, `--save`, `--format`, `--output`  |
+| `app:update-pourcentage`                   | champ pourcentage des `FicheMatiere`                                                                             | —                                                                                                                     |
+| `app:update-codification`                  | génère la codification des formations                                                                            | —                                                                                                                     |
+| `app:update-code-bcc`, `app:update-ac`     | codes BCC / apprentissages critiques                                                                             | —                                                                                                                     |
+| `app:update-dpe`, `app:update-slug`        | DPE / slugs                                                                                                      | —                                                                                                                     |
+| `app:update-droits`                        | profils selon les responsabilités                                                                                | —                                                                                                                     |
+| `app:update-notif`                         | active les notifications par défaut                                                                              | —                                                                                                                     |
+| `app:recopie-profils`                      | recopie les profils utilisateurs d'une campagne vers une autre                                                   | `[annee-depart]`, `[annee-arrivee]`, `--annee-depart=`, `--annee-arrivee=`, `--dry-run`, `--force`                    |
+| `app:recopie-domaine`                      | recopie les domaines                                                                                             | —                                                                                                                     |
+| `app:translations:import-missing`          | importe les traductions manquantes, reformate `translations/*.yaml`                                              | `--translations-dir`, `--simulate`, `--overwrite`, `--format`, `--no-backup`                                          |
+| `app:parcours:fix-coherence-ouverture`     | corrige les incohérences d'ouverture parcours / années (dry-run par défaut)                                      | `--campagne=2027-2028`, `--apply`, `--action=all\|fermer-annees\|fermer-parcours`                                     |
+| `app:coherence:analyze`                    | analyse la cohérence rédactionnelle et structurelle des parcours (règles + IA optionnelle)                       | `--campagne=`, `--parcours=`, `--limit=`, `--no-ai`, `--force`                                                        |
+| `app:workflow:check-metadata-completeness` | contrôle les metadata des workflows                                                                              | —                                                                                                                     |
 
 ## Publication / exports / versioning
 

@@ -82,6 +82,30 @@
             {% endfor %}
         </ul>
     {% endif %}
+
+    {% if is_granted('ROLE_ADMIN') and dpeParcours.parcours is not null %}
+        <div class="rounded-xl border border-secondary-200 bg-secondary-50 p-3 text-sm dark:border-secondary-700 dark:bg-secondary-800/50">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-xs font-semibold uppercase tracking-wider text-secondary-600 dark:text-secondary-300">
+                        Cohérence rédactionnelle (indicatif)
+                    </span>
+                    <twig:CoherenceBadge :parcours="dpeParcours.parcours" :clickable="false"/>
+                </div>
+                <a href="{{ path('app_coherence_parcours_modal', {parcours: dpeParcours.parcours.id}) }}"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   class="inline-flex items-center gap-1 text-xs font-semibold text-primary-700 hover:underline dark:text-primary-300">
+                    {{ ux_icon('icon:eye', {class: 'h-3.5 w-3.5'}) }}
+                    <span>Consulter le diagnostic</span>
+                </a>
+            </div>
+            <p class="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+                Cet indicateur signale les textes éventuellement fictifs, de remplissage ou incohérents ; il reste non
+                bloquant pour la transmission.
+            </p>
+        </div>
+    {% endif %}
 </div>
 
 {% form_theme form 'communs/form_theme_v2.html.twig' %}

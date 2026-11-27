@@ -705,6 +705,7 @@ fiche_matiere_v2.synthese_modifications_footer.fermer: 'Fermer'
 fiche_matiere_v2.synthese_modifications_footer.sauvegarder_snapshot: 'Figer un nouveau snapshot JSON'
 parcours_descriptifs.edit.title: 'Modifier les descriptifs haut de page'
 parcours_liens_courts.edit.title: 'Modifier le lien court du parcours'
-
-
-
+coherence.parcours.modal_title: 'Cohérence rédactionnelle & IA — %libelle%'
+coherence.parcours.modal_subtitle: 'Formation : %formation%'
+coherence.fiche.modal_title: 'Cohérence rédactionnelle & IA — %libelle%'
+coherence.fiche.modal_subtitle: 'Parcours : %parcours%'
