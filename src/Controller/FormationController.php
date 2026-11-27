@@ -549,7 +549,6 @@ class FormationController extends BaseController
     }
 
     #[Route('/edit/formation/{slug}', name: 'app_formation_edit_modal', methods: ['GET', 'POST'])]
-    #[IsGranted('ROLE_ADMIN')]
     public function editModal(
         ProfilRepository $profilRepository,
         EventDispatcherInterface $eventDispatcher,
@@ -561,6 +560,12 @@ class FormationController extends BaseController
         #[MapEntity(mapping: ['slug' => 'slug'])]
         Formation                $formation
     ): Response {
+        $isAdmin = $this->isGranted('ROLE_ADMIN');
+        $canEditGenerique = $this->isGranted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') && $formation->isClassique() === false;
+        if(!$isAdmin && !$canEditGenerique) {
+            throw $this->createAccessDeniedException();
+        }
+
         if ($formation->getDomaine() === null && $formation->getMention()?->getDomaines()?->first() !== null) {
             $formation->setDomaine($formation->getMention()->getDomaines()->first());
         }
