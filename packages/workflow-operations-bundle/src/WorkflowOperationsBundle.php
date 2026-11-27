@@ -35,6 +35,7 @@ final class WorkflowOperationsBundle extends AbstractBundle
             ->set(Operation\WorkflowOperationInspector::class)
             ->set(Operation\WorkflowOperationExecutor::class)
             ->set(Security\SecurityMetadataOperationAuthorizer::class)
+                ->tag('workflow_operations.authorizer')
         ;
     }
 }
