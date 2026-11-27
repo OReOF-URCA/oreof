@@ -428,7 +428,8 @@
                                                     icon: 'ph:arrows-left-right-light',
                                                     url: path('app_formation_edit_modal', {slug: formation.slug}),
                                                     modal: true,
-                                                    disabled: not is_granted('ROLE_ADMIN'),
+                                                    disabled: (not is_granted('ROLE_ADMIN')) 
+                                                        and (not (is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') and formation.classique == false)),
                                                     help: not is_granted('ROLE_ADMIN') ? 'Action réservée aux administrateurs' : null
                                                 },
                                                 {
@@ -523,6 +524,14 @@
                                                         icon: 'icon:info',
                                                         url: path('parcours_v2_voir', {parcours: parcours.id}),
                                                         target: '_blank'
+                                                    },
+                                                    {
+                                                        label: 'Modifier',
+                                                        icon: 'ph:arrows-left-right-light',
+                                                        url: path('parcours_v2_modifier', {parcours: parcours.id}),
+                                                        target: '_blank',
+                                                        disabled: (not is_granted('ROLE_ADMIN')) 
+                                                            and (not (is_granted('ROLE_SAISIE_FORM_GENERIQUE_DIRECTION') and parcours.formation.classique == false))
                                                     },
                                                     {
                                                         label: 'Déplacer',
