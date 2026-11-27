@@ -2,6 +2,24 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.9.0](https://github.com/OReOF-URCA/oreof/compare/v2.8.0...v2.9.0) (2026-11-27)
+
+
+### Features
+
+* **coherence:** implement coherence analysis feature for parcours and fiche matière ([390d81f](https://github.com/OReOF-URCA/oreof/commit/390d81f227d368089dbfbc1172bf41ab38f97d60))
+* enhance JSON response handling and add filtering for formation stats ([6c2831e](https://github.com/OReOF-URCA/oreof/commit/6c2831eaf52734bfa1b54d28a7411cefcbff6929))
+* **fiche-matiere:** implement getStatsForFormations method and refactor stats calculation in controllers ([312ce3f](https://github.com/OReOF-URCA/oreof/commit/312ce3fca1d1a1286bf73190c4fcf36fdf6b570b))
+* improve access control for Fiche Matiere and enhance user permission checks ([6f84855](https://github.com/OReOF-URCA/oreof/commit/6f84855bd6fdc7327b6acec35d4bc5d1da417ad2))
+* **logos:** implement logo management with upload, update, and delete functionalities ([922b36f](https://github.com/OReOF-URCA/oreof/commit/922b36f69b463694dc4ceb481299a43b94d26a1d))
+* **parcours:** add normalized codes Rome handling and update lien court management ([1150d24](https://github.com/OReOF-URCA/oreof/commit/1150d243bec45ca31a2233315c606fe1c3e3f1aa))
+* **parcours:** add normalized codes Rome handling and update lien court management ([e3b80f0](https://github.com/OReOF-URCA/oreof/commit/e3b80f07415a42fd8fccc7015474d21b1bbbf966))
+* **parcours:** add normalized codes Rome handling and update lien court management ([ea21792](https://github.com/OReOF-URCA/oreof/commit/ea217925937c58a1cf97919efc13cde2ad96fa84))
+* **parcours:** affichage du lien cours s'il existe ([7f606ca](https://github.com/OReOF-URCA/oreof/commit/7f606caf202a350bcceaf4569340cbe8cb077d26))
+* **parcours:** update lien court handling in JSON export for parcours data ([9e06fb4](https://github.com/OReOF-URCA/oreof/commit/9e06fb42d03b619309c6a248a81692ea1e405dd2))
+* refactor access control for Fiche Matiere and improve edit permissions handling ([7ad1307](https://github.com/OReOF-URCA/oreof/commit/7ad1307c48da76f20afccb0f6055ecd5723990de))
+* **workflow:** enhance parcours validation with non-classique handling and competence checks ([f6faab2](https://github.com/OReOF-URCA/oreof/commit/f6faab238fd0711c2d7cbe4cc552231e5e0a2689))
+
 ## [2.8.0](https://github.com/OReOF-URCA/oreof/compare/v2.7.0...v2.8.0) (2026-11-20)
 
 
