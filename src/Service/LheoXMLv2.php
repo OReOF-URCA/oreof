@@ -399,6 +399,7 @@ HTML;
         $admissionParcours .= $parcours->getTypeDiplome()?->getModalitesAdmission() ?? "";
         $admissionParcours .= "<h3>Calendrier d'inscription</h3>";
         $admissionParcours .= $etablissementInformation->getCalendrierInscription() ?? "";
+        $admissionParcours .= "<h3>Tarifs d'inscription</h3>";
         $admissionParcours .= $commonData['tarif_inscription'];
 
         // Poursuite d'études
@@ -443,13 +444,13 @@ HTML;
         // Prérequis
         $prerequis = "";
         if ($parcours->getTypeDiplome()?->getPrerequisObligatoires()) {
-            $prerequis .= '<strong>Prérequis obligatoires :</strong><br>';
+            $prerequis .= '<h4>Prérequis obligatoires :</h4><br>';
             $prerequis .= $this->cleanString($parcours->getTypeDiplome()->getPrerequisObligatoires());
         }
-        $prerequis .= '<br><strong>Niveau de français requis :</strong><br>';
+        $prerequis .= '<br><h4>Niveau de français requis :</h4><br>';
         $prerequis .= $parcours->getNiveauFrancais()?->libelle() ?? 'Aucune condition spécifique.';
 
-        $prerequis .= '<br><br><strong>Prérequis recommandés :</strong><br>';
+        $prerequis .= '<br><br><h4>Prérequis recommandés :</h4><br>';
         $prerequis .= $this->cleanString($parcours->getPrerequis()) ?? 'Aucune condition spécifique.';
 
         // Rythme de la formation
@@ -713,8 +714,7 @@ HTML;
             // à mettre dans : <extras><extra><organisation-pedagogique>
             'handicap' => $infoEtabV2->getMentionHandicap() ?? "",
             // à mettre dans : <extras><extra><admission>
-            'tarif_inscription' => "<br><div><a href=\"#\">&nbsp;Lien vers la page présentant 
-                                    les tarifs d'inscription&nbsp;</a></div>",
+            'tarif_inscription' => $infoEtabV2->getTarifInscription() ?? "",
             // à mettre dans <extras><extra><informations-pratiques>
             'devenir_des_etudiants' => $linkedData['devenir_etudiants'] ?? "",
             // à mettre dans <extras><extra><informations-pratiques>
