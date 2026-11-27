@@ -179,9 +179,11 @@
             </div>
         </aside>
         <div class="ps-3 flex-1 overflow-y-auto flex flex-col pt-0">
+            {% set lienCourt = parcours.lienCourt|default('')|trim %}
             {% if (parcours.descriptifHautPage != '' and parcours.descriptifHautPage != null)  or
                 (parcours.descriptifBasPage != '' and parcours.descriptifBasPage != null) or
-                (parcours.descriptifHautPageAutomatique != '' and parcours.descriptifHautPageAutomatique != null) %}
+                (parcours.descriptifHautPageAutomatique != '' and parcours.descriptifHautPageAutomatique != null) or
+                lienCourt != '' %}
                 <section data-scroll-spy-target="section"
                          class="app-section-card"
                          id="presentation_complementaire">
@@ -192,6 +194,23 @@
                     }) }}
 
                     <dl class="space-y-4 text-sm text-secondary-700 dark:text-secondary-200">
+                        {% if lienCourt != '' %}
+                            <div class="space-y-2">
+                                <dt class="text-xs font-black uppercase tracking-[0.18em] text-secondary-400 dark:text-secondary-500">
+                                    Lien court (permalien)
+                                </dt>
+                                <dd class="flex flex-wrap items-center gap-2">
+                                    <a href="{{ lienCourt }}" target="_blank" rel="noopener noreferrer"
+                                       class="inline-flex items-center gap-1.5 font-mono text-sm text-primary-600 hover:underline dark:text-primary-400 break-all">
+                                        <twig:UX:Icon name="ph:link-light" class="h-4 w-4 shrink-0"/>
+                                        <span>{{ lienCourt }}</span>
+                                        <twig:UX:Icon name="ph:arrow-square-out-light"
+                                                      class="h-4 w-4 shrink-0 text-secondary-400"/>
+                                    </a>
+                                    <twig:CopyLinkButton url="{{ lienCourt }}" size="sm" class="shrink-0"/>
+                                </dd>
+                            </div>
+                        {% endif %}
                         {% if (parcours.descriptifHautPageAutomatique != '' and parcours.descriptifHautPageAutomatique != null) %}
                             <div class="space-y-2">
                                 <dt class="text-xs font-black uppercase tracking-[0.18em] text-secondary-400 dark:text-secondary-500">
